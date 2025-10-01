@@ -2,11 +2,17 @@
   "imports": {
     "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.5.2",
     "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.3",
+    "@libsql/client": "npm:@libsql/client@^0.15.15",
+    "@types/pg": "npm:@types/pg@^8.15.5",
+    "drizzle-kit": "npm:drizzle-kit@^0.31.5",
+    "drizzle-orm": "npm:drizzle-orm@^0.44.5",
     "hono": "npm:hono@^4.9.9",
     "zod": "npm:zod@^4.1.11"
   },
   "tasks": {
-    "start": "deno run --watch --allow-net --allow-read --allow-env src/main.ts"
+    "start": "deno run --watch --allow-net --allow-read --allow-sys --allow-ffi --allow-env src/main.ts",
+    "push": "deno --env -A --node-modules-dir npm:drizzle-kit push",
+    "generate": "deno --env -A --node-modules-dir npm:drizzle-kit generate"
   },
   "compilerOptions": {
     "jsx": "precompile",

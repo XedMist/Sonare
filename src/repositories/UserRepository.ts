@@ -17,4 +17,12 @@ export default class UserRepository {
     store.set(user.id, user);
     return user;
   }
+
+  async findById(id: number): Promise<User | null> {
+    return store.get(id) || null;
+  }
+
+  async delete(id: number): Promise<boolean> {
+    return store.delete(id);
+  }
 }

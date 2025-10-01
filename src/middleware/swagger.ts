@@ -45,6 +45,50 @@ const openApiDoc = {
         },
       },
     },
+    "/api/users/{id}": {
+        get: {
+          summary: "Finds a user by ID",
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: {
+                type: "integer",
+              },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "OK",
+            },
+            "404": {
+              description: "User not found",
+            },
+          },
+        },
+        delete: {
+          summary: "Deletes a user by ID",
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: {
+                type: "integer",
+              },
+            },
+          ],
+          responses: {
+            "204": {
+              description: "User deleted successfully",
+            },
+            "404": {
+              description: "User not found",
+            },
+          },
+        },
+      },
   },
 };
 

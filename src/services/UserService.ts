@@ -13,4 +13,14 @@ export default class UserService {
   async create(payload: Omit<User, "id">): Promise<User> {
     return this.repo.insert(payload);
   }
+
+  async findById(id: number): Promise<User | null> {
+    return this.repo.findById(id);
+  }
+
+  async delete(id: number): Promise<boolean> {
+    const user = await this.repo.findById(id);
+    if (user) return this.repo.delete(id);
+    return false;
+  }
 }

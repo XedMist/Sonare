@@ -24,4 +24,27 @@ router.post(
   },
 );
 
+router.get("/:id", async (c) => {
+  const { id } = c.req.param();
+  const user = await service.findById(Number(id));
+  
+  if (user) {
+    return c.json(user);
+  } else {
+    return c.json({ message: "User not found" }, 404);
+  }
+});
+
+
+router.delete("/:id", async (c) => {
+  const { id } = c.req.param();
+  const user = await service.delete(Number(id));
+
+  if (user) {
+    return c.json({ message: "User deleted" });
+  } else {
+    return c.json({ message: "User not found" }, 404);
+  }
+});
+
 export default router;

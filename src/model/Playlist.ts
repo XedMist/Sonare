@@ -1,15 +1,17 @@
-import Track from "./Track.ts";
+import * as z from "zod";
 
-export default class Playlist {
+// La interfaz del tipo Playlist
+export interface Playlist {
+  id: number;
   name: string;
-  tracks: Track[] = [];
-
-  constructor(name: string, tracks: Track[]) {
-    this.name = name;
-    this.tracks = tracks;
-  }
-
-  getTotalDuration(): number {
-    return this.tracks.reduce((total, track) => total + track.duration, 0);
-  }
+  userId: number;
+  trackIds: number[];
 }
+
+// El esquema para validar el cuerpo de los POST
+export const playlistSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  userId: z.number(),
+  trackIds: z.array(z.number()).default([]),
+});

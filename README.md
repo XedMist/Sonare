@@ -9,7 +9,11 @@
 └── src
     ├── app.ts  # Donde se añaden los controladores
     ├── controller 
-    │   └── user.ts
+    │   ├─── user.ts
+    │   ├─── artist.ts
+    │   ├─── playlist.ts
+    │   ├─── track.ts
+    │   ├─── users.ts
     ├── main.ts # Entrypoint de la API
     ├── middleware
     │   └── ...

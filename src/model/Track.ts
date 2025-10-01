@@ -1,6 +1,7 @@
-import Album from "./Album.ts";
+import * as z from "zod";
 
-type Genre =
+// La definición de los géneros musicales
+export type Genre =
   | "Rock"
   | "Pop"
   | "Jazz"
@@ -22,24 +23,45 @@ type Genre =
   | "Techno"
   | "House";
 
-export default class Track {
+// La interfaz del tipo Track
+export interface Track {
+  id: number;
   name: string;
   duration: number;
   path: string;
-  album?: Album;
-  genres?: Genre[] = [];
-
-  constructor(
-    name: string,
-    duration: number,
-    path: string,
-    album?: Album,
-    genres?: Genre[],
-  ) {
-    this.name = name;
-    this.duration = duration;
-    this.path = path;
-    this.album = album;
-    this.genres = genres;
-  }
+  albumId?: number;
+  genres: Genre[];
 }
+
+// El esquema para validar el cuerpo de los POST
+export const trackSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  duration: z.number().positive(),
+  path: z.string(),
+  albumId: z.number().optional(),
+  genres: z.array(
+    z.enum([
+      "Rock",
+      "Pop",
+      "Jazz",
+      "Classical",
+      "Hip-Hop",
+      "Electronic",
+      "Country",
+      "Reggae",
+      "Blues",
+      "Folk",
+      "Metal",
+      "Punk",
+      "R&B",
+      "Soul",
+      "Funk",
+      "Disco",
+      "Gospel",
+      "Ska",
+      "Techno",
+      "House",
+    ]),
+  ).default([]),
+});

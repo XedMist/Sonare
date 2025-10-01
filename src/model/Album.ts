@@ -1,14 +1,17 @@
-import Artist from "./Artist.ts";
-import Track from "./Track.ts";
+import * as z from "zod";
 
-export default class Album {
+// La interfaz del tipo Album
+export interface Album {
+  id: number;
   name: string;
-  artists: Artist[] = [];
-  tracks: Track[] = [];
-
-  constructor(name: string, artists: Artist[], tracks: Track[] = []) {
-    this.name = name;
-    this.artists = artists;
-    this.tracks = tracks;
-  }
+  artistIds: number[];
+  trackIds: number[];
 }
+
+// El esquema para validar el cuerpo de los POST
+export const albumSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  artistIds: z.array(z.number()).default([]),
+  trackIds: z.array(z.number()).default([]),
+});

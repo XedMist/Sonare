@@ -1,7 +1,13 @@
-export default class Artist {
-  name: string;
+import * as z from "zod";
 
-  constructor(name: string) {
-    this.name = name;
-  }
+// La interfaz del tipo User
+export interface Artist {
+  id: number;
+  name: string;
 }
+
+// El esquema para validar el cuerpo de los POST
+export const artistSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});

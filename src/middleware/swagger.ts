@@ -46,49 +46,128 @@ const openApiDoc = {
       },
     },
     "/api/users/{id}": {
-        get: {
-          summary: "Finds a user by ID",
-          parameters: [
-            {
-              name: "id",
-              in: "path",
-              required: true,
-              schema: {
-                type: "integer",
-              },
-            },
-          ],
-          responses: {
-            "200": {
-              description: "OK",
-            },
-            "404": {
-              description: "User not found",
+      get: {
+        summary: "Finds a user by ID",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "integer",
             },
           },
-        },
-        delete: {
-          summary: "Deletes a user by ID",
-          parameters: [
-            {
-              name: "id",
-              in: "path",
-              required: true,
-              schema: {
-                type: "integer",
-              },
-            },
-          ],
-          responses: {
-            "204": {
-              description: "User deleted successfully",
-            },
-            "404": {
-              description: "User not found",
-            },
+        ],
+        responses: {
+          "200": {
+            description: "OK",
+          },
+          "404": {
+            description: "User not found",
           },
         },
       },
+      delete: {
+        summary: "Deletes a user by ID",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "integer",
+            },
+          },
+        ],
+        responses: {
+          "204": {
+            description: "User deleted successfully",
+          },
+          "404": {
+            description: "User not found",
+          },
+        },
+      },
+    },
+    "/api/artists": {
+      get: {
+        summary: "Finds all artists",
+        responses: {
+          "200": {
+            description: "OK",
+          },
+        },
+      },
+      post: {
+        summary: "Adds an artist",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  name: {
+                    type: "string",
+                    description: "The name of the artist",
+                  },
+                },
+                required: ["name"],
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Artist created successfully",
+          },
+        },
+      },
+    },
+    "/api/artists/{id}": {
+      get: {
+        summary: "Finds an artist by ID",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "integer",
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "OK",
+          },
+          "404": {
+            description: "Artist not found",
+          },
+        },
+      },
+      delete: {
+        summary: "Deletes an artist by ID",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "integer",
+            },
+          },
+        ],
+        responses: {
+          "204": {
+            description: "Artist deleted successfully",
+          },
+          "404": {
+            description: "Artist not found",
+          },
+        },
+      },
+    },
   },
 };
 

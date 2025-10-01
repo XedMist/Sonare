@@ -1,21 +1,21 @@
-import UserService from "../services/UserService.ts";
+import ArtistService from "../services/ArtistService.ts";
 import { zValidator } from "@hono/zod-validator";
-import { userSchema } from "../model/User.ts";
+import { artistSchema } from "../model/Artist.ts";
 import { Hono } from "hono";
 
 const router = new Hono();
-const service = new UserService();
+const service = new ArtistService();
 
 router.get("/", async (c) => {
-  const users = await service.findAll();
-  return c.json(users);
+  const artists = await service.findAll();
+  return c.json(artists);
 });
 
 // El zValidator comprueba que lo que se pase en el curpo de la
 // peticion es lo que se espera. El omit es para que no pasen la id
 router.post(
   "/",
-  zValidator("json", userSchema.omit({ id: true })),
+  zValidator("json", artistSchema.omit({ id: true })),
   async (c) => {
     const body = c.req.valid("json");
     const created = await service.create(body);
@@ -26,23 +26,23 @@ router.post(
 
 router.get("/:id", async (c) => {
   const { id } = c.req.param();
-  const user = await service.findById(Number(id));
+  const artist = await service.findById(Number(id));
 
-  if (user) {
-    return c.json(user);
+  if (artist) {
+    return c.json(artist);
   } else {
-    return c.json({ message: "User not found" }, 404);
+    return c.json({ message: "Artist not found" }, 404);
   }
 });
 
 router.delete("/:id", async (c) => {
   const { id } = c.req.param();
-  const user = await service.delete(Number(id));
+  const artist = await service.delete(Number(id));
 
-  if (user) {
-    return c.json({ message: "User deleted" });
+  if (artist) {
+    return c.json({ message: "Artist deleted" });
   } else {
-    return c.json({ message: "User not found" }, 404);
+    return c.json({ message: "Artist not found" }, 404);
   }
 });
 

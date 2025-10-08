@@ -7,17 +7,17 @@ export default class UserService {
   playlistRepo = new PlaylistRepository();
 
   async findAll(): Promise<User[]> {
-    return this.repo.findAll();
+    return await this.repo.findAll();
   }
 
   // El omit es para no tener que pasar el id al crear el usuario
   // De eso se encarga el repo
   async create(payload: Omit<User, "id">): Promise<User> {
-    return this.repo.insert(payload);
+    return await this.repo.insert(payload);
   }
 
   async findById(id: number): Promise<User | null> {
-    return this.repo.findById(id);
+    return await this.repo.findById(id);
   }
 
   async delete(id: number): Promise<boolean> {

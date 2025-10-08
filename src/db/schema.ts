@@ -6,3 +6,10 @@ export const usersTable = sqliteTable("users", {
 });
 
 export type InsertUser = typeof usersTable.$inferInsert;
+
+export const tracksTable = sqliteTable("tracks", {
+  id: int().primaryKey({ autoIncrement: true }),
+  path: text().notNull(),
+});
+
+export type InsertTrack = typeof tracksTable.$inferInsert;

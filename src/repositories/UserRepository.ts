@@ -1,7 +1,7 @@
-import { type User, userSchema } from "../model/User.ts";
-import { InsertUser, usersTable } from "../db/schema.ts";
+import { type User, userSchema } from "@/model/User.ts";
+import { InsertUser, usersTable } from "@/db/schema.ts";
 import { eq } from "drizzle-orm";
-import { db } from "../db/db.ts";
+import { db } from "@/db/db.ts";
 
 export default class UserRepository {
   async findAll(): Promise<User[]> {

@@ -27,7 +27,7 @@ router.get("/:id/file", async (c) => {
   const track = await service.downloadTrack(Number(id));
 
   if (track) {
-    return c.json(track);
+    return c.body(Deno.readFileSync("./media/apt.opus"));
   } else {
     return c.json({ message: "Track not found" }, 404);
   }

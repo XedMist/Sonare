@@ -15,7 +15,7 @@ export default class TrackService {
     const track = await this.repo.findById(id);
     if (!track) return null;
 
-    const file = await Deno.readFile(track.path);
+    const file = await Deno.readFileSync(track.path);
     return new Blob([file]);
   }
 }

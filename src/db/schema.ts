@@ -1,4 +1,4 @@
-import { int, sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core";
+import { int, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 export const usersTable = sqliteTable("users", {
@@ -33,8 +33,12 @@ export const albumsRelations = relations(albumsTable, ({ many }) => ({
 }));
 
 export const tracksToAlbumsTable = sqliteTable("tracks_to_albums", {
-  trackId: int("track_id").notNull().references(() => tracksTable.id, { onDelete: "cascade" }),
-  albumId: int("album_id").notNull().references(() => albumsTable.id, { onDelete: "cascade" }),
+  trackId: int("track_id").notNull().references(() => tracksTable.id, {
+    onDelete: "cascade",
+  }),
+  albumId: int("album_id").notNull().references(() => albumsTable.id, {
+    onDelete: "cascade",
+  }),
 }, (table) => ({
   pk: primaryKey({ columns: [table.trackId, table.albumId] }),
 }));
@@ -65,8 +69,12 @@ export const artistsRelations = relations(artistsTable, ({ many }) => ({
 export type InsertArtist = typeof artistsTable.$inferInsert;
 
 export const albumsToArtistsTable = sqliteTable("albums_to_artists", {
-  albumId: int("album_id").notNull().references(() => albumsTable.id, { onDelete: "cascade" }),
-  artistId: int("artist_id").notNull().references(() => artistsTable.id, { onDelete: "cascade" }),
+  albumId: int("album_id").notNull().references(() => albumsTable.id, {
+    onDelete: "cascade",
+  }),
+  artistId: int("artist_id").notNull().references(() => artistsTable.id, {
+    onDelete: "cascade",
+  }),
 }, (table) => ({
   pk: primaryKey({ columns: [table.albumId, table.artistId] }),
 }));
@@ -88,7 +96,9 @@ export const albumsToArtistsRelations = relations(
 export const playlistsTable = sqliteTable("playlists", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
-  userId: int().notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  userId: int().notNull().references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
 });
 
 export const playlistsRelations = relations(
@@ -103,8 +113,12 @@ export const playlistsRelations = relations(
 );
 
 export const playlistsToTracksTable = sqliteTable("playlists_to_tracks", {
-  playlistId: int("playlist_id").notNull().references(() => playlistsTable.id, { onDelete: "cascade" }),
-  trackId: int("track_id").notNull().references(() => tracksTable.id, { onDelete: "cascade" }),
+  playlistId: int("playlist_id").notNull().references(() => playlistsTable.id, {
+    onDelete: "cascade",
+  }),
+  trackId: int("track_id").notNull().references(() => tracksTable.id, {
+    onDelete: "cascade",
+  }),
 }, (table) => ({
   pk: primaryKey({ columns: [table.playlistId, table.trackId] }),
 }));

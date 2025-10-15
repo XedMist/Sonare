@@ -18,6 +18,6 @@ export default class TrackRepository {
     if (ids.length === 0) return [];
     const tracks = await db.select().from(tracksTable)
       .where(inArray(tracksTable.id, ids));
-    return tracks.map(t => trackSchema.parse(t));
+    return tracks.map((t) => trackSchema.parse(t));
   }
 }

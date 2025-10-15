@@ -1,7 +1,7 @@
 import PlaylistRepository from "../repositories/PlaylistRepository.ts";
 import TrackRepository from "../repositories/TrackRepository.ts";
 import UserRepository from "../repositories/UserRepository.ts";
-import type { PlaylistDTO, CreatePlaylist } from "../model/Playlist.ts";
+import type { CreatePlaylist, PlaylistDTO } from "../model/Playlist.ts";
 import { db } from "@/db/db.ts";
 import { sql } from "drizzle-orm";
 import { playlistsToTracksTable, tracksTable } from "@/db/schema.ts";
@@ -36,7 +36,7 @@ export default class PlaylistService {
     }
 
     const playlist = await this.repo.insert(payload);
-    
+
     if (payload.trackIds && payload.trackIds.length > 0) {
       for (const trackId of payload.trackIds) {
         await this.repo.addTrack(playlist.id, trackId);
@@ -70,7 +70,10 @@ export default class PlaylistService {
     return this.repo.delete(id);
   }
 
-  async addTrack(playlistId: number, trackId: number): Promise<PlaylistDTO | null> {
+  async addTrack(
+    playlistId: number,
+    trackId: number,
+  ): Promise<PlaylistDTO | null> {
     const playlist = await this.repo.findById(playlistId);
     if (!playlist) return null;
 
@@ -83,7 +86,10 @@ export default class PlaylistService {
     return { ...playlist, trackIds };
   }
 
-  async removeTrack(playlistId: number, trackId: number): Promise<PlaylistDTO | null> {
+  async removeTrack(
+    playlistId: number,
+    trackId: number,
+  ): Promise<PlaylistDTO | null> {
     const playlist = await this.repo.findById(playlistId);
     if (!playlist) return null;
 

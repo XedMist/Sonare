@@ -1,7 +1,7 @@
 import { playlistsTable, playlistsToTracksTable } from "@/db/schema.ts";
 import type { CreatePlaylist, Playlist } from "@/model/Playlist.ts";
 import { db } from "@/db/db.ts";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export default class PlaylistRepository {
   async findAll(): Promise<Playlist[]> {
@@ -41,7 +41,7 @@ export default class PlaylistRepository {
     const tracks = await db.select({ trackId: playlistsToTracksTable.trackId })
       .from(playlistsToTracksTable)
       .where(eq(playlistsToTracksTable.playlistId, playlistId));
-    return tracks.map(t => t.trackId);
+    return tracks.map((t) => t.trackId);
   }
 
   async addTrack(playlistId: number, trackId: number): Promise<void> {
@@ -50,10 +50,10 @@ export default class PlaylistRepository {
       .where(
         and(
           eq(playlistsToTracksTable.playlistId, playlistId),
-          eq(playlistsToTracksTable.trackId, trackId)
-        )
+          eq(playlistsToTracksTable.trackId, trackId),
+        ),
       );
-    
+
     if (existing.length === 0) {
       await db.insert(playlistsToTracksTable).values({
         playlistId,
@@ -66,8 +66,8 @@ export default class PlaylistRepository {
     await db.delete(playlistsToTracksTable).where(
       and(
         eq(playlistsToTracksTable.playlistId, playlistId),
-        eq(playlistsToTracksTable.trackId, trackId)
-      )
+        eq(playlistsToTracksTable.trackId, trackId),
+      ),
     );
   }
 }

@@ -11,4 +11,12 @@ export default class ArtistService {
   async create(payload: Omit<Artist, "id">): Promise<Artist> {
     return await this.repo.insert(payload);
   }
+
+  async findById(id: number): Promise<Artist | null> {
+    return await this.repo.findById(id);
+  }
+
+  async delete(id: number): Promise<boolean> {
+    return await this.repo.delete(id);
+  }
 }

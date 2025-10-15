@@ -22,12 +22,11 @@ router.get("/:id", async (c) => {
 
 router.get("/:id/file", async (c) => {
   const { id } = c.req.param();
-  const track = await service.downloadTrack(Number(id));
+  const result = await service.downloadTrack(Number(id));
 
-  if (track) {
-    c.header("Content-Type", "audio/opus");
-
-    return c.body(track as unknown as ReadableStream);
+  if (result) {
+    c.header("Content-Type", result.mimeType);
+    return c.body(result.data);
   } else {
     return c.json({ message: "Track not found" }, 404);
   }

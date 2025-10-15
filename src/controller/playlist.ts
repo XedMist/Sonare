@@ -1,6 +1,6 @@
 import PlaylistService from "../services/PlaylistService.ts";
 import { zValidator } from "@hono/zod-validator";
-import { playlistSchema } from "../model/Playlist.ts";
+import { playlistCreateSchema } from "../model/Playlist.ts";
 import { Hono } from "hono";
 import * as z from "zod";
 
@@ -16,7 +16,7 @@ router.get("/", async (c) => {
 // peticion es lo que se espera. El omit es para que no pasen la id
 router.post(
   "/",
-  zValidator("json", playlistSchema.omit({ id: true })),
+  zValidator("json", playlistCreateSchema),
   async (c) => {
     const body = c.req.valid("json");
     const created = await service.create(body);
@@ -96,7 +96,7 @@ router.delete("/:id", async (c) => {
   const deleted = await service.delete(Number(id));
 
   if (deleted) {
-    return c.json({ message: "Playlist deleted" });
+    return c.body(null, 204);
   } else {
     return c.json({ message: "Playlist not found" }, 404);
   }

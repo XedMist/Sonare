@@ -1,6 +1,8 @@
 .vscode
 node_modules
 drizzle
+docs
+
 # Prerequisites
 *.d
 

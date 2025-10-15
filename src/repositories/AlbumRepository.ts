@@ -1,28 +1,38 @@
+import { eq } from "drizzle-orm";
+import { albumsTable, albumsToArtistsTable } from "../db/schema.ts";
 import type { Album } from "../model/Album.ts";
-
-// Si fuera de verdad se deberia llamar a la base de datos
-// Para la prueba se utiliza un mapa
-let nextId = 1;
-const store = new Map<number, Album>();
+import { db } from '@/db/db.ts'
 
 export default class AlbumRepository {
-  // No hace falta el async pero lo dejo para imitar a como se
-  // haria con una base de datos real
-  async findAll(): Promise<Album[]> {
-    return Array.from(store.values());
+  async getAlbumsFromArtist(id: number): Promise<Album[]> {
+    const result = await db.select({
+      id: albumsTable.id,
+      name: albumsTable.name,
+    }).from(albumsTable)
+      .leftJoin(albumsToArtistsTable, eq(albumsTable.id, albumsToArtistsTable.albumId))
+      .where(eq(albumsToArtistsTable.artistId, id));
+    
+    return result.map(a => ({ id: a.id, name: a.name, artistIds: [], trackIds: [] }));
   }
 
-  async insert(a: Omit<Album, "id">): Promise<Album> {
-    const album: Album = { id: nextId++, ...a };
-    store.set(album.id, album);
-    return album;
+  async getAlbums(example: Album): Promise<Album[]> {
+    const result = await db.select({
+      id: albumsTable.id,
+      name: albumsTable.name,
+    }).from(albumsTable)
+      .where(eq(albumsTable.name, example.name));
+    
+    return result.map(a => ({ id: a.id, name: a.name, artistIds: [], trackIds: [] }));
   }
 
   async findById(id: number): Promise<Album | null> {
-    return store.get(id) || null;
-  }
-
-  async delete(id: number): Promise<boolean> {
-    return store.delete(id);
+    const result = await db.select({
+      id: albumsTable.id,
+      name: albumsTable.name,
+    }).from(albumsTable)
+      .where(eq(albumsTable.id, id));
+    
+    if (result.length === 0) return null;
+    return { id: result[0].id, name: result[0].name, artistIds: [], trackIds: [] };
   }
 }

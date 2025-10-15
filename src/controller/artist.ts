@@ -22,4 +22,26 @@ router.post(
   },
 );
 
+router.get("/:id", async (c) => {
+  const { id } = c.req.param();
+  const artist = await service.findById(Number(id));
+
+  if (artist) {
+    return c.json(artist);
+  } else {
+    return c.json({ message: "Artist not found" }, 404);
+  }
+});
+
+router.delete("/:id", async (c) => {
+  const { id } = c.req.param();
+  const deleted = await service.delete(Number(id));
+
+  if (deleted) {
+    return c.body(null, 204);
+  } else {
+    return c.json({ message: "Artist not found" }, 404);
+  }
+});
+
 export default router;

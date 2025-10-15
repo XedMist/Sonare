@@ -37,10 +37,10 @@ router.get("/:id", async (c) => {
 
 router.delete("/:id", async (c) => {
   const { id } = c.req.param();
-  const user = await service.delete(Number(id));
+  const deleted = await service.delete(Number(id));
 
-  if (user) {
-    return c.json({ message: "User deleted" });
+  if (deleted) {
+    return c.body(null, 204);
   } else {
     return c.json({ message: "User not found" }, 404);
   }

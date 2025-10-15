@@ -11,11 +11,10 @@ export default class TrackService {
   async findById(id: number): Promise<Track | null> {
     return await this.repo.findById(id);
   }
-  async downloadTrack(id: number): Promise<Blob | null> {
+  async downloadTrack(id: number): Promise<Uint8Array | null> {
     const track = await this.repo.findById(id);
     if (!track) return null;
 
-    const file = await Deno.readFileSync(track.path);
-    return new Blob([file]);
+    return await Deno.readFile(track.path);
   }
 }

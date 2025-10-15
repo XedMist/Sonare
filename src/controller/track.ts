@@ -1,6 +1,4 @@
 import TrackService from "../services/TrackService.ts";
-import { zValidator } from "@hono/zod-validator";
-import { trackSchema } from "../model/Track.ts";
 import { Hono } from "hono";
 
 const router = new Hono();
@@ -27,7 +25,9 @@ router.get("/:id/file", async (c) => {
   const track = await service.downloadTrack(Number(id));
 
   if (track) {
-    return c.body(Deno.readFileSync("./media/apt.opus"));
+    c.header("Content-Type", "audio/opus");
+
+    return c.body(track as unknown as ReadableStream);
   } else {
     return c.json({ message: "Track not found" }, 404);
   }

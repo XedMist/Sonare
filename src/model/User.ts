@@ -1,13 +1,22 @@
 import * as z from "zod";
 
-// La interfaz del tipo User
 export interface User {
   id: number;
   name: string;
 }
 
-// El esquema para validar el cuerpo de los POST
+export const userCreateSchema = z.object({
+  name: z.string().min(1),
+});
+
+export const userUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+});
+
 export const userSchema = z.object({
   id: z.number(),
   name: z.string(),
 });
+
+export type UserCreate = z.infer<typeof userCreateSchema>;
+export type UserUpdate = z.infer<typeof userUpdateSchema>;

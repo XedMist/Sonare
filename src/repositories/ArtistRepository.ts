@@ -1,5 +1,6 @@
 import { db } from "../db/db.ts";
 import type { Album, Artist } from "../generated/prisma/index.d.ts";
+import type { PrismaClientKnownRequestError } from "../generated/prisma/runtime/library.d.ts";
 export default class ArtistRepository {
   async getAlbums(artistId: string, pagination: {limit: number, offset: number} | undefined): Promise<Album[]> {
       return await db.album.findMany({
@@ -24,7 +25,7 @@ export default class ArtistRepository {
     })
   }
 
-  async insert(artist: Omit<Artist, "id">) {
+  async insert(artist: Pick<Artist, "name">) {
     await db.artist.create({
       data: {
         name: artist.name
@@ -32,14 +33,19 @@ export default class ArtistRepository {
     })
   }
 
-  async delete({ id, name }: Partial<Album>) {
+  async delete({ id, name }: Partial<Album>): Promise<boolean> {
+    try {
     await db.artist.delete({
       where: {
         id: id,
         name: name
-      }
+      },
     })
+    return true;
+  } catch(_) {
+    return false;
   }
+}
 
   async update(id: string, name: string) {
     await db.artist.update({

@@ -8,7 +8,7 @@ export default class ArtistService {
         return await this.repo.findAll();
     }
 
-    async create(payload: Omit<Artist, "id">): Promise<void> {
+    async create(payload: Pick<Artist, "name">): Promise<void> {
         await this.repo.insert(payload);
     }
 
@@ -16,8 +16,8 @@ export default class ArtistService {
         return await this.repo.findById(id);
     }
 
-    async delete(id: Pick<Artist, "id">): Promise<void> {
-        await this.repo.delete(id);
+    async delete(id: Pick<Artist, "id">): Promise<boolean> {
+        return await this.repo.delete(id);
     }
 
 }

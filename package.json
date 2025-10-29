@@ -4,13 +4,17 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prisma-zod-generator": "^1.30.2"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "scripts": {
-    "dev": "bun run --hot src/app.ts"
+    "dev": "bun run --hot src/app.ts",
+    "generate": "bunx --bun prisma@latest generate",
+    "studio": "bunx --bun prisma@latest studio",
+    "push": "bunx --bun prisma@latest db push"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.2",

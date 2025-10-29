@@ -64,3 +64,4 @@ dkms.conf
 /prisma/generated
 
 /src/generated/prisma
+/src/generated/zod

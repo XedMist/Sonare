@@ -1,10 +1,8 @@
-import { type User, userSchema } from "@/model/User.ts";
-import { InsertUser, usersTable } from "@/db/schema.ts";
-import { eq } from "drizzle-orm";
-import { db } from "@/db/db.ts";
+import { db } from "../db/db.ts";
+import type { User } from "../generated/prisma/client.d.ts";
 
 export default class UserRepository {
-    async findAll(): Promise<User[]> {
+    /*async findAll(): Promise<User[]> {
         return await db.select().from(usersTable);
     }
 
@@ -26,5 +24,5 @@ export default class UserRepository {
         const rs = await db.delete(usersTable).where(eq(usersTable.id, id))
             .returning();
         return rs.length != 0;
-    }
+    }*/
 }

@@ -8,7 +8,7 @@ router.get("/", async (c) => {
   const name = c.req.query("name")
   const artist = c.req.query("artist")
   if (name) {
-    const albums = await service.getAlbums({id: 0, name, artistIds: [], trackIds: []})
+    const albums = await service.getAlbums();
     return c.json(albums)
   } else if (artist) {
     const albums = await service.getAlbumsFromArtist(Number(artist))

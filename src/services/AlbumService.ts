@@ -7,7 +7,7 @@ export default class AlbumService {
   async getAlbumsFromArtist(id: number): Promise<Album[]> {
       return await this.repo.getAlbumsFromArtist(id)
   }
-  async getAlbums(example: Album): Promise<Album[]> {
-      return await this.repo.getAlbums(example)
+  async getAlbums(): Promise<Album[]> {
+      return await this.repo.findAll({});
   }
 }

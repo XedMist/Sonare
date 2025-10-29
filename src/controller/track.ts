@@ -1,10 +1,14 @@
+import { zValidator } from "@hono/zod-validator";
 import TrackService from "../services/TrackService.ts";
 import { Hono } from "hono";
+import {TrackFindManySchema} from '../generated/zod/schemas'
 
 const router = new Hono();
 const service = new TrackService();
 
-router.get("/", async (c) => {
+router.get("/", 
+    zValidator("query", TrackFindManySchema),
+    async (c) => {
     const tracks = await service.findAll();
     return c.json(tracks);
 });

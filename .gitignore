@@ -1,8 +1,7 @@
 .vscode
 node_modules
 drizzle
-
-
+endpoints.txt
 
 .env
 # Prerequisites

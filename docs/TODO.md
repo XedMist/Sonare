@@ -1,5 +1,5 @@
 # Sonare - Lista de Tareas Pendientes
-
+- Hacerlo en distintas ramas
 ## Autenticación y Autorización
 - [ ] Implementar autenticación de usuarios (ej. JWT).
 - [ ] Proteger las rutas que lo necesiten (ej. crear/modificar playlists).

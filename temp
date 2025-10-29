@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+  runtime = "deno"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String   @unique
+  name    String?
+
+  playlists Playlist[]
+}
+
+
+model Track {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  path String
+  name String
+  duration Int
+  thumbnail String
+
+  albumID String @db.ObjectId
+  album Album @relation(fields: [albumID], references: [id])
+}
+
+model Artist {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+
+  albums  Album[] 
+}
+
+model Album {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  artistID  String  @db.ObjectId
+  artist Artist @relation(fields: [artistID], references:[id])
+
+  tracksIDs  String[] @db.ObjectId
+  tracks  Track[] 
+}
+
+model Playlist {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  userID String @db.ObjectId
+  user User @relation(fields: [userID], references: [id])
+
+}

@@ -1,29 +1,54 @@
-import type { Artist } from "../model/Artist.ts";
 import { db } from "../db/db.ts";
-import { artistsTable } from "../db/schema.ts";
-import { eq } from "drizzle-orm";
-
+import type { Album, Artist } from "../generated/prisma/index.d.ts";
 export default class ArtistRepository {
+  async getAlbums(artistId: string, pagination: {limit: number, offset: number} | undefined): Promise<Album[]> {
+      return await db.album.findMany({
+          where: {
+            artistID: {
+              equals: artistId,            }
+          },
+          skip: pagination ? pagination.offset : pagination,
+          take: pagination ? pagination.limit : pagination,
+      })
+  }
+
   async findAll(): Promise<Artist[]> {
-    return await db.select().from(artistsTable);
+    return await db.artist.findMany()
   }
 
-  async insert(a: Omit<Artist, "id">): Promise<Artist> {
-    const result = await db.insert(artistsTable).values(a).returning();
-    return result[0];
+  async findById({ id }: Pick<Album, "id">): Promise<Artist | null> {
+    return await db.artist.findUnique({
+      where: { 
+        id: id, 
+      }
+    })
   }
 
-  async findById(id: number): Promise<Artist | null> {
-    const artist = await db.select().from(artistsTable).where(
-      eq(artistsTable.id, id),
-    );
-    return artist.length === 0 ? null : artist[0];
+  async insert(artist: Omit<Artist, "id">) {
+    await db.artist.create({
+      data: {
+        name: artist.name
+      }
+    })
   }
 
-  async delete(id: number): Promise<boolean> {
-    const result = await db.delete(artistsTable).where(
-      eq(artistsTable.id, id),
-    ).returning();
-    return result.length !== 0;
+  async delete({ id, name }: Partial<Album>) {
+    await db.artist.delete({
+      where: {
+        id: id,
+        name: name
+      }
+    })
+  }
+
+  async update(id: string, name: string) {
+    await db.artist.update({
+      where: {
+        id: id,
+      },
+      data: {
+        name: name
+      }
+    })
   }
 }

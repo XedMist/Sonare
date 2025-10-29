@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 export interface Artist {
-  id: number;
+  id: string;
   name: string;
 }
 

@@ -7,10 +7,10 @@ import * as z from "zod";
 const router = new Hono();
 const service = new PlaylistService();
 
-router.get("/", async (c) => {
-  const playlists = await service.findAll();
-  return c.json(playlists);
-});
+// router.get("/", async (c) => {
+//   // const playlists = await service.findAll();
+//   // return c.json(playlists);
+// });
 
 // El zValidator comprueba que lo que se pase en el curpo de la
 // peticion es lo que se espera. El omit es para que no pasen la id

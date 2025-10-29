@@ -1,6 +1,9 @@
 .vscode
 node_modules
 drizzle
+
+
+
 .env
 # Prerequisites
 *.d
@@ -57,6 +60,7 @@ dkms.conf
 
 # debug information files
 *.dwo
+
 /prisma/generated
 
 /src/generated/prisma

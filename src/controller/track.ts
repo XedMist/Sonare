@@ -5,31 +5,31 @@ const router = new Hono();
 const service = new TrackService();
 
 router.get("/", async (c) => {
-  const tracks = await service.findAll();
-  return c.json(tracks);
+    const tracks = await service.findAll();
+    return c.json(tracks);
 });
 
 router.get("/:id", async (c) => {
-  const { id } = c.req.param();
-  const track = await service.findById({ id });
+    const { id } = c.req.param();
+    const track = await service.findById({ id });
 
-  if (track) {
-    return c.json(track);
-  } else {
-    return c.json({ message: "Track not found" }, 404);
-  }
+    if (track) {
+        return c.json(track);
+    } else {
+        return c.json({ message: "Track not found" }, 404);
+    }
 });
 
 router.get("/:id/file", async (c) => {
-  const { id } = c.req.param();
-  const result = await service.downloadTrack({ id });
+    const { id } = c.req.param();
+    const result = await service.downloadTrack({ id });
 
-  if (result !== null) {
-    c.header("Content-Type", result.mimeType);
-    return c.body(result.data);
-  } else {
-    return c.json({ message: "Track not found" }, 404);
-  }
+    if (result !== null) {
+        c.header("Content-Type", result.mimeType);
+        return c.body(result.data as any);
+    } else {
+        return c.json({ message: "Track not found" }, 404);
+    }
 });
 
 export default router;

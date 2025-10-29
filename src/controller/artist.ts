@@ -9,45 +9,43 @@ const router = new Hono();
 const service = new ArtistService();
 
 router.get("/", async (c) => {
-  const artists = await service.findAll();
-  return c.json(artists);
+    const artists = await service.findAll();
+    return c.json(artists);
 });
 
 router.post(
-  "/",
-  zValidator("json", artistSchema.omit({ id: true })),
-  async (c) => {
-    const body = c.req.valid("json");
-    const created = await service.create({
-      ...body,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    "/",
+    zValidator("json", artistSchema.omit({ id: true })),
+    async (c) => {
+        const body = c.req.valid("json");
+        const created = await service.create({
+            ...body,
+        });
 
-    return c.json(created, 201);
-  },
+        return c.json(created, 201);
+    },
 );
 
 router.get("/:id", async (c) => {
-  const { id } = c.req.param();
-  const artist = await service.findById({ id });
+    const { id } = c.req.param();
+    const artist = await service.findById({ id });
 
-  if (artist) {
-    return c.json(artist);
-  } else {
-    return c.json({ message: "Artist not found" }, 404);
-  }
+    if (artist) {
+        return c.json(artist);
+    } else {
+        return c.json({ message: "Artist not found" }, 404);
+    }
 });
 
 router.delete("/:id", async (c) => {
-  const { id } = c.req.param();
-  const deleted = await service.delete({ id });
+    const { id } = c.req.param();
+    const deleted = await service.delete({ id });
 
-  /*if (deleted) {
-    return c.body(null, 204);
-  } else {
-    return c.json({ message: "Artist not found" }, 404);
-  }*/
+    /*if (deleted) {
+      return c.body(null, 204);
+    } else {
+      return c.json({ message: "Artist not found" }, 404);
+    }*/
 });
 
 export default router;

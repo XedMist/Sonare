@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  email String  @unique
+  name  String?
+
+  playlists Playlist[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Track {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  path      String
+  name      String
+  duration  Int
+  thumbnail String
+
+  albumID String @db.ObjectId
+  album   Album  @relation(fields: [albumID], references: [id])
+
+  playlistItems PlaylistTrack[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([albumID])
+}
+
+model Artist {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  albums Album[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Album {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  artistID String @db.ObjectId
+  artist   Artist @relation(fields: [artistID], references: [id])
+
+  tracks Track[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Playlist {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  userID String @db.ObjectId
+  user   User   @relation(fields: [userID], references: [id])
+
+  items PlaylistTrack[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userID])
+  @@index([name])
+}
+
+model PlaylistTrack {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  playlistId String   @db.ObjectId
+  trackId    String   @db.ObjectId
+  position   Int?
+  addedAt    DateTime @default(now())
+
+  playlist Playlist @relation(fields: [playlistId], references: [id])
+  track    Track    @relation(fields: [trackId], references: [id])
+
+  @@unique([playlistId, trackId])
+  @@index([playlistId])
+  @@index([trackId])
+}

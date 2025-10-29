@@ -1,0 +1,24 @@
+{
+  "name": "sonare",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun run --hot src/app.ts"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-validator": "^0.7.4",
+    "@prisma/client": "^6.17.1",
+    "drizzle-orm": "^0.44.6",
+    "hono": "^4.10.2",
+    "npm": "^11.6.2",
+    "prisma": "^6.17.1"
+  }
+}

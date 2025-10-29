@@ -2,10 +2,10 @@ import * as z from "zod";
 
 // La interfaz del tipo Album
 export interface Album {
-  id: number;
+  id: string;
   name: string;
-  artistIds: number[];
-  trackIds: number[];
+  artistID: string;
+  trackIDs: string[];
 }
 
 // El esquema para validar el cuerpo de los POST

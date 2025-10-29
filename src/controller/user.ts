@@ -6,7 +6,7 @@ import { Hono } from "hono";
 const router = new Hono();
 const service = new UserService();
 
-router.get("/", async (c) => {
+/*router.get("/", async (c) => {
   const users = await service.findAll();
   return c.json(users);
 });
@@ -44,6 +44,6 @@ router.delete("/:id", async (c) => {
   } else {
     return c.json({ message: "User not found" }, 404);
   }
-});
+});*/
 
 export default router;

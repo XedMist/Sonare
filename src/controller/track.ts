@@ -11,7 +11,7 @@ router.get("/", async (c) => {
 
 router.get("/:id", async (c) => {
   const { id } = c.req.param();
-  const track = await service.findById(Number(id));
+  const track = await service.findById({ id });
 
   if (track) {
     return c.json(track);
@@ -22,9 +22,9 @@ router.get("/:id", async (c) => {
 
 router.get("/:id/file", async (c) => {
   const { id } = c.req.param();
-  const result = await service.downloadTrack(Number(id));
+  const result = await service.downloadTrack({ id });
 
-  if (result) {
+  if (result !== null) {
     c.header("Content-Type", result.mimeType);
     return c.body(result.data);
   } else {

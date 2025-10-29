@@ -14,7 +14,7 @@ router.get("/", async (c) => {
 
 // El zValidator comprueba que lo que se pase en el curpo de la
 // peticion es lo que se espera. El omit es para que no pasen la id
-router.post(
+/*router.post(
   "/",
   zValidator("json", playlistCreateSchema),
   async (c) => {
@@ -100,6 +100,6 @@ router.delete("/:id", async (c) => {
   } else {
     return c.json({ message: "Playlist not found" }, 404);
   }
-});
+});*/
 
 export default router;

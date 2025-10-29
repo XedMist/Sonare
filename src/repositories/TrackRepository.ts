@@ -14,10 +14,24 @@ export default class TrackRepository {
     })
   }
 
+<<<<<<< HEAD
   async getTracksFromAlbum(albumID: string): Promise<Track[]> {
     return await db.track.findMany({
       where: { albumID},
     });
+||||||| 4691fd2
+  async findByIds(ids: number[]): Promise<Track[]> {
+    if (ids.length === 0) return [];
+    const tracks = await db.select().from(tracksTable)
+      .where(inArray(tracksTable.id, ids));
+    return tracks.map(t => trackSchema.parse(t));
+=======
+  async findByIds(ids: number[]): Promise<Track[]> {
+    if (ids.length === 0) return [];
+    const tracks = await db.select().from(tracksTable)
+      .where(inArray(tracksTable.id, ids));
+    return tracks.map((t) => trackSchema.parse(t));
+>>>>>>> main
   }
 
   async getTracksFromArtist(artistID: string): Promise<Track[]> {

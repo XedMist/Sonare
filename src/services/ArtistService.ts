@@ -1,5 +1,5 @@
+import type { Artist } from "../generated/prisma/index.d.ts";
 import ArtistRepository from "../repositories/ArtistRepository.ts";
-import type { Artist } from "../model/Artist.ts";
 
 export default class ArtistService {
   repo = new ArtistRepository();
@@ -8,15 +8,15 @@ export default class ArtistService {
     return await this.repo.findAll();
   }
 
-  async create(payload: Omit<Artist, "id">): Promise<Artist> {
-    return await this.repo.insert(payload);
+  async create(payload: Omit<Artist, "id">): Promise<void> {
+    await this.repo.insert(payload);
   }
 
-  async findById(id: number): Promise<Artist | null> {
+  async findById(id: Pick<Artist, "id">): Promise<Artist | null> {
     return await this.repo.findById(id);
   }
 
-  async delete(id: number): Promise<boolean> {
-    return await this.repo.delete(id);
+  async delete(id: Pick<Artist, "id">): Promise<void> {
+    await this.repo.delete(id);
   }
 }

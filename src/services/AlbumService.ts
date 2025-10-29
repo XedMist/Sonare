@@ -1,5 +1,5 @@
+import type { Album } from "../generated/prisma/index.d.ts";
 import AlbumRepository from "../repositories/AlbumRepository.ts";
-import type { Album } from "../model/Album.ts";
 
 export default class AlbumService {
   repo = new AlbumRepository();

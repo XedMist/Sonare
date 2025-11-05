@@ -6,12 +6,17 @@ import { readFileSync } from 'node:fs'
 export default class TrackService {
     repo = new TrackRepository();
 
-    async findAll(): Promise<Track[]> {
-        return await this.repo.findAll();
+    async findAll(name: string | undefined, albumID: string | undefined, artistID: string | undefined, pagination: { skip?: number, take?: number } | undefined): Promise<Track[]> {
+        return await this.repo.findAll({ name }, { id: albumID }, { id: artistID }, pagination ?? {});
     }
 
-    async findById(id: Pick<Track, "id">): Promise<Track | null> {
-        return await this.repo.findById(id);
+    async findById(id: string): Promise<Track | null> {
+        return await this.repo.findById({ id });
+    }
+
+    async getThumbnail(id: string): Promise<string | null> {
+        const track = await this.findById(id)
+        return track === null ? track : track.thumbnail;
     }
 
     async downloadTrack(id: Pick<Track, "id">): Promise<{ data: Uint8Array; mimeType: string } | null> {

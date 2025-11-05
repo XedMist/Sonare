@@ -1,53 +1,56 @@
 import ArtistService from "../services/ArtistService.ts";
 import { zValidator } from "@hono/zod-validator";
+import { z } from 'zod'
 import { Hono } from "hono";
-import {ArtistCreateOneSchema, ArtistFindManySchema} from '@/generated/zod/schemas'
+import { ArtistCreateInputObjectSchema } from "@/generated/zod/schemas/index.ts";
 
-const router = new Hono();
+const artistController = new Hono();
 const service = new ArtistService();
 
-router.get("/",
-    
-    zValidator("query", ArtistFindManySchema),
-    async (c) => {
+const PaginationQuerySchema = z.object({
+    page: z.string().regex(/^\d+$/).transform(Number).default(1).pipe(z.number().min(1)),
+    limit: z.string().regex(/^\d+$/).transform(Number).default(10).pipe(z.number().min(1).max(100)),
+});
 
-    const artists = await service.findAll();
+
+artistController.get("/", zValidator("query", PaginationQuerySchema), async (c) => {
+    const { page, limit } = c.req.valid('query')
+    const artists = await service.findAll({ skip: page, take: limit });
     return c.json(artists);
 });
 
-router.post(
-    "/",
-    zValidator("json", ArtistCreateOneSchema),
-    async (c) => {
-        const body = c.req.valid("json");
-        const created = await service.create({
-            name: body.data.name,
-        });
-
-        return c.json(created, 201);
-    },
-);
-
-router.get("/:id", async (c) => {
-    const { id } = c.req.param();
-    const artist = await service.findById({ id });
-
-    if (artist) {
-        return c.json(artist);
-    } else {
-        return c.json({ message: "Artist not found" }, 404);
-    }
+artistController.post("/", zValidator("json", ArtistCreateInputObjectSchema), async (c) => {
+    const body = c.req.valid("json");
+    const artist = await service.create(body.name);
+    return c.json(artist, 201);
 });
 
-router.delete("/:id", async (c) => {
+artistController.get("/:id", async (c) => {
     const { id } = c.req.param();
-    const deleted = await service.delete({ id });
-
-    if (deleted) {
-      return c.body(null, 204);
-    } else {
-      return c.json({ message: "Artist not found" }, 404);
-    }
+    const artist = await service.findByID(id);
+    return c.json(artist);
 });
 
-export default router;
+artistController.delete("/:id", async (c) => {
+    const { id } = c.req.param();
+    await service.delete(id);
+    return c.body(null, 204);
+});
+
+artistController.get("/:id/albums", zValidator("query", PaginationQuerySchema), async (c) => {
+    const { page, limit } = c.req.valid('query')
+    const { id } = c.req.param();
+
+    const artists = await service.getAlbumsByArtist(id, { skip: page, take: limit });
+    return c.json(artists);
+});
+
+artistController.get("/:id/tracks", zValidator("query", PaginationQuerySchema), async (c) => {
+    const { page, limit } = c.req.valid('query')
+    const { id } = c.req.param();
+
+    const artists = await service.getTracksByArtist(id, { skip: page, take: limit });
+    return c.json(artists);
+});
+
+export default artistController;

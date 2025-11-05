@@ -1,23 +1,31 @@
-import type { Artist } from "../generated/prisma/index.d.ts";
+import type { Album } from "@prisma/client";
+import type { Artist, Track } from "../generated/prisma/index.d.ts";
 import ArtistRepository from "../repositories/ArtistRepository.ts";
 
 export default class ArtistService {
-    repo = new ArtistRepository();
+    private artistRepository = new ArtistRepository();
 
-    async findAll(): Promise<Artist[]> {
-        return await this.repo.findAll();
+    async findAll(pagination: { skip?: number, take?: number } | undefined): Promise<Artist[]> {
+        return await this.artistRepository.findAll(pagination ?? {});
     }
 
-    async create(payload: Pick<Artist, "name">): Promise<void> {
-        await this.repo.insert(payload);
+    async findByID(id: string): Promise<Artist | null> {
+        return await this.artistRepository.findById({ id });
     }
 
-    async findById(id: Pick<Artist, "id">): Promise<Artist | null> {
-        return await this.repo.findById(id);
+    async create(name: string): Promise<Artist> {
+        return await this.artistRepository.insert({ name });
     }
 
-    async delete(id: Pick<Artist, "id">): Promise<boolean> {
-        return await this.repo.delete(id);
+    async delete(id: string): Promise<boolean> {
+        return await this.artistRepository.delete({ id });
     }
 
+    async getAlbumsByArtist(id: string, pagination: { skip?: number, take?: number } | undefined): Promise<Album[]> {
+        return await this.artistRepository.getAlbumsOfArtist(id, pagination ?? {});
+    }
+
+    async getTracksByArtist(id: string, pagination: { skip?: number, take?: number } | undefined): Promise<Track[]> {
+        return await this.artistRepository.getTracksOfArtist(id, pagination ?? {});
+    }
 }

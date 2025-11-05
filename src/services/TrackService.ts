@@ -1,6 +1,6 @@
 import type { Track } from "../generated/prisma/index.d.ts";
 import TrackRepository from "../repositories/TrackRepository.ts";
-import { readFileSync } from 'node:fs'
+import { promises as fs } from 'node:fs'
 
 
 export default class TrackService {
@@ -23,12 +23,11 @@ export default class TrackService {
         const track = await this.repo.findById(id);
         if (!track) return null;
 
-        const data = readFileSync(track.path);
+        const data = await fs.readFile(track.path);
         const extension = track.path.split('.').pop()?.toLowerCase();
-
         const mimeType = this.getMimeType(extension);
-
         return { data, mimeType };
+        
     }
 
     private getMimeType(extension?: string): string {

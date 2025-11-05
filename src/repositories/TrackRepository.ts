@@ -1,5 +1,5 @@
 import { db } from "@/db/db.ts";
-import type { Track, Album, Artist } from "@prisma/client";
+import type { Track, Album, Artist } from "../generated/prisma/index.d.ts";
 
 export default class TrackRepository {
     async findAll({ name }: Pick<Track, "name"> | { name: undefined }, album: Pick<Album, "id"> | { id: undefined }, artist: Pick<Artist, "id"> | { id: undefined }, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {

@@ -9,7 +9,7 @@ const playlistController = new Hono();
 const service = new PlaylistService();
 
 const PaginationQuerySchema = z.object({
-  page: z.string().regex(/^\d+$/).transform(Number).default(1).pipe(z.number().min(1)),
+  page: z.string().regex(/^\d+$/).transform(Number).default(0).pipe(z.number().min(0)),
   limit: z.string().regex(/^\d+$/).transform(Number).default(10).pipe(z.number().min(1).max(100)),
 });
 

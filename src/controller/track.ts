@@ -2,13 +2,15 @@ import { zValidator } from "@hono/zod-validator";
 import TrackService from "../services/TrackService.ts";
 import { Hono } from "hono";
 import { TrackFindManySchema } from '../generated/zod/schemas'
-import { z } from 'zod'
+import { z } from 'zod';
+import { stream } from "hono/streaming"
+import { bodyLimit } from "hono/body-limit";
 
 const router = new Hono();
 const service = new TrackService();
 
 const QuerySchema = z.object({
-    page: z.string().regex(/^\d+$/).transform(Number).default(1).pipe(z.number().min(1)),
+    page: z.string().regex(/^\d+$/).transform(Number).default(0).pipe(z.number().min(0)),
     limit: z.string().regex(/^\d+$/).transform(Number).default(10).pipe(z.number().min(1).max(100)),
     name: z.string().optional(),
     artistID: z.string().optional(),
@@ -29,14 +31,17 @@ router.get("/:id", async (c) => {
 
 router.get("/:id/file", async (c) => {
     const { id } = c.req.param();
-    const result = await service.downloadTrack({ id });
+    const track = await service.findById(id);
 
-    if (result !== null) {
-        c.header("Content-Type", result.mimeType);
-        return c.body(result.data as any);
-    } else {
+    if (track === null) {
         return c.json({ message: "Track not found" }, 404);
     }
+
+    const file = Bun.file(track.path);
+    c.header("Content-Type", "audio/mp4")
+    return stream(c, async (stream) => {
+        stream.pipe(file.stream());
+    })
 });
 
 router.get("/:id/thumbnail", async (c) => {

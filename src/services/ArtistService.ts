@@ -1,5 +1,4 @@
-import type { Album } from "@prisma/client";
-import type { Artist, Track } from "../generated/prisma/index.d.ts";
+import type { Artist, Track, Album } from "../generated/prisma/index.d.ts";
 import ArtistRepository from "../repositories/ArtistRepository.ts";
 
 export default class ArtistService {

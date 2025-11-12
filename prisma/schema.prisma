@@ -1,11 +1,11 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../src/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 generator zod {
-	provider = "prisma-zod-generator"
-  output = "../src/generated/zod"
+  provider = "prisma-zod-generator"
+  output   = "../src/generated/zod"
 }
 
 datasource db {
@@ -22,6 +22,9 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  roleID String @db.ObjectId
+  role   Role   @relation(fields: [roleID], references: [id])
 }
 
 model Track {
@@ -95,4 +98,30 @@ model PlaylistTrack {
   @@unique([playlistId, trackId])
   @@index([playlistId])
   @@index([trackId])
+}
+
+model Role {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
+
+  permisionsID String[] @db.ObjectId
+  permisions Permision[] @relation(fields: [permisionsID], references: [ id ])
+
+  User       User[]
+}
+
+model Permision {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  capability Capability
+  resource   String
+
+  rolesID String[] @db.ObjectId
+  roles Role[] @relation(fields: [rolesID], references: [ id ])
+}
+
+enum Capability {
+  READ
+  CREATE
+  DELETE
+  UPDATE
 }

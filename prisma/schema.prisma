@@ -15,16 +15,17 @@ datasource db {
 
 model User {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  email String  @unique
-  name  String?
+
+  name  String  @unique
+  password String
 
   playlists Playlist[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
   roleID String @db.ObjectId
   role   Role   @relation(fields: [roleID], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Track {

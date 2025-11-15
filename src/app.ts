@@ -1,30 +1,42 @@
 import { Hono } from "hono";
-import userRouter from "./controller/user.ts";
-import artistRouter from "./controller/artist.ts";
-import albumRouter from "./controller/album.ts";
-import trackRouter from "./controller/track.ts";
-import playlistRouter from "./controller/playlist.ts";
-import loginRouter from "./controller/login.ts";
 import { logger } from "hono/logger";
-import swaggerMiddleware from "./middleware/swagger.ts";
 
-import {jwt} from "hono/jwt";
-import type { JwtVariables } from 'hono/jwt';
+import {
+    artistController,
+    albumController,
+    trackController,
+    playlistController,
+    authController,
+} from "@/controller/index.ts";
 
-const authMiddleware = jwt({
-    secret: process.env.JWT_SECRET ?? 'secreto',
-});
+
+import swaggerMiddleware from "@/middleware/swagger.ts";
+import { authMiddleware } from "@/middleware/AuthMiddleware.ts";
+import { requestContext } from '@/middleware/requestContext.ts'
+import { errorHandler } from "@/middleware/errorHandler.ts";
 
 const app = new Hono();
+
 app.use(logger());
+app.use('*', requestContext())
+app.onError(errorHandler)
+
 const api = app.basePath("/api");
 
-api.use("/users/*", authMiddleware).route("/users", userRouter);
-api.use("/artists/*", authMiddleware).route("/artists", artistRouter);
-api.use("/albums/*", authMiddleware).route("/albums", albumRouter);
-api.use("/tracks/*", authMiddleware).route("/tracks", trackRouter);
-api.use("/playlists/*", authMiddleware).route("/playlists", playlistRouter);
-api.route("/login", loginRouter);
+
+// Rutas publicas 
+api.route("/auth", authController);
 api.route("/swagger", swaggerMiddleware);
+
+// Rutas con auth 
+api.use("/artists/*", authMiddleware);
+api.use("/albums/*", authMiddleware);
+api.use("/tracks/*", authMiddleware);
+api.use("/playlists/*", authMiddleware);
+
+api.route("/artists", artistController);
+api.route("/albums", albumController);
+api.route("/tracks", trackController);
+api.route("/playlists", playlistController);
 
 export default app;

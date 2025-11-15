@@ -1,5 +1,6 @@
-import type { Artist, Track, Album } from "../generated/prisma/index.d.ts";
-import ArtistRepository from "../repositories/ArtistRepository.ts";
+import { NotFoundError } from "@/error/ApiError.ts";
+import type { Artist, Track, Album } from "@/model/entity/index.ts";
+import ArtistRepository from "@/repositories/ArtistRepository.ts";
 
 export default class ArtistService {
     private artistRepository = new ArtistRepository();
@@ -8,8 +9,10 @@ export default class ArtistService {
         return await this.artistRepository.findAll(pagination ?? {});
     }
 
-    async findByID(id: string): Promise<Artist | null> {
-        return await this.artistRepository.findById({ id });
+    async findByID(id: string): Promise<Artist> {
+        const artist = await this.artistRepository.findById({ id });
+        if (!artist) throw new NotFoundError("No se encontro el artista")
+        return artist
     }
 
     async create(name: string): Promise<Artist> {

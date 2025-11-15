@@ -1,22 +1,26 @@
 import { db } from '@/db/db.ts'
-import type { Album, Track } from "../generated/prisma/index.d.ts";
+import type { Album, Track } from "../model/entity/index.ts";
+import { PrismaMapper } from "../model/mappers.ts";
 
 export default class AlbumRepository {
     async findAll({ take, skip }: { skip?: number; take?: number }): Promise<Album[]> {
-        return await db.album.findMany({ skip, take })
+        const albums = await db.album.findMany({ skip, take });
+        return albums.map(PrismaMapper.toAlbum);
     }
 
     async findById({ id }: Pick<Album, 'id'>): Promise<Album | null> {
-        return await db.album.findUnique({
+        const album = await db.album.findUnique({
             where: { id },
-        })
+        });
+        return album ? PrismaMapper.toAlbum(album) : null;
     }
 
     async getTracksOfAlbum({ id }: Pick<Album, 'id'>, { take, skip }: { skip?: number, take?: number }): Promise<Track[]> {
-        return await db.track.findMany({
+        const tracks = await db.track.findMany({
             where: { albumID: id },
             skip,
             take,
-        })
+        });
+        return tracks.map(PrismaMapper.toTrack);
     }
 }

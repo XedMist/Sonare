@@ -1,23 +1,26 @@
 import { db } from "../db/db.ts";
-import type { Playlist } from "../generated/prisma/client.d.ts";
+import type { Playlist } from "../model/entity/index.ts";
+import { PrismaMapper } from "../model/mappers.ts";
 
 
 // Get, post, get id, delete id
 export default class PlaylistRepository { 
     async findAll({skip, take} : {skip?: number, take?: number}): Promise<Playlist[]> {
-        return await db.playlist.findMany({ skip, take });
+        const playlists = await db.playlist.findMany({ skip, take });
+        return playlists.map(PrismaMapper.toPlaylist);
     }
 
     async findById({id} : Pick<Playlist, "id">): Promise<Playlist | null> {
-        return await db.playlist.findUnique({
+        const playlist = await db.playlist.findUnique({
             where: {
                 id: id,
             }
         });
+        return playlist ? PrismaMapper.toPlaylist(playlist) : null;
     }
 
     async create(playlist: Pick<Playlist, "name" | "userID">): Promise<Playlist> {
-        return await db.playlist.create({
+        const created = await db.playlist.create({
             data: {
                 name: playlist.name,
                 user: {
@@ -27,6 +30,7 @@ export default class PlaylistRepository {
                 }
             }
         });
+        return PrismaMapper.toPlaylist(created);
     }
     
     async delete({id} : Pick<Playlist, "id">): Promise<boolean> {

@@ -1,0 +1,40 @@
+import { z } from 'zod';
+
+// Playlist DTOs
+export const PlaylistResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  userID: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const PlaylistCreateSchema = z.object({
+  name: z.string().min(1).max(100),
+  userID: z.string(),
+});
+
+export const PlaylistUpdateSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+});
+
+// PlaylistTrack DTOs
+export const PlaylistTrackResponseSchema = z.object({
+  id: z.string(),
+  playlistId: z.string(),
+  trackId: z.string(),
+  position: z.number().nullable(),
+  addedAt: z.date(),
+});
+
+export const PlaylistTrackCreateSchema = z.object({
+  playlistId: z.string(),
+  trackId: z.string(),
+  position: z.number().nullable().optional(),
+});
+
+export type PlaylistResponse = z.infer<typeof PlaylistResponseSchema>;
+export type PlaylistCreate = z.infer<typeof PlaylistCreateSchema>;
+export type PlaylistUpdate = z.infer<typeof PlaylistUpdateSchema>;
+export type PlaylistTrackResponse = z.infer<typeof PlaylistTrackResponseSchema>;
+export type PlaylistTrackCreate = z.infer<typeof PlaylistTrackCreateSchema>;

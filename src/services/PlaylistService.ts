@@ -1,5 +1,6 @@
-import PlaylistRepository from "../repositories/PlaylistRepository.ts";
-import type { Playlist } from '../generated/prisma/index.d.ts'
+import PlaylistRepository from "@/repositories/PlaylistRepository.ts";
+import type { Playlist } from '@/model/entity/index.ts'
+import { NotFoundError } from "@/error/ApiError.ts";
 
 export default class PlaylistService {
     private playlistRepository = new PlaylistRepository();
@@ -8,8 +9,10 @@ export default class PlaylistService {
         return await this.playlistRepository.findAll(pagination ?? {});
     }
 
-    async findByID(id: string): Promise<Playlist | null> {
-        return await this.playlistRepository.findById({ id });
+    async findByID(id: string): Promise<Playlist> {
+        const playlist = await this.playlistRepository.findById({ id });
+        if (!playlist) throw new NotFoundError("No se encontro la playlist");
+        return playlist;
     }
 
     async create(name: string, userID: string): Promise<Playlist> {

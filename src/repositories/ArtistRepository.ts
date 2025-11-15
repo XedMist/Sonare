@@ -1,11 +1,12 @@
 import { db } from "../db/db.ts";
 
-import type { Album, Artist, Track } from "../generated/prisma/index.d.ts";
+import type { Album, Artist, Track } from "../model/entity/index.ts";
+import { PrismaMapper } from "../model/mappers.ts";
 
 export default class ArtistRepository {
 
     async getAlbumsOfArtist(artistId: string, { skip, take }: { skip?: number, take?: number }): Promise<Album[]> {
-        return await db.album.findMany({
+        const albums = await db.album.findMany({
             where: {
                 artistID: {
                     equals: artistId,
@@ -13,11 +14,12 @@ export default class ArtistRepository {
             },
             skip,
             take
-        })
+        });
+        return albums.map(PrismaMapper.toAlbum);
     }
 
     async getTracksOfArtist(artistId: string, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {
-        return await db.track.findMany({
+        const tracks = await db.track.findMany({
             where: {
                 album: {
                     artistID: {
@@ -27,31 +29,35 @@ export default class ArtistRepository {
             },
             skip,
             take
-        })
+        });
+        return tracks.map(PrismaMapper.toTrack);
     }
 
     async findAll({ skip, take }: { skip?: number, take?: number }): Promise<Artist[]> {
-        return await db.artist.findMany({ skip, take })
+        const artists = await db.artist.findMany({ skip, take });
+        return artists.map(PrismaMapper.toArtist);
     }
 
     async findById({ id }: Pick<Artist, "id">): Promise<Artist | null> {
-        return await db.artist.findUnique({
+        const artist = await db.artist.findUnique({
             where: {
                 id: id,
             }
-        })
+        });
+        return artist ? PrismaMapper.toArtist(artist) : null;
     }
 
 
     async insert(artist: Pick<Artist, "name">): Promise<Artist> {
-        return await db.artist.create({
+        const created = await db.artist.create({
             data: {
                 name: artist.name
             }
-        })
+        });
+        return PrismaMapper.toArtist(created);
     }
 
-    async delete({ id }: Partial<Album>): Promise<boolean> {
+    async delete({ id }: Pick<Artist, "id">): Promise<boolean> {
         try {
             await db.artist.delete({
                 where: {
@@ -64,14 +70,15 @@ export default class ArtistRepository {
         }
     }
 
-    async update(id: string, name: string) {
-        await db.artist.update({
+    async update(id: string, name: string): Promise<Artist> {
+        const updated = await db.artist.update({
             where: {
                 id: id,
             },
             data: {
                 name: name
             }
-        })
+        });
+        return PrismaMapper.toArtist(updated);
     }
 }

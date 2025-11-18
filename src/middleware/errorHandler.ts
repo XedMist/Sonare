@@ -1,4 +1,5 @@
 import type { ErrorHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
 import {
     AppError,
@@ -16,6 +17,20 @@ export const errorHandler: ErrorHandler = (err, c) => {
     const instance = c.req.path ?? new URL(c.req.url).pathname;
     const traceId = c.get('requestId');
 
+    if (err instanceof HTTPException) {
+        return c.json(
+            {
+                type: 'about:blank',
+                title: err.message,
+                status: err.status,
+                instance,
+                traceId,
+            },
+            err.status as ContentfulStatusCode,
+            problemHeaders
+        );
+    }
+
     if (err instanceof AppError) {
         return c.json(err.toProblem(instance, traceId), err.status as ContentfulStatusCode, problemHeaders);
     }
@@ -26,19 +41,19 @@ export const errorHandler: ErrorHandler = (err, c) => {
     }
 
     const anyErr = err as any;
-    
+
     // Prisma P2002: Unique constraint violation
     if (anyErr?.code === 'P2002') {
         const appErr = new ConflictError('Unique constraint violated');
         return c.json(appErr.toProblem(instance, traceId), appErr.status as ContentfulStatusCode, problemHeaders);
     }
-    
+
     // Prisma P2025: Record not found
     if (anyErr?.code === 'P2025') {
         const appErr = new NotFoundError('Record not found');
         return c.json(appErr.toProblem(instance, traceId), appErr.status as ContentfulStatusCode, problemHeaders);
     }
-    
+
     // Prisma P2023: Malformed ID 
     if (anyErr?.code === 'P2023') {
         const appErr = new BadRequestError("Formato de ID invalido");

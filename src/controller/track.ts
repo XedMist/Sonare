@@ -6,6 +6,8 @@ import TrackService from "@/services/TrackService.ts";
 import { PaginationQuerySchema } from "@/model/dto/CommonDTO.ts";
 import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
+import { requirePermission } from "@/middleware/AuthMiddleware";
+import { Capability } from "@/generated/prisma/client";
 
 const router = new Hono();
 const service = new TrackService();
@@ -16,19 +18,19 @@ const QuerySchema = PaginationQuerySchema.extend({
     albumID: z.string().optional(),
 });
 
-router.get("/", validate("query", QuerySchema), async (c) => {
+router.get("/", validate("query", QuerySchema), requirePermission(Capability.READ, "tracks"), async (c) => {
     const { page, limit, name, albumID, artistID } = c.req.valid('query')
     const tracks = await service.findAll(name, albumID, artistID, { skip: page, take: limit });
     return c.json(tracks.map(DTOMapper.toTrackResponse));
 });
 
-router.get("/:id", async (c) => {
+router.get("/:id", requirePermission(Capability.READ, "tracks"), async (c) => {
     const { id } = c.req.param();
     const track = await service.findById(id);
     return track ? c.json(DTOMapper.toTrackResponse(track)) : c.json({ message: "Track not found" }, 404);
 });
 
-router.get("/:id/file", async (c) => {
+router.get("/:id/file", requirePermission(Capability.READ, "tracks"), async (c) => {
     const { id } = c.req.param();
     const track = await service.findById(id);
 
@@ -40,7 +42,7 @@ router.get("/:id/file", async (c) => {
     })
 });
 
-router.get("/:id/thumbnail", async (c) => {
+router.get("/:id/thumbnail", requirePermission(Capability.READ, "tracks"), async (c) => {
     const { id } = c.req.param();
     const thumbnail = await service.getThumbnail(id)
     return c.json({ thumbnail })

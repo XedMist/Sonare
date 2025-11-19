@@ -1,5 +1,5 @@
 import { db } from "../db/db.ts";
-import type { Playlist } from "../model/entity/index.ts";
+import type { Playlist, Track } from "../model/entity/index.ts";
 import { PrismaMapper } from "../model/mappers.ts";
 
 
@@ -45,5 +45,45 @@ export default class PlaylistRepository {
             return false;
         }
     }
-}
 
+    async getTracksInPlaylist(playlistID: string): Promise<Track[]> {
+        const playlist = await db.playlist.findUnique({
+            where: { id: playlistID },
+            include: { items: { include: { track: true } } }
+        });
+        if (!playlist) {
+            return [];
+        }
+        return playlist.items.map(item => PrismaMapper.toTrack(item.track));
+    }
+
+    async addTrackToPlaylist(playlistID: string, trackID: string): Promise<Playlist> {
+        const updated = await db.playlist.update({
+            where: { id: playlistID },
+            data: {
+                items: {
+                    connect: {
+                        id: trackID
+                    }
+                }
+            }
+        });
+        return PrismaMapper.toPlaylist(updated);
+    }
+
+    async removeTrackFromPlaylist(playlistID: string, trackID: string): Promise<Playlist> {
+        const updated = await db.playlist.update({
+            where: { id: playlistID },
+            data: {
+                items: {
+                    disconnect: {
+                        id: trackID
+                    }
+                }
+            }
+        });
+        return PrismaMapper.toPlaylist(updated);
+    }
+
+    
+}

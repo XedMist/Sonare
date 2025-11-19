@@ -1,5 +1,5 @@
 import PlaylistRepository from "@/repositories/PlaylistRepository.ts";
-import type { Playlist } from '@/model/entity/index.ts'
+import type { Playlist, Track } from '@/model/entity/index.ts'
 import { NotFoundError } from "@/error/ApiError.ts";
 
 export default class PlaylistService {
@@ -21,5 +21,32 @@ export default class PlaylistService {
 
     async delete(id: string): Promise<boolean> {
         return await this.playlistRepository.delete({ id });
+    }
+
+    async getTracksInPlaylist(playlistID: string): Promise<Track[]> {
+        const playlist = await this.playlistRepository.findById({ id: playlistID });
+        if (!playlist){
+            throw new NotFoundError("No se encontro la playlist");
+        }
+        const tracksPlaylist = await this.playlistRepository.getTracksInPlaylist(playlistID);
+        return tracksPlaylist;
+    }
+
+    async addTrackToPlaylist(playlistID: string, trackID: string): Promise<Playlist> {
+        const playlist = await this.playlistRepository.findById({ id: playlistID });
+        if (!playlist){
+            throw new NotFoundError("No se encontro la playlist");
+        }
+        const updatedPlaylist = await this.playlistRepository.addTrackToPlaylist(playlistID, trackID);
+        return updatedPlaylist;
+    }
+
+    async removeTrackFromPlaylist(playlistID: string, trackID: string): Promise<Playlist> {
+        const playlist = await this.playlistRepository.findById({ id: playlistID });
+        if (!playlist){
+            throw new NotFoundError("No se encontro la playlist");
+        }
+        const updatedPlaylist = await this.playlistRepository.removeTrackFromPlaylist(playlistID, trackID);
+        return updatedPlaylist;
     }
 }

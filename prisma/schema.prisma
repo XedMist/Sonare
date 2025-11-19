@@ -37,8 +37,11 @@ model Track {
   duration  Int
   thumbnail String
 
-  albumID String @db.ObjectId
-  album   Album  @relation(fields: [albumID], references: [id])
+  albumID String? @db.ObjectId
+  album   Album?  @relation(fields: [albumID], references: [id])
+
+  artistID String @db.ObjectId
+  artist   Artist @relation(fields: [artistID], references: [id])
 
   playlistItems PlaylistTrack[]
 
@@ -47,6 +50,7 @@ model Track {
 
   @@index([name])
   @@index([albumID])
+  @@index([artistID])
 }
 
 model Artist {
@@ -54,6 +58,7 @@ model Artist {
   name String
 
   albums Album[]
+  tracks Track[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

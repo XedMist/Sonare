@@ -14,9 +14,9 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name  String  @unique
+  name     String @unique
   password String
 
   playlists Playlist[]
@@ -112,10 +112,10 @@ model Role {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String @unique
 
-  permisionsID String[] @db.ObjectId
-  permisions Permision[] @relation(fields: [permisionsID], references: [ id ])
+  permisionsID String[]    @db.ObjectId
+  permisions   Permision[] @relation(fields: [permisionsID], references: [id])
 
-  User       User[]
+  User User[]
 }
 
 model Permision {
@@ -124,7 +124,7 @@ model Permision {
   resource   String
 
   rolesID String[] @db.ObjectId
-  roles Role[] @relation(fields: [rolesID], references: [ id ])
+  roles   Role[]   @relation(fields: [rolesID], references: [id])
 }
 
 enum Capability {

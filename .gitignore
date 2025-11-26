@@ -2,9 +2,10 @@
 node_modules
 drizzle
 endpoints.txt
-*.env
+.env
 *.py
 urls.txt
+urls2.txt
 
 # Prerequisites
 *.d

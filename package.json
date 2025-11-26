@@ -5,7 +5,7 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "prisma": "^6.18.0",
+    "prisma": "6.19",
     "prisma-zod-generator": "^1.30.2"
   },
   "peerDependencies": {
@@ -13,16 +13,17 @@
   },
   "scripts": {
     "dev": "bun run --hot src/app.ts",
-    "generate": "bunx --bun prisma@latest generate",
-    "studio": "bunx --bun prisma@latest studio",
-    "push": "bunx --bun prisma@latest db push"
+    "generate": "bunx --bun prisma@6 generate",
+    "studio": "bunx --bun prisma@6 studio",
+    "push": "bunx --bun prisma@6 db push"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.2",
     "@hono/zod-validator": "^0.7.4",
-    "@prisma/client": "^6.18.0",
+    "@prisma/client": "6.19",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "hono": "^4.10.2",
     "npm": "^11.6.2",

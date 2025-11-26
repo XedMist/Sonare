@@ -2,8 +2,11 @@
 node_modules
 drizzle
 endpoints.txt
-
 .env
+*.py
+urls.txt
+urls2.txt
+
 # Prerequisites
 *.d
 
@@ -64,3 +67,5 @@ dkms.conf
 
 /src/generated/prisma
 /src/generated/zod
+
+/media

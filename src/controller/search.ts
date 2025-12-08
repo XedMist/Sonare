@@ -21,10 +21,18 @@ searchController.get("/", validate("query", SearchQuerySchema), requirePermissio
     
     const result = await service.search(q, types);
 
+    const relatedTracks = Object.fromEntries(
+        Object.entries(result.relatedTracks).map(([trackId, tracks]) => [
+            trackId,
+            tracks.map(DTOMapper.toTrackResponse)
+        ])
+    );
+
     return c.json({
         artists: result.artists.map(DTOMapper.toArtistResponse),
         albums: result.albums.map(DTOMapper.toAlbumResponse),
-        tracks: result.tracks.map(DTOMapper.toTrackResponse)
+        tracks: result.tracks.map(DTOMapper.toTrackResponse),
+        relatedTracks
     });
 });
 

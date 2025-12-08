@@ -962,6 +962,14 @@ export const openApiDoc = {
                     artists: { type: "array", items: { type: "object" } },
                     albums: { type: "array", items: { type: "object" } },
                     tracks: { type: "array", items: { type: "object" } },
+                    relatedTracks: {
+                      type: "object",
+                      description: "Mapping of track IDs to related tracks from the same album (or artist when no album)",
+                      additionalProperties: {
+                        type: "array",
+                        items: { type: "object" }
+                      }
+                    },
                   },
                 },
               },

@@ -57,32 +57,43 @@ export default class PlaylistRepository {
         return playlist.items.map(item => PrismaMapper.toTrack(item.track));
     }
 
-    async addTrackToPlaylist(playlistID: string, trackID: string): Promise<Playlist> {
-        const updated = await db.playlist.update({
-            where: { id: playlistID },
+    async addTrackToPlaylist(playlistId: string, trackId: string): Promise<Playlist> {
+        await db.playlistTrack.create({
             data: {
-                items: {
-                    connect: {
-                        id: trackID
-                    }
-                }
+                playlistId: playlistId,
+                trackId: trackId
             }
         });
-        return PrismaMapper.toPlaylist(updated);
+
+        const updated = await this.findById({ id: playlistId });
+        if (!updated) {
+            throw new Error("Playlist not found after adding track");
+        }
+        return updated;
     }
 
     async removeTrackFromPlaylist(playlistID: string, trackID: string): Promise<Playlist> {
-        const updated = await db.playlist.update({
-            where: { id: playlistID },
-            data: {
-                items: {
-                    disconnect: {
-                        id: trackID
-                    }
-                }
+        await db.playlistTrack.deleteMany({
+            where: {
+                playlistId: playlistID,
+                trackId: trackID
             }
         });
-        return PrismaMapper.toPlaylist(updated);
+
+        const updated = await this.findById({ id: playlistID });
+        if (!updated) {
+            throw new Error("Playlist not found after removing track");
+        }
+        return updated;
+    }
+
+    async findByUserID(userID: string): Promise<Playlist[]> {
+        const playlists = await db.playlist.findMany({
+            where: {
+                userID: userID
+            }
+        });
+        return playlists.map(PrismaMapper.toPlaylist);
     }
 
     

@@ -7,7 +7,7 @@ import type {
   PlaylistTrack as PrismaPlaylistTrack,
   Role as PrismaRole,
   Permision as PrismaPermission
-} from '../generated/prisma/index.js';
+} from '@/generated/prisma/client.ts';
 
 import type {
   User,
@@ -71,7 +71,7 @@ export class PrismaMapper {
       name: prisma.name,
       duration: prisma.duration,
       thumbnail: prisma.thumbnail,
-      albumID: prisma.albumID,
+      albumID: prisma.albumID || '',
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
     };

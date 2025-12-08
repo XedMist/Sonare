@@ -1,4 +1,4 @@
-import { PrismaClient } from './generated/prisma';
+import { PrismaClient } from './generated/prisma/client';
 import { parseFile } from 'music-metadata';
 import * as fs from 'fs/promises';
 import * as path from 'path';

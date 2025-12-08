@@ -7,6 +7,8 @@ import {
     trackController,
     playlistController,
     authController,
+    meController,
+    searchController,
 } from "@/controller/index.ts";
 
 
@@ -33,10 +35,14 @@ api.use("/artists/*", authMiddleware);
 api.use("/albums/*", authMiddleware);
 api.use("/tracks/*", authMiddleware);
 api.use("/playlists/*", authMiddleware);
+api.use("/me/*", authMiddleware);
+api.use("/search/*", authMiddleware);
 
 api.route("/artists", artistController);
 api.route("/albums", albumController);
 api.route("/tracks", trackController);
 api.route("/playlists", playlistController);
+api.route("/me", meController);
+api.route("/search", searchController);
 
 export default app;

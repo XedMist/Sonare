@@ -27,7 +27,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  favoritosID String @db.ObjectId
+  favoritosID String? @db.ObjectId
 }
 
 model Track {

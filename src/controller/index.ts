@@ -3,3 +3,5 @@ export { default as trackController } from "@/controller/track.ts";
 export { default as albumController } from "@/controller/album.ts";
 export { default as artistController } from "@/controller/artist.ts";
 export { default as authController } from "@/controller/auth.ts";
+export { default as meController } from "@/controller/me.ts";
+export { default as searchController } from "@/controller/search.ts";

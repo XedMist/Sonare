@@ -743,5 +743,232 @@ export const openApiDoc = {
         },
       },
     },
+    "/api/playlists/{id}/tracks": {
+      put: {
+        summary: "Add track to playlist",
+        tags: ["Playlists"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  trackID: {
+                    type: "string",
+                  },
+                },
+                required: ["trackID"],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Track added to playlist",
+          },
+        },
+      },
+      delete: {
+        summary: "Remove track from playlist",
+        tags: ["Playlists"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  trackID: {
+                    type: "string",
+                  },
+                },
+                required: ["trackID"],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Track removed from playlist",
+          },
+        },
+      },
+    },
+    "/api/me": {
+      get: {
+        summary: "Get current user profile",
+        tags: ["User"],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "User profile",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string" },
+                    name: { type: "string" },
+                    role: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/me/playlists": {
+      get: {
+        summary: "Get current user's playlists",
+        tags: ["User"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "page",
+            in: "query",
+            schema: {
+              type: "integer",
+              default: 0,
+            },
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: { 
+              type: "integer",
+              default: 10,
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "List of playlists",
+          },
+        },
+      },
+    },
+    "/api/me/favorites": {
+      get: {
+        summary: "Get user's favorite tracks",
+        tags: ["User"],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "List of favorite tracks",
+          },
+        },
+      },
+      put: {
+        summary: "Add track to favorites",
+        tags: ["User"],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  trackID: { type: "string" },
+                },
+                required: ["trackID"],
+              },
+            },
+          },
+        },
+        responses: {
+          "204": {
+            description: "Track added to favorites",
+          },
+        },
+      },
+      delete: {
+        summary: "Remove track from favorites",
+        tags: ["User"],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  trackID: { type: "string" },
+                },
+                required: ["trackID"],
+              },
+            },
+          },
+        },
+        responses: {
+          "204": {
+            description: "Track removed from favorites",
+          },
+        },
+      },
+    },
+    "/api/search": {
+      get: {
+        summary: "Search for artists, albums, and tracks",
+        tags: ["Search"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "q",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+            description: "Search query",
+          },
+          {
+            name: "type",
+            in: "query",
+            schema: { type: "string", default: "artist,album,track" },
+            description: "Comma-separated list of types to search",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Search results",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    artists: { type: "array", items: { type: "object" } },
+                    albums: { type: "array", items: { type: "object" } },
+                    tracks: { type: "array", items: { type: "object" } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
 };

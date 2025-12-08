@@ -33,8 +33,13 @@ export const PlaylistTrackCreateSchema = z.object({
   position: z.number().nullable().optional(),
 });
 
+export const PlaylistTrackActionSchema = z.object({
+  trackID: z.string(),
+});
+
 export type PlaylistResponse = z.infer<typeof PlaylistResponseSchema>;
 export type PlaylistCreate = z.infer<typeof PlaylistCreateSchema>;
 export type PlaylistUpdate = z.infer<typeof PlaylistUpdateSchema>;
 export type PlaylistTrackResponse = z.infer<typeof PlaylistTrackResponseSchema>;
 export type PlaylistTrackCreate = z.infer<typeof PlaylistTrackCreateSchema>;
+export type PlaylistTrackAction = z.infer<typeof PlaylistTrackActionSchema>;

@@ -3,6 +3,7 @@ import type { Playlist, Track } from '@/model/entity/index.ts'
 import { NotFoundError } from "@/error/ApiError.ts";
 
 export default class PlaylistService {
+    
     private playlistRepository = new PlaylistRepository();
 
     async findAll(pagination: { skip?: number, take?: number } | undefined): Promise<Playlist[]> {

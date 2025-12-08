@@ -8,7 +8,7 @@ import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { NotFoundError } from "@/error/ApiError.ts";
 import { requirePermission } from '@/middleware/AuthMiddleware'
-import { Capability } from "@/generated/prisma/edge";
+import { Capability } from "@/generated/prisma/client";
 
 const artistController = new Hono();
 const service = new ArtistService();

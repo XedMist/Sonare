@@ -5,8 +5,7 @@ import { PaginationQuerySchema } from "@/model/dto/CommonDTO.ts";
 import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { requirePermission } from "@/middleware/AuthMiddleware";
-import { Capability } from "@/generated/prisma";
-
+import { Capability } from "@/generated/prisma/client";
 
 const albumController = new Hono();
 const service = new AlbumService();

@@ -3,12 +3,12 @@ import { Hono } from "hono";
 import PlaylistService from "@/services/PlaylistService.ts";
 
 import { PaginationQuerySchema } from "@/model/dto/CommonDTO.ts";
-import { PlaylistCreateSchema } from "@/model/dto/PlaylistDTO.ts";
+import { PlaylistCreateSchema, PlaylistTrackActionSchema } from "@/model/dto/PlaylistDTO.ts";
 import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { requirePermission } from "@/middleware/AuthMiddleware";
 import { NotFoundError } from "@/error/ApiError.ts";
-import { Capability } from "@/generated/prisma";
+import { Capability } from "@/generated/prisma/client";
 
 const playlistController = new Hono();
 
@@ -26,10 +26,25 @@ playlistController.post("/", validate("json", PlaylistCreateSchema), requirePerm
     return c.json(DTOMapper.toPlaylistResponse(playlist), 201);
 });
 
+
 playlistController.get("/:id", requirePermission(Capability.READ, "playlists"), async (c) => {
     const { id } = c.req.param();
     const playlist = await service.findByID(id);
     return c.json(DTOMapper.toPlaylistResponse(playlist));
+});
+
+playlistController.put("/:id/tracks", validate("json", PlaylistTrackActionSchema), requirePermission(Capability.UPDATE, "playlists"), async (c) => {
+    const {id} = c.req.param();
+    const body = c.req.valid("json");
+    const updated = await service.addTrackToPlaylist(id, body.trackID);
+    return c.json(DTOMapper.toPlaylistResponse(updated));
+});
+
+playlistController.delete("/:id/tracks", validate("json", PlaylistTrackActionSchema), requirePermission(Capability.UPDATE, "playlists"), async (c) => {
+    const {id} = c.req.param();
+    const body = c.req.valid("json");
+    const updated = await service.removeTrackFromPlaylist(id, body.trackID);
+    return c.json(DTOMapper.toPlaylistResponse(updated));
 });
 
 playlistController.delete("/:id", requirePermission(Capability.DELETE, "playlists"), async (c) => {

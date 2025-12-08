@@ -27,6 +27,7 @@ export interface User {
   role?: Role;
   createdAt: Date;
   updatedAt: Date;
+  favoritosID?: string;
 }
 
 export interface Artist {

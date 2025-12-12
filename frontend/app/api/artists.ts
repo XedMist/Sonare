@@ -51,3 +51,15 @@ export async function getArtistTracks(id: string, params: GetArtistsParams = {})
   const data = await apiClient<Track[]>(`/artists/${id}/tracks?${queryParams}`);
   return { data };
 }
+
+export async function getArtistSingles(id: string, params: GetArtistsParams = {}): Promise<ListResponse<Track>> {
+  const { page = 0, limit = DEFAULT_PAGE_SIZE } = params;
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  
+  // Backend returns array directly
+  const data = await apiClient<Track[]>(`/artists/${id}/singles?${queryParams}`);
+  return { data };
+}

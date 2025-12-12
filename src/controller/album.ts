@@ -15,13 +15,27 @@ const storageService = new StorageService();
 albumController.get("/", validate("query", PaginationQuerySchema), requirePermission(Capability.READ, "albums"), async (c) => {
     const { page, limit } = c.req.valid('query')
     const albums = await service.findAll({ skip: page, take: limit });
-    return c.json(albums.map(DTOMapper.toAlbumResponse));
+    
+    const response = await Promise.all(albums.map(async (album) => {
+        const dto = DTOMapper.toAlbumResponse(album);
+        if (dto.cover) {
+             dto.cover = await storageService.getPresignedUrl(dto.cover);
+        }
+        return dto;
+    }));
+
+    return c.json(response);
 });
 
 albumController.get("/:id", requirePermission(Capability.READ, "albums"), async (c) => {
     const { id } = c.req.param();
     const album = await service.findByID(id);
-    return c.json(DTOMapper.toAlbumResponse(album));
+    
+    const dto = DTOMapper.toAlbumResponse(album);
+    if (dto.cover) {
+        dto.cover = await storageService.getPresignedUrl(dto.cover);
+    }
+    return c.json(dto);
 });
 
 albumController.get("/:id/tracks", validate("query", PaginationQuerySchema), requirePermission(Capability.READ, "albums"), async (c) => {

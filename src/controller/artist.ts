@@ -49,7 +49,16 @@ artistController.get("/:id/albums", requirePermission(Capability.READ, "artists"
     const { id } = c.req.param();
 
     const albums = await service.getAlbumsByArtist(id, { skip: page, take: limit });
-    return c.json(albums.map(DTOMapper.toAlbumResponse));
+    
+    const response = await Promise.all(albums.map(async (album) => {
+        const dto = DTOMapper.toAlbumResponse(album);
+        if (dto.cover) {
+             dto.cover = await storageService.getPresignedUrl(dto.cover);
+        }
+        return dto;
+    }));
+
+    return c.json(response);
 });
 
 artistController.get("/:id/tracks", requirePermission(Capability.READ, "artists"), validate("query", PaginationQuerySchema), async (c) => {
@@ -59,6 +68,23 @@ artistController.get("/:id/tracks", requirePermission(Capability.READ, "artists"
     const tracks = await service.getTracksByArtist(id, { skip: page, take: limit });
     
     const response = await Promise.all(tracks.map(async (track) => {
+        const dto = DTOMapper.toTrackResponse(track);
+        if (dto.thumbnail) {
+             dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+        }
+        return dto;
+    }));
+
+    return c.json(response);
+});
+
+artistController.get("/:id/singles", requirePermission(Capability.READ, "artists"), validate("query", PaginationQuerySchema), async (c) => {
+    const { page, limit } = c.req.valid('query')
+    const { id } = c.req.param();
+
+    const singles = await service.getSinglesByArtist(id, { skip: page, take: limit });
+    
+    const response = await Promise.all(singles.map(async (track) => {
         const dto = DTOMapper.toTrackResponse(track);
         if (dto.thumbnail) {
              dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);

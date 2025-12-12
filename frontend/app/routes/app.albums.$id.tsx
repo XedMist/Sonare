@@ -97,8 +97,8 @@ export default function AlbumDetailPage() {
     playQueue(tracks, index);
   };
 
-  // Get the first track's thumbnail as album artwork
-  const albumArtwork = tracks[0]?.thumbnail || null;
+  // Use album cover or fallback to first track's thumbnail
+  const albumArtwork = album?.cover || tracks[0]?.thumbnail || null;
 
   if (isLoading) {
     return (

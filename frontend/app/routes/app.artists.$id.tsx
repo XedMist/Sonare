@@ -29,6 +29,7 @@ export default function ArtistDetailPage() {
   const [artist, setArtist] = useState<Artist | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [singles, setSingles] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,15 +41,17 @@ export default function ArtistDetailPage() {
         setIsLoading(true);
         setError(null);
 
-        const [artistData, albumsRes, tracksRes] = await Promise.all([
+        const [artistData, albumsRes, tracksRes, singlesRes] = await Promise.all([
           artistsApi.getArtist(id),
           artistsApi.getArtistAlbums(id, { limit: 20 }),
           artistsApi.getArtistTracks(id, { limit: 10 }),
+          artistsApi.getArtistSingles(id, { limit: 20 }),
         ]);
 
         setArtist(artistData);
         setAlbums(albumsRes.data || []);
         setTracks(tracksRes.data || []);
+        setSingles(singlesRes.data || []);
       } catch (err) {
         console.error("Failed to fetch artist:", err);
         setError("Failed to load artist. Please try again.");
@@ -61,20 +64,26 @@ export default function ArtistDetailPage() {
   }, [id]);
 
   const handlePlayAll = () => {
-    if (tracks.length > 0) {
-      playQueue(tracks);
+    const allTracks = [...tracks, ...singles];
+    if (allTracks.length > 0) {
+      playQueue(allTracks);
     }
   };
 
   const handleShuffle = () => {
-    if (tracks.length > 0) {
-      const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+    const allTracks = [...tracks, ...singles];
+    if (allTracks.length > 0) {
+      const shuffled = [...allTracks].sort(() => Math.random() - 0.5);
       playQueue(shuffled);
     }
   };
 
   const handlePlayTrack = (track: Track) => {
     playTrack(track, tracks);
+  };
+
+  const handlePlaySingle = (track: Track) => {
+    playTrack(track, singles);
   };
 
   if (isLoading) {
@@ -128,18 +137,18 @@ export default function ArtistDetailPage() {
             {artist.name}
           </h1>
           <p className="text-surface-400">
-            {albums.length} albums • {tracks.length} popular tracks
+            {albums.length} albums • {singles.length} singles • {tracks.length} tracks
           </p>
         </div>
       </div>
 
       {/* Action buttons */}
       <div className="flex items-center gap-4 mb-8">
-        <Button size="lg" onClick={handlePlayAll} disabled={tracks.length === 0}>
+        <Button size="lg" onClick={handlePlayAll} disabled={tracks.length === 0 && singles.length === 0}>
           <PlayIcon size={24} />
           Play
         </Button>
-        <Button variant="secondary" size="lg" onClick={handleShuffle} disabled={tracks.length === 0}>
+        <Button variant="secondary" size="lg" onClick={handleShuffle} disabled={tracks.length === 0 && singles.length === 0}>
           <ShuffleIcon size={20} />
           Shuffle
         </Button>
@@ -201,7 +210,7 @@ export default function ArtistDetailPage() {
 
       {/* Albums */}
       {albums.length > 0 && (
-        <section>
+        <section className="mb-12">
           <h2 className="text-2xl font-bold text-surface-100 mb-4">
             Albums
           </h2>
@@ -214,6 +223,7 @@ export default function ArtistDetailPage() {
               >
                 <div className="relative mb-3">
                   <Artwork
+                    src={album.cover}
                     alt={album.name}
                     size="full"
                     rounded="md"
@@ -224,6 +234,49 @@ export default function ArtistDetailPage() {
                   {album.name}
                 </h3>
                 <p className="text-sm text-surface-400">Album</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Singles */}
+      {singles.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-bold text-surface-100 mb-4">
+            Singles
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {singles.map((single) => (
+              <div
+                key={single.id}
+                className="bg-surface-800 rounded-lg p-4 hover:bg-surface-700 transition-colors cursor-pointer group"
+                onClick={() => handlePlaySingle(single)}
+              >
+                <div className="relative mb-3">
+                  <Artwork
+                    src={single.thumbnail}
+                    alt={single.name}
+                    size="full"
+                    rounded="md"
+                    className="shadow-lg"
+                  />
+                  {/* Play button overlay */}
+                  <button
+                    className="absolute bottom-2 right-2 w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-105"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlaySingle(single);
+                    }}
+                    aria-label={`Play ${single.name}`}
+                  >
+                    <PlayIcon size={20} className="text-surface-900 ml-0.5" />
+                  </button>
+                </div>
+                <h3 className="font-medium text-surface-100 truncate">
+                  {single.name}
+                </h3>
+                <p className="text-sm text-surface-400">Single</p>
               </div>
             ))}
           </div>

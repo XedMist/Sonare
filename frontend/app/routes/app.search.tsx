@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { usePlayer } from "../context/PlayerContext";
-import * as artistsApi from "../api/artists";
-import * as albumsApi from "../api/albums";
-import * as tracksApi from "../api/tracks";
+import * as searchApi from "../api/search";
 import { Card, SkeletonCard, SkeletonTrackRow } from "../components/ui";
 import { Artwork } from "../components/ui/Avatar";
 import { SearchIcon, PlayIcon } from "../components/icons/Icons";
@@ -64,27 +62,11 @@ export default function SearchPage() {
       setHasSearched(true);
 
       try {
-        // Fetch all data in parallel
-        const [tracksRes, artistsRes, albumsRes] = await Promise.all([
-          tracksApi.getTracks({ name: debouncedQuery, limit: 20 }),
-          artistsApi.getArtists({ limit: 50 }), // No search endpoint, fetch all and filter
-          albumsApi.getAlbums({ limit: 50 }), // No search endpoint, fetch all and filter
-        ]);
+        const results = await searchApi.search(debouncedQuery);
 
-        setTracks(tracksRes.data || []);
-
-        // Client-side filtering for artists and albums
-        const lowerQuery = debouncedQuery.toLowerCase();
-        setArtists(
-          (artistsRes.data || []).filter((a) =>
-            a.name.toLowerCase().includes(lowerQuery)
-          ).slice(0, 6)
-        );
-        setAlbums(
-          (albumsRes.data || []).filter((a) =>
-            a.name.toLowerCase().includes(lowerQuery)
-          ).slice(0, 6)
-        );
+        setTracks(results.tracks || []);
+        setArtists(results.artists || []);
+        setAlbums(results.albums || []);
       } catch (err) {
         console.error("Search failed:", err);
       } finally {
@@ -222,6 +204,7 @@ export default function SearchPage() {
                   >
                     <div className="relative mb-3">
                       <Artwork
+                        src={album.cover}
                         alt={album.name}
                         size="full"
                         rounded="md"

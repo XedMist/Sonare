@@ -35,7 +35,7 @@ async function main() {
       const artistPath = path.join(MEDIA_DIR, artistName);
       if (!(await isDirectory(artistPath))) continue;
 
-      console.log("Processing Artist: ${artistName}");
+      console.log(`Processing Artist: ${artistName}`);
 
       // Find or create artist
       let dbArtist = await prisma.artist.findFirst({ where: { name: artistName } });
@@ -51,7 +51,7 @@ async function main() {
         if (await isDirectory(itemPath)) {
           // It's an album
           const albumName = item;
-          console.log("Processing Album: ${albumName}");
+          console.log(`Processing Album: ${albumName}`);
 
           let dbAlbum = await prisma.album.findFirst({
             where: { name: albumName, artistID: dbArtist.id }
@@ -96,7 +96,7 @@ async function main() {
                          artistID: dbArtist.id
                      }
                  });
-                 console.log("Added track: ${trackName}");
+                 console.log(`Added track: ${trackName}`);
              }
           }
 
@@ -130,7 +130,7 @@ async function main() {
                       artistID: dbArtist.id
                   }
               });
-              console.log("Added single track: ${trackName}");
+              console.log(`Added single track: ${trackName}`);
           }
         }
       }

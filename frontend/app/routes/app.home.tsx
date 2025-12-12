@@ -110,7 +110,7 @@ function HeroFeaturedCard({
         <div className="relative flex-shrink-0">
           <div className="absolute inset-0 bg-primary-500/30 rounded-xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
           <Artwork
-            src={null}
+            src={album.cover}
             alt={album.name}
             size="full"
             rounded="lg"
@@ -308,6 +308,7 @@ export default function AppHomePage() {
                 key={album.id}
                 title={album.name}
                 subtitle={album.artist?.name || "Artista desconocido"}
+                image={album.cover}
                 onClick={() => navigate(`/app/albums/${album.id}`)}
                 onPlay={() => handlePlayAlbum(album)}
               />
@@ -372,6 +373,7 @@ export default function AppHomePage() {
               key={album.id}
               title={album.name}
               subtitle={album.artist?.name || "Artista desconocido"}
+              image={album.cover}
               onClick={() => navigate(`/app/albums/${album.id}`)}
               onPlay={() => handlePlayAlbum(album)}
             />

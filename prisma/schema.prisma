@@ -68,6 +68,7 @@ model Artist {
 model Album {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String
+  cover String?
 
   artistID String @db.ObjectId
   artist   Artist @relation(fields: [artistID], references: [id])

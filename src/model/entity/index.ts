@@ -40,6 +40,7 @@ export interface Artist {
 export interface Album {
   id: string;
   name: string;
+  cover?: string | null;
   artistID: string;
   artist?: Artist;
   createdAt: Date;

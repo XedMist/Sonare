@@ -43,6 +43,8 @@ function trackToPlayerTrack(track: Track): PlayerTrack {
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const loadedTrackId = useRef<string | null>(null);
+  const shouldAutoPlay = useRef(false);
   
   const [queue, setQueue] = useState<PlayerTrack[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -77,8 +79,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         audio.currentTime = 0;
         audio.play();
       } else if (currentIndex < queue.length - 1) {
+        shouldAutoPlay.current = true;
         setCurrentIndex((prev) => prev + 1);
       } else if (repeatMode === "all" && queue.length > 0) {
+        shouldAutoPlay.current = true;
         setCurrentIndex(0);
       } else {
         setIsPlaying(false);
@@ -103,6 +107,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [currentIndex, queue.length, repeatMode, volume]);
 
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
   // Update audio source when current track changes
   useEffect(() => {
     let isMounted = true;
@@ -110,20 +119,36 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const fetchAudioUrl = async () => {
       if (audioRef.current && currentTrack) {
         try {
-          // Only fetch if we don't have a URL yet or if it's a new track
-          // Note: Since we reset audioUrl to "" in trackToPlayerTrack, we always fetch here.
-          // You might want to cache this if needed, but presigned URLs expire.
+          // Reset time immediately
+          setCurrentTime(0);
+          
           const url = await getTrackAudioUrl(currentTrack.id);
           
-          if (isMounted) {
-             audioRef.current.src = url;
-             audioRef.current.load();
-             if (isPlaying) {
-               audioRef.current.play().catch(() => {
-                 // Handle autoplay restrictions
-                 setIsPlaying(false);
-               });
-             }
+          if (isMounted && audioRef.current) {
+             const audio = audioRef.current;
+             
+             // Define handler for when audio is ready
+             const handleCanPlay = async () => {
+               audio.removeEventListener("canplaythrough", handleCanPlay);
+               
+               // Check if we should auto-play (track ended naturally or user hit play)
+               if (shouldAutoPlay.current || isPlayingRef.current) {
+                 shouldAutoPlay.current = false;
+                 try {
+                   await audio.play();
+                   setIsPlaying(true);
+                 } catch (error) {
+                   console.error("Playback failed:", error);
+                   if (error instanceof Error && error.name !== "AbortError") {
+                     setIsPlaying(false);
+                   }
+                 }
+               }
+             };
+             
+             audio.addEventListener("canplaythrough", handleCanPlay);
+             audio.src = url;
+             loadedTrackId.current = currentTrack.id;
           }
         } catch (error) {
           console.error("Failed to fetch audio URL:", error);
@@ -142,9 +167,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // Handle play/pause state changes
   useEffect(() => {
     if (audioRef.current && currentTrack) {
+      // If the loaded track is different from current track, wait for fetchAudioUrl
+      if (loadedTrackId.current !== currentTrack.id) {
+        if (!isPlaying) {
+          audioRef.current.pause();
+        }
+        return;
+      }
+
       if (isPlaying) {
-        audioRef.current.play().catch(() => {
-          setIsPlaying(false);
+        audioRef.current.play().catch((error) => {
+           // Ignore AbortError which happens when pausing/loading quickly
+           if (error.name !== "AbortError") {
+             setIsPlaying(false);
+           }
         });
       } else {
         audioRef.current.pause();

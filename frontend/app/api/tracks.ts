@@ -40,6 +40,7 @@ export async function getTrackThumbnail(id: string): Promise<{ thumbnail: string
 }
 
 // Get the audio file URL for a track
-export function getTrackAudioUrl(id: string): string {
-  return `${API_BASE_URL}/tracks/${id}/file`;
+export async function getTrackAudioUrl(id: string): Promise<string> {
+  const response = await apiClient<{ url: string }>(`/tracks/${id}/file`);
+  return response.url;
 }

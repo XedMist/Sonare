@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 import { DEFAULT_PAGE_SIZE } from "../config";
-import type { Playlist } from "../types";
+import type { Playlist, Track } from "../types";
 
 interface GetPlaylistsParams {
   page?: number;
@@ -25,12 +25,35 @@ export async function getPlaylists(params: GetPlaylistsParams = {}): Promise<Lis
 }
 
 export async function getPlaylist(id: string): Promise<Playlist> {
+  // Backend returns playlist without tracks - fetch them separately
   return apiClient<Playlist>(`/playlists/${id}`);
 }
 
+// Fetch tracks for a playlist (new endpoint)
+export async function getPlaylistTracks(id: string): Promise<Track[]> {
+  return apiClient<Track[]>(`/playlists/${id}/tracks`);
+}
+
+// Combined helper to get playlist with tracks
+export async function getPlaylistWithTracks(id: string): Promise<{ playlist: Playlist; tracks: Track[] }> {
+  const [playlist, tracks] = await Promise.all([
+    getPlaylist(id),
+    getPlaylistTracks(id),
+  ]);
+  return { playlist, tracks };
+}
+
+// Backend expects only { name } - userID is derived from JWT
 export async function createPlaylist(data: { name: string; userID: string }): Promise<Playlist> {
   return apiClient<Playlist>("/playlists", {
     method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updatePlaylist(id: string, data: { name: string }): Promise<Playlist> {
+  return apiClient<Playlist>(`/playlists/${id}`, {
+    method: "PATCH",
     body: JSON.stringify(data),
   });
 }
@@ -41,15 +64,40 @@ export async function deletePlaylist(id: string): Promise<void> {
   });
 }
 
-// Placeholder endpoints for future backend support
-export async function addTrackToPlaylist(playlistId: string, trackId: string): Promise<void> {
-  // TODO: Implement when backend endpoint is available
-  console.warn("addTrackToPlaylist is not yet implemented on the backend");
-  throw new Error("Not implemented: addTrackToPlaylist");
+// Backend: PUT /:id/tracks with { trackID } - adds one track at a time
+export async function addTrackToPlaylist(
+  playlistId: string, 
+  trackId: string
+): Promise<Playlist> {
+  return apiClient<Playlist>(`/playlists/${playlistId}/tracks`, {
+    method: "PUT",
+    body: JSON.stringify({ trackID: trackId }),
+  });
 }
 
-export async function removeTrackFromPlaylist(playlistId: string, trackId: string): Promise<void> {
-  // TODO: Implement when backend endpoint is available
-  console.warn("removeTrackFromPlaylist is not yet implemented on the backend");
-  throw new Error("Not implemented: removeTrackFromPlaylist");
+// Helper to add multiple tracks sequentially
+export async function addTracksToPlaylist(
+  playlistId: string, 
+  trackIds: string[]
+): Promise<Playlist> {
+  let result: Playlist | null = null;
+  for (const trackId of trackIds) {
+    result = await addTrackToPlaylist(playlistId, trackId);
+  }
+  // Return final playlist state, or fetch if empty
+  if (!result) {
+    result = await getPlaylist(playlistId);
+  }
+  return result;
+}
+
+// Backend: DELETE /:id/tracks with { trackID } in body
+export async function removeTrackFromPlaylist(
+  playlistId: string, 
+  trackId: string
+): Promise<void> {
+  await apiClient(`/playlists/${playlistId}/tracks`, {
+    method: "DELETE",
+    body: JSON.stringify({ trackID: trackId }),
+  });
 }

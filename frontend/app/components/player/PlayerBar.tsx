@@ -1,6 +1,7 @@
 import { usePlayer } from "../../context/PlayerContext";
-import { IconButton } from "../ui";
+import { IconButton, Badge, Slider } from "../ui";
 import { Artwork } from "../ui/Avatar";
+import { getTrackThumbnailUrl } from "../../api/tracks";
 import {
   PlayIcon,
   PauseIcon,
@@ -14,7 +15,6 @@ import {
   QueueMusicIcon,
 } from "../icons/Icons";
 
-// Format seconds to mm:ss
 function formatTime(seconds: number): string {
   if (!seconds || !isFinite(seconds)) return "0:00";
   const mins = Math.floor(seconds / 60);
@@ -42,35 +42,22 @@ export function PlayerBar() {
 
   if (!currentTrack) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900 border-t border-surface-800 flex items-center justify-center text-surface-500">
-        <p className="text-sm">Select a track to start playing</p>
+      <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900/95 backdrop-blur-xl border-t border-surface-700/60 flex items-center justify-center">
+        <p className="text-sm text-surface-500">Select a track to start playing</p>
       </div>
     );
   }
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
-    seek(percentage * duration);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVolume(parseFloat(e.target.value));
-  };
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900/95 backdrop-blur-lg border-t border-surface-800 z-40">
+    <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900/95 backdrop-blur-xl border-t border-surface-700/60 z-40">
       <div className="h-full max-w-screen-2xl mx-auto px-4 flex items-center gap-4">
-        {/* Left: Track info */}
         <div className="flex items-center gap-3 w-[30%] min-w-0">
           <Artwork
-            src={currentTrack.thumbnail}
+            src={getTrackThumbnailUrl(currentTrack.id)}
             alt={currentTrack.name}
             size="md"
             rounded="sm"
+            className="shadow-lg shadow-black/30"
           />
           <div className="min-w-0">
             <p className="text-sm font-medium text-surface-100 truncate">
@@ -80,11 +67,12 @@ export function PlayerBar() {
               {currentTrack.album?.name || "Unknown Album"}
             </p>
           </div>
+          <Badge variant="secondary" className="hidden sm:flex ml-2">
+            Playing
+          </Badge>
         </div>
 
-        {/* Center: Player controls */}
         <div className="flex-1 flex flex-col items-center gap-1 max-w-md">
-          {/* Control buttons */}
           <div className="flex items-center gap-2">
             <IconButton
               onClick={toggleShuffle}
@@ -104,6 +92,7 @@ export function PlayerBar() {
               aria-label={isPlaying ? "Pause" : "Play"}
               variant="primary"
               size="lg"
+              className="hover:scale-105 transition-transform"
             >
               {isPlaying ? <PauseIcon size={24} /> : <PlayIcon size={24} />}
             </IconButton>
@@ -126,29 +115,22 @@ export function PlayerBar() {
             </IconButton>
           </div>
 
-          {/* Progress bar */}
           <div className="w-full flex items-center gap-2">
             <span className="text-xs text-surface-400 w-10 text-right">
               {formatTime(currentTime)}
             </span>
-            <div
-              className="flex-1 h-1 bg-surface-600 rounded-full cursor-pointer group"
-              onClick={handleProgressClick}
-            >
-              <div
-                className="h-full bg-surface-100 group-hover:bg-primary-500 rounded-full relative transition-colors"
-                style={{ width: `${progress}%` }}
-              >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-surface-100 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </div>
+            <Slider
+              value={currentTime}
+              max={duration || 100}
+              onChange={seek}
+              className="flex-1"
+            />
             <span className="text-xs text-surface-400 w-10">
               {formatTime(duration)}
             </span>
           </div>
         </div>
 
-        {/* Right: Volume and queue */}
         <div className="hidden md:flex items-center gap-2 w-[30%] justify-end">
           <IconButton aria-label="Queue" size="sm">
             <QueueMusicIcon size={18} />
@@ -166,15 +148,11 @@ export function PlayerBar() {
                 <VolumeUpIcon size={18} />
               )}
             </IconButton>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
+            <Slider
               value={volume}
-              onChange={handleVolumeChange}
-              className="flex-1 accent-primary-500"
-              aria-label="Volume"
+              max={1}
+              onChange={setVolume}
+              className="flex-1"
             />
           </div>
         </div>

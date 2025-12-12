@@ -37,7 +37,7 @@ const PlayerContext = createContext<PlayerContextType | null>(null);
 function trackToPlayerTrack(track: Track): PlayerTrack {
   return {
     ...track,
-    audioUrl: getTrackAudioUrl(track.id),
+    audioUrl: "", // Will be fetched asynchronously
   };
 }
 
@@ -119,16 +119,38 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // Update audio source when current track changes
   useEffect(() => {
-    if (audioRef.current && currentTrack) {
-      audioRef.current.src = currentTrack.audioUrl;
-      audioRef.current.load();
-      if (isPlaying) {
-        audioRef.current.play().catch(() => {
-          // Handle autoplay restrictions
-          setIsPlaying(false);
-        });
+    let isMounted = true;
+
+    const fetchAudioUrl = async () => {
+      if (audioRef.current && currentTrack) {
+        try {
+          // Only fetch if we don't have a URL yet or if it's a new track
+          // Note: Since we reset audioUrl to "" in trackToPlayerTrack, we always fetch here.
+          // You might want to cache this if needed, but presigned URLs expire.
+          const url = await getTrackAudioUrl(currentTrack.id);
+          
+          if (isMounted) {
+             audioRef.current.src = url;
+             audioRef.current.load();
+             if (isPlaying) {
+               audioRef.current.play().catch(() => {
+                 // Handle autoplay restrictions
+                 setIsPlaying(false);
+               });
+             }
+          }
+        } catch (error) {
+          console.error("Failed to fetch audio URL:", error);
+          if (isMounted) setIsPlaying(false);
+        }
       }
-    }
+    };
+
+    fetchAudioUrl();
+
+    return () => {
+      isMounted = false;
+    };
   }, [currentTrack?.id]);
 
   // Handle play/pause state changes

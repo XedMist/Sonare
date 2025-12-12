@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import ArtistService from "@/services/ArtistService.ts";
+import { StorageService } from "@/services/StorageService.ts";
 
 import { PaginationQuerySchema } from "@/model/dto/CommonDTO.ts";
 import { ArtistCreateSchema } from "@/model/dto/ArtistDTO.ts";
@@ -12,6 +13,7 @@ import { Capability } from "@/generated/prisma/client";
 
 const artistController = new Hono();
 const service = new ArtistService();
+const storageService = new StorageService();
 
 
 artistController.get("/", validate("query", PaginationQuerySchema), requirePermission(Capability.READ, "artists"), async (c) => {
@@ -55,7 +57,16 @@ artistController.get("/:id/tracks", requirePermission(Capability.READ, "artists"
     const { id } = c.req.param();
 
     const tracks = await service.getTracksByArtist(id, { skip: page, take: limit });
-    return c.json(tracks.map(DTOMapper.toTrackResponse));
+    
+    const response = await Promise.all(tracks.map(async (track) => {
+        const dto = DTOMapper.toTrackResponse(track);
+        if (dto.thumbnail) {
+             dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+        }
+        return dto;
+    }));
+
+    return c.json(response);
 });
 
 export default artistController;

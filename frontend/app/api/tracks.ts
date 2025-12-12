@@ -42,7 +42,8 @@ export function getTrackAudioUrl(id: string): string {
   return token ? `${url}?token=${encodeURIComponent(token)}` : url;
 }
 
-// Get the thumbnail image URL for a track (no auth required)
-export function getTrackThumbnailUrl(id: string): string {
-  return `${API_BASE_URL}/tracks/${id}/thumbnail`;
+// Get the audio file URL for a track
+export async function getTrackAudioUrl(id: string): Promise<string> {
+  const response = await apiClient<{ url: string }>(`/tracks/${id}/file`);
+  return response.url;
 }

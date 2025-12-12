@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const AlbumResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
+  cover: z.string().nullable().optional(),
   artistID: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),

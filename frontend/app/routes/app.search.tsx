@@ -2,21 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { usePlayer } from "../context/PlayerContext";
 import * as searchApi from "../api/search";
-import * as albumsApi from "../api/albums";
-import { MediaCard } from "../components/shared/MediaCard";
-import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
-import { 
-  LoadingSection, 
-  ErrorState, 
-  SectionHeader,
-  NoSearchResultsState,
-  SkeletonGrid,
-  SkeletonTrackList
-} from "../components/shared/StateComponents";
-import { Input } from "../components/ui";
-import { SearchIcon, CloseIcon } from "../components/icons/Icons";
-import { getTrackThumbnailUrl } from "../api/tracks";
+import { Card, SkeletonCard, SkeletonTrackRow } from "../components/ui";
+import { Artwork } from "../components/ui/Avatar";
+import { SearchIcon, PlayIcon } from "../components/icons/Icons";
 import type { Artist, Album, Track } from "../types";
 
 // ============================================
@@ -275,9 +263,19 @@ export default function AppSearchPage() {
       performSearch(query);
     }, 300);
 
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
+      setIsLoading(true);
+      setHasSearched(true);
+
+      try {
+        const results = await searchApi.search(debouncedQuery);
+
+        setTracks(results.tracks || []);
+        setArtists(results.artists || []);
+        setAlbums(results.albums || []);
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
   }, [query, performSearch]);
@@ -382,16 +380,116 @@ export default function AppSearchPage() {
 
       {/* Results */}
       {!isLoading && hasResults && (
-        <>
-          <ArtistsSection artists={artists} />
-          <AlbumsSection albums={albums} onPlayAlbum={handlePlayAlbum} />
-          <TracksSection
-            tracks={tracks}
-            allTracks={tracks}
-            onPlayTrack={handlePlayTrack}
-            onAddToPlaylist={handleAddToPlaylist}
-          />
-        </>
+        <div className="space-y-8">
+          {/* Artists */}
+          {artists.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold text-surface-100 mb-4">Artists</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {artists.map((artist) => (
+                  <Card
+                    key={artist.id}
+                    hover
+                    className="group"
+                    onClick={() => navigate(`/app/artists/${artist.id}`)}
+                  >
+                    <Artwork
+                      alt={artist.name}
+                      size="full"
+                      rounded="full"
+                      className="mb-3 shadow-lg"
+                    />
+                    <h3 className="font-medium text-surface-100 truncate">{artist.name}</h3>
+                    <p className="text-sm text-surface-400">Artist</p>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Albums */}
+          {albums.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold text-surface-100 mb-4">Albums</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {albums.map((album) => (
+                  <Card
+                    key={album.id}
+                    hover
+                    className="group"
+                    onClick={() => navigate(`/app/albums/${album.id}`)}
+                  >
+                    <div className="relative mb-3">
+                      <Artwork
+                        src={album.cover}
+                        alt={album.name}
+                        size="full"
+                        rounded="md"
+                        className="shadow-lg"
+                      />
+                    </div>
+                    <h3 className="font-medium text-surface-100 truncate">{album.name}</h3>
+                    <p className="text-sm text-surface-400 truncate">
+                      {album.artist?.name || "Unknown Artist"}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Tracks */}
+          {tracks.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold text-surface-100 mb-4">Songs</h2>
+              <div className="space-y-1">
+                {tracks.map((track, index) => (
+                  <div
+                    key={track.id}
+                    className="flex items-center gap-4 p-2 rounded-lg hover:bg-surface-700 group cursor-pointer"
+                    onClick={() => handlePlayTrack(track)}
+                  >
+                    {/* Track number / play button */}
+                    <div className="w-8 text-center">
+                      <span className="text-surface-400 group-hover:hidden">
+                        {index + 1}
+                      </span>
+                      <button
+                        className="hidden group-hover:block text-surface-100"
+                        aria-label={`Play ${track.name}`}
+                      >
+                        <PlayIcon size={16} />
+                      </button>
+                    </div>
+
+                    {/* Track artwork */}
+                    <Artwork
+                      src={track.thumbnail}
+                      alt={track.name}
+                      size="sm"
+                      rounded="sm"
+                    />
+
+                    {/* Track info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-surface-100 truncate">
+                        {track.name}
+                      </p>
+                      <p className="text-sm text-surface-400 truncate">
+                        {track.album?.name || "Unknown Album"}
+                      </p>
+                    </div>
+
+                    {/* Duration */}
+                    <span className="text-sm text-surface-400">
+                      {formatDuration(track.duration)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
 
       {/* Add to Playlist Dialog */}

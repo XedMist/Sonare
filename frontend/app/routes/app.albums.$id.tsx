@@ -268,10 +268,8 @@ export default function AlbumDetailPage() {
     playTrack(track, data.tracks);
   };
 
-  const handleAddToPlaylist = (track: Track) => {
-    setSelectedTrack(track);
-    setIsPlaylistDialogOpen(true);
-  };
+  // Use album cover or fallback to first track's thumbnail
+  const albumArtwork = album?.cover || tracks[0]?.thumbnail || null;
 
   // ============================================
   // RENDER

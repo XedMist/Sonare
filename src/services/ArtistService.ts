@@ -30,4 +30,8 @@ export default class ArtistService {
     async getTracksByArtist(id: string, pagination: { skip?: number, take?: number } | undefined): Promise<Track[]> {
         return await this.artistRepository.getTracksOfArtist(id, pagination ?? {});
     }
+
+    async getSinglesByArtist(id: string, pagination: { skip?: number, take?: number } | undefined): Promise<Track[]> {
+        return await this.artistRepository.getSinglesOfArtist(id, pagination ?? {});
+    }
 }

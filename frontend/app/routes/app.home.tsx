@@ -78,12 +78,30 @@ function QuickPlayCard({ title, subtitle, artwork, onPlay }: QuickPlayCardProps)
       className="group relative flex items-center gap-3 p-3 rounded-lg bg-surface-800/50 hover:bg-surface-700/60 transition-all cursor-pointer border border-surface-700/30"
       onClick={onPlay}
     >
-      <div className="w-12 h-12 rounded bg-surface-700 overflow-hidden flex-shrink-0">
-        {artwork ? (
-          <img src={artwork} alt={title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
-            <PlayIcon size={20} className="text-white" />
+      {/* Background glow effect */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl" />
+      <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-purple-500/10 rounded-full blur-2xl" />
+
+      <div className="relative flex flex-col md:flex-row items-center gap-6 p-6 md:p-8">
+        {/* Album artwork */}
+        <div className="relative flex-shrink-0">
+          <div className="absolute inset-0 bg-primary-500/30 rounded-xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+          <Artwork
+            src={album.cover}
+            alt={album.name}
+            size="full"
+            rounded="lg"
+            className="relative w-40 h-40 md:w-48 md:h-48 shadow-2xl group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 text-center md:text-left">
+          <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
+            <Sparkles size={16} className="text-primary-400" />
+            <span className="text-xs uppercase tracking-wider text-primary-400 font-semibold">
+              Destacado para ti
+            </span>
           </div>
         )}
       </div>
@@ -380,23 +398,93 @@ export default function AppHomePage() {
         onSeeAll={() => navigate("/app/library")}
       />
 
-      {/* Artists Grid */}
-      <MediaGridSection
-        title="Artists"
-        subtitle="Your favorite artists"
-        items={artistItems}
-        onSeeAll={() => navigate("/app/library")}
-      />
+      {/* Sección: Álbumes populares */}
+      <MediaSection
+        title="Álbumes populares"
+        subtitle="Los más escuchados esta semana"
+        viewAllLink="/app/albums"
+        delay={0}
+      >
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <FeaturedCardSkeleton key={i} />
+            ))
+          : albums.slice(1, 7).map((album) => (
+              <FeaturedCard
+                key={album.id}
+                title={album.name}
+                subtitle={album.artist?.name || "Artista desconocido"}
+                image={album.cover}
+                onClick={() => navigate(`/app/albums/${album.id}`)}
+                onPlay={() => handlePlayAlbum(album)}
+              />
+            ))}
+      </MediaSection>
 
-      {/* Playlists Grid */}
-      {playlistItems.length > 0 && (
-        <MediaGridSection
-          title="Your Playlists"
-          subtitle="Custom playlists you've created"
-          items={playlistItems}
-          onPlayItem={handlePlayPlaylist}
-          onSeeAll={() => navigate("/app/library")}
-        />
+      {/* Sección: Artistas destacados */}
+      <MediaSection
+        title="Artistas destacados"
+        subtitle="Descubre nuevos talentos"
+        viewAllLink="/app/artists"
+        delay={100}
+      >
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <FeaturedCardSkeleton key={i} />
+            ))
+          : artists.slice(0, 6).map((artist) => (
+              <FeaturedCard
+                key={artist.id}
+                title={artist.name}
+                subtitle="Artista"
+                onClick={() => navigate(`/app/artists/${artist.id}`)}
+                rounded="full"
+              />
+            ))}
+      </MediaSection>
+
+      {/* Sección: Tus playlists */}
+      {(isLoading || playlists.length > 0) && (
+        <MediaSection
+          title="Tus playlists"
+          subtitle="Tu música organizada"
+          viewAllLink="/app/library"
+          delay={200}
+        >
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <FeaturedCardSkeleton key={i} />
+              ))
+            : playlists.map((playlist) => (
+                <FeaturedCard
+                  key={playlist.id}
+                  title={playlist.name}
+                  subtitle="Playlist"
+                  onClick={() => navigate(`/app/playlists/${playlist.id}`)}
+                  onPlay={() => handlePlayPlaylist(playlist)}
+                />
+              ))}
+        </MediaSection>
+      )}
+
+      {/* Sección: Más álbumes para descubrir */}
+      {!isLoading && albums.length > 7 && (
+        <MediaSection
+          title="Explora más"
+          subtitle="Música que te puede gustar"
+          delay={300}
+        >
+          {albums.slice(7, 13).map((album) => (
+            <FeaturedCard
+              key={album.id}
+              title={album.name}
+              subtitle={album.artist?.name || "Artista desconocido"}
+              image={album.cover}
+              onClick={() => navigate(`/app/albums/${album.id}`)}
+              onPlay={() => handlePlayAlbum(album)}
+            />
+          ))}
+        </MediaSection>
       )}
 
       {/* Add to Playlist Dialog */}

@@ -81,10 +81,6 @@ export interface AuthTokens {
     refreshToken: string;
 }
 
-export interface AuthResponse extends AuthTokens {
-    user?: User;
-}
-
 // API Response types
 export interface PaginatedResponse<T> {
     data: T[];

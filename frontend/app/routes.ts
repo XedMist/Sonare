@@ -22,4 +22,7 @@ export default [
         route("albums/:id", "routes/app.albums.$id.tsx"),
         route("playlists/:id", "routes/app.playlists.$id.tsx"),
     ]),
+
+    // 404 - Not Found (catch all)
+    route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

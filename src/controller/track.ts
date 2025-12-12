@@ -44,8 +44,28 @@ router.get("/:id/file", requirePermission(Capability.READ, "tracks"), async (c) 
 
 router.get("/:id/thumbnail", requirePermission(Capability.READ, "tracks"), async (c) => {
     const { id } = c.req.param();
-    const thumbnail = await service.getThumbnail(id)
-    return c.json({ thumbnail })
+    const thumbnailPath = await service.getThumbnail(id);
+    
+    if (!thumbnailPath) {
+        return c.json({ message: "Thumbnail not found" }, 404);
+    }
+
+    const file = Bun.file(thumbnailPath);
+    const extension = thumbnailPath.split('.').pop()?.toLowerCase();
+    const mimeTypes: Record<string, string> = {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "gif": "image/gif",
+        "webp": "image/webp",
+    };
+    const mimeType = mimeTypes[extension || ""] || "image/jpeg";
+    
+    c.header("Content-Type", mimeType);
+
+    return stream(c, async (stream) => {
+        stream.pipe(file.stream());
+    });
 })
 
 export default router;

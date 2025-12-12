@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 
 import SearchService from "@/services/SearchService.ts";
+import { StorageService } from "@/services/StorageService.ts";
 import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { requirePermission } from "@/middleware/AuthMiddleware";
@@ -9,6 +10,7 @@ import { Capability } from "@/generated/prisma/client";
 
 const searchController = new Hono();
 const service = new SearchService();
+const storageService = new StorageService();
 
 const SearchQuerySchema = z.object({
     q: z.string().min(3),
@@ -21,17 +23,29 @@ searchController.get("/", validate("query", SearchQuerySchema), requirePermissio
     
     const result = await service.search(q, types);
 
-    const relatedTracks = Object.fromEntries(
-        Object.entries(result.relatedTracks).map(([trackId, tracks]) => [
-            trackId,
-            tracks.map(DTOMapper.toTrackResponse)
-        ])
-    );
+    const tracks = await Promise.all(result.tracks.map(async (track) => {
+        const dto = DTOMapper.toTrackResponse(track);
+        if (dto.thumbnail) {
+             dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+        }
+        return dto;
+    }));
+
+    const relatedTracks: Record<string, any[]> = {};
+    for (const [trackId, trackList] of Object.entries(result.relatedTracks)) {
+         relatedTracks[trackId] = await Promise.all(trackList.map(async (track) => {
+            const dto = DTOMapper.toTrackResponse(track);
+            if (dto.thumbnail) {
+                 dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+            }
+            return dto;
+        }));
+    }
 
     return c.json({
         artists: result.artists.map(DTOMapper.toArtistResponse),
         albums: result.albums.map(DTOMapper.toAlbumResponse),
-        tracks: result.tracks.map(DTOMapper.toTrackResponse),
+        tracks: tracks,
         relatedTracks
     });
 });

@@ -36,6 +36,7 @@ model Track {
   name      String
   duration  Int
   thumbnail String
+  lyrics    String?
 
   albumID String? @db.ObjectId
   album   Album?  @relation(fields: [albumID], references: [id])

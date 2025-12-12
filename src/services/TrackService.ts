@@ -1,7 +1,6 @@
 import { NotFoundError } from "@/error/ApiError.ts";
 import type { Track } from "@/model/entity/index.ts";
 import TrackRepository from "@/repositories/TrackRepository.ts";
-import { promises as fs } from 'node:fs'
 
 
 export default class TrackService {
@@ -20,17 +19,6 @@ export default class TrackService {
     async getThumbnail(id: string): Promise<string | null> {
         const track = await this.findById(id)
         return track === null ? track : track.thumbnail;
-    }
-
-    async downloadTrack(id: Pick<Track, "id">): Promise<{ data: Uint8Array; mimeType: string } | null> {
-        const track = await this.trackRepository.findById(id);
-        if (!track) throw new NotFoundError("Pista no encontrada")
-
-        const data = await fs.readFile(track.path);
-        const extension = track.path.split('.').pop()?.toLowerCase();
-        const mimeType = this.getMimeType(extension);
-        return { data, mimeType };
-
     }
 
     private getMimeType(extension?: string): string {

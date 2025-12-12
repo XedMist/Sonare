@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
 import { PlayIcon } from "../icons/Icons";
 import { Artwork } from "../ui/Avatar";
-import { getTrackThumbnailUrl } from "../../api/tracks";
 import type { Track } from "../../types";
 
 interface QuickPlaySectionProps {
@@ -66,7 +65,7 @@ export function QuickPlaySection({ tracks, isLoading, onPlay }: QuickPlaySection
           >
             <div className="relative flex-shrink-0">
               <Artwork
-                src={getTrackThumbnailUrl(track.id)}
+                src={track.thumbnail}
                 alt={track.name}
                 size="md"
                 rounded="sm"

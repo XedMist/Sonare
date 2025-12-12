@@ -4,10 +4,9 @@ interface AvatarProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   fallback?: string;
-  loading?: "lazy" | "eager";
 }
 
-export function Avatar({ src, alt, size = "md", className = "", fallback, loading = "lazy" }: AvatarProps) {
+export function Avatar({ src, alt, size = "md", className = "", fallback }: AvatarProps) {
   const sizeStyles = {
     sm: "w-8 h-8 text-xs",
     md: "w-10 h-10 text-sm",
@@ -22,7 +21,6 @@ export function Avatar({ src, alt, size = "md", className = "", fallback, loadin
       <img
         src={src}
         alt={alt}
-        loading={loading}
         className={`${sizeStyles[size]} rounded-full object-cover ${className}`}
       />
     );
@@ -44,7 +42,6 @@ interface ArtworkProps {
   size?: "sm" | "md" | "lg" | "full";
   className?: string;
   rounded?: "sm" | "md" | "lg" | "full";
-  loading?: "lazy" | "eager";
 }
 
 export function Artwork({
@@ -53,7 +50,6 @@ export function Artwork({
   size = "md",
   className = "",
   rounded = "md",
-  loading = "lazy",
 }: ArtworkProps) {
   const sizeStyles = {
     sm: "w-10 h-10",
@@ -74,7 +70,6 @@ export function Artwork({
       <img
         src={src}
         alt={alt}
-        loading={loading}
         className={`${sizeStyles[size]} ${roundedStyles[rounded]} object-cover ${className}`}
       />
     );

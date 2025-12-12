@@ -1,4 +1,4 @@
-import { forwardRef, useId, type InputHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes } from "react";
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,8 +8,7 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
   ({ className = "", label, error, helperText, id, ...props }, ref) => {
-    const generatedId = useId();
-    const inputId = id || props.name || generatedId;
+    const inputId = id || props.name || Math.random().toString(36).slice(2);
 
     return (
       <div className="w-full">

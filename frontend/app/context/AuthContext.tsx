@@ -14,6 +14,18 @@ interface AuthContextState {
 
 const AuthContext = createContext<AuthContextState | null>(null);
 
+function createFallbackUser(username: string): User {
+    const now = new Date().toISOString();
+    return {
+        id: "",
+        name: username,
+        roleID: "",
+        createdAt: now,
+        updatedAt: now,
+    };
+}
+
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -29,12 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                // Fetch user profile using the stored token
-                const profile = await authApi.getProfile();
+                // Ideally validate token / fetch user profile
+                const profile = await authApi.getProfile?.();
                 setUser(profile ?? null);
             } catch {
                 // Token invalid → clear & unauthenticate
-                tokenStorage.clearTokens();
+                tokenStorage.clear();
                 setUser(null);
             }
 
@@ -46,23 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // --- LOGIN --------------------------------------------------------------
     const login = useCallback(async (credentials: LoginRequest) => {
-        // Login returns { accessToken, refreshToken } - no user
-        await authApi.login(credentials);
-        
-        // Fetch user profile after successful login
-        try {
-            const profile = await authApi.getProfile();
-            setUser(profile);
-        } catch {
-            // Profile fetch failed but we're logged in - create minimal user
-            setUser({
-                id: "",
-                name: credentials.username,
-                roleID: "",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            });
+        const response = await authApi.login(credentials);
+
+        let userData = response.user;
+        if (!userData) {
+            userData = createFallbackUser(credentials.username);
         }
+
+        setUser(userData);
     }, []);
 
     // --- REGISTER -----------------------------------------------------------
@@ -70,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         async (data: RegisterRequest) => {
             await authApi.register(data);
 
-            // Automatically log in after registration
+            // Optional: Automatically log in after registration
             await login({ username: data.name, password: data.password });
         },
         [login]
@@ -81,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await authApi.logout();
         } finally {
-            tokenStorage.clearTokens();
+            tokenStorage.clear();
             setUser(null);
         }
     }, []);

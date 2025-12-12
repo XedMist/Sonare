@@ -55,19 +55,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("off");
   const [shuffle, setShuffle] = useState(false);
 
-  // Use refs for values accessed in event handlers to avoid stale closures
-  const repeatModeRef = useRef(repeatMode);
-  const queueRef = useRef(queue);
-  const currentIndexRef = useRef(currentIndex);
-  
-  // Keep refs in sync
-  useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
-  useEffect(() => { queueRef.current = queue; }, [queue]);
-  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
-
   const currentTrack = currentIndex >= 0 && currentIndex < queue.length ? queue[currentIndex] : null;
 
-  // Initialize audio element - only once
+  // Initialize audio element
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
@@ -85,11 +75,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
 
     const handleEnded = () => {
-      const currentRepeatMode = repeatModeRef.current;
-      const currentQueue = queueRef.current;
-      const idx = currentIndexRef.current;
-      
-      if (currentRepeatMode === "one") {
+      if (repeatMode === "one") {
         audio.currentTime = 0;
         audio.play();
       } else if (currentIndex < queue.length - 1) {
@@ -119,7 +105,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, []); // Empty deps - only run once
+  }, [currentIndex, queue.length, repeatMode, volume]);
 
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => {

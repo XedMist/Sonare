@@ -1,57 +1,30 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { usePlayer } from "../context/PlayerContext";
-import { useAuth } from "../context/AuthContext";
 import * as playlistsApi from "../api/playlists";
-import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
-import { 
-  LoadingSection, 
-  ErrorState, 
-  NoTracksState
-} from "../components/shared/StateComponents";
-import { 
-  Button, 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogFooter, 
-  Input,
-  DropdownMenu,
-  DropdownItem,
-  DropdownSeparator
-} from "../components/ui";
-import { 
-  PlayIcon, 
-  ShuffleIcon, 
-  BackIcon, 
-  PlaylistIcon, 
-  EditIcon, 
-  DeleteIcon,
-  MoreIcon,
-  PlusIcon
-} from "../components/icons/Icons";
-import { getTrackThumbnailUrl } from "../api/tracks";
+import { Button, Skeleton, SkeletonTrackRow } from "../components/ui";
+import { Artwork } from "../components/ui/Avatar";
+import { PlayIcon, ShuffleIcon, HeartIcon, MoreIcon, CloseIcon } from "../components/icons/Icons";
 import type { Playlist, Track } from "../types";
+import type { Route } from "../+types/root";
 
-// ============================================
-// TYPES
-// ============================================
-
-interface PlaylistData {
-  playlist: Playlist | null;
-  tracks: Track[];
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Playlist - Sonare" },
+    { name: "description", content: "View playlist details on Sonare" },
+  ];
 }
 
-type LoadingState = "loading" | "error" | "success";
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-
 function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+function formatTotalDuration(tracks: Track[]): string {
+  const totalSeconds = tracks.reduce((sum, track) => sum + track.duration, 0);
+  const hours = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
   
   if (hours > 0) {
     return `${hours} hr ${mins} min`;
@@ -59,469 +32,275 @@ function formatDuration(seconds: number): string {
   return `${mins} min`;
 }
 
-function getTotalDuration(tracks: Track[]): number {
-  return tracks.reduce((total, track) => total + (track.duration || 0), 0);
-}
-
-// ============================================
-// RENAME PLAYLIST DIALOG
-// ============================================
-
-interface RenameDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  currentName: string;
-  onRename: (newName: string) => Promise<void>;
-}
-
-function RenameDialog({ open, onOpenChange, currentName, onRename }: RenameDialogProps) {
-  const [name, setName] = useState(currentName);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setName(currentName);
-    setError(null);
-  }, [currentName, open]);
-
-  const handleRename = async () => {
-    if (!name.trim() || name.trim() === currentName) {
-      onOpenChange(false);
-      return;
-    }
-
-    try {
-      setIsRenaming(true);
-      setError(null);
-      await onRename(name.trim());
-      onOpenChange(false);
-    } catch (err) {
-      console.error("Failed to rename playlist:", err);
-      setError("Failed to rename playlist. Please try again.");
-    } finally {
-      setIsRenaming(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader onClose={() => onOpenChange(false)}>
-          Rename playlist
-        </DialogHeader>
-        <div className="py-4">
-          <Input
-            placeholder="Playlist name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleRename()}
-            autoFocus
-          />
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleRename} isLoading={isRenaming} disabled={!name.trim()}>
-            Rename
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ============================================
-// DELETE CONFIRMATION DIALOG
-// ============================================
-
-interface DeleteDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  playlistName: string;
-  onDelete: () => Promise<void>;
-}
-
-function DeleteDialog({ open, onOpenChange, playlistName, onDelete }: DeleteDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    try {
-      setIsDeleting(true);
-      await onDelete();
-      onOpenChange(false);
-    } catch (err) {
-      console.error("Failed to delete playlist:", err);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader onClose={() => onOpenChange(false)}>
-          Delete playlist
-        </DialogHeader>
-        <div className="py-4">
-          <p className="text-surface-300">
-            Are you sure you want to delete <strong className="text-surface-100">"{playlistName}"</strong>?
-            This action cannot be undone.
-          </p>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ============================================
-// PLAYLIST HERO SECTION
-// ============================================
-
-interface PlaylistHeroProps {
-  playlist: Playlist;
-  tracks: Track[];
-  isOwner: boolean;
-  onPlayAll: () => void;
-  onShuffle: () => void;
-  onBack: () => void;
-  onRename: () => void;
-  onDelete: () => void;
-}
-
-function PlaylistHero({ 
-  playlist, 
-  tracks, 
-  isOwner,
-  onPlayAll, 
-  onShuffle, 
-  onBack,
-  onRename,
-  onDelete 
-}: PlaylistHeroProps) {
-  const totalDuration = getTotalDuration(tracks);
-  const firstTrackId = tracks[0]?.id;
-
-  return (
-    <div className="relative mb-8">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary-600/15 via-surface-900/70 to-surface-900 rounded-xl -z-10" />
-      
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="absolute top-4 left-4 p-2 rounded-full bg-surface-800/80 hover:bg-surface-700 transition-colors z-10"
-        aria-label="Go back"
-      >
-        <BackIcon size={20} className="text-surface-100" />
-      </button>
-
-      {/* More options menu */}
-      {isOwner && (
-        <div className="absolute top-4 right-4 z-10">
-          <DropdownMenu
-            trigger={
-              <button
-                className="p-2 rounded-full bg-surface-800/80 hover:bg-surface-700 transition-colors"
-                aria-label="More options"
-              >
-                <MoreIcon size={20} className="text-surface-100" />
-              </button>
-            }
-          >
-            <DropdownItem onClick={onRename}>
-              <EditIcon size={16} className="mr-2" />
-              Rename playlist
-            </DropdownItem>
-            <DropdownSeparator />
-            <DropdownItem onClick={onDelete} destructive>
-              <DeleteIcon size={16} className="mr-2" />
-              Delete playlist
-            </DropdownItem>
-          </DropdownMenu>
-        </div>
-      )}
-      
-      {/* Content */}
-      <div className="p-6 pt-16 md:p-8 md:pt-16">
-        <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
-          {/* Playlist Artwork */}
-          <div className="relative">
-            <div className="w-48 h-48 md:w-56 md:h-56 rounded-lg shadow-2xl shadow-black/40 overflow-hidden bg-gradient-to-br from-primary-500 to-primary-700">
-              {firstTrackId ? (
-                <img
-                  src={getTrackThumbnailUrl(firstTrackId)}
-                  alt={playlist.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <PlaylistIcon size={64} className="text-white/60" />
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Playlist Info */}
-          <div className="flex-1 text-center md:text-left">
-            <p className="text-sm font-medium text-surface-400 uppercase tracking-wider mb-2">
-              Playlist
-            </p>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-surface-100 mb-3">
-              {playlist.name}
-            </h1>
-            
-            {/* Playlist stats */}
-            <div className="flex items-center justify-center md:justify-start gap-2 text-surface-400 text-sm">
-              <span>{tracks.length} tracks</span>
-              {tracks.length > 0 && (
-                <>
-                  <span>•</span>
-                  <span>{formatDuration(totalDuration)}</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Action Buttons */}
-        <div className="flex items-center justify-center md:justify-start gap-3 mt-6">
-          <Button onClick={onPlayAll} size="lg" className="gap-2" disabled={tracks.length === 0}>
-            <PlayIcon size={20} />
-            Play
-          </Button>
-          <Button onClick={onShuffle} variant="secondary" size="lg" className="gap-2" disabled={tracks.length === 0}>
-            <ShuffleIcon size={20} />
-            Shuffle
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// TRACKS LIST SECTION
-// ============================================
-
-interface TracksListProps {
-  tracks: Track[];
-  isOwner: boolean;
-  onPlayTrack: (track: Track, index: number) => void;
-  onAddToPlaylist: (track: Track) => void;
-  onRemoveFromPlaylist: (track: Track) => void;
-}
-
-function TracksList({ tracks, isOwner, onPlayTrack, onAddToPlaylist, onRemoveFromPlaylist }: TracksListProps) {
-  const navigate = useNavigate();
-
-  if (tracks.length === 0) {
-    return <NoTracksState />;
-  }
-
-  return (
-    <div className="bg-surface-800/30 rounded-lg border border-surface-700/30 p-2">
-      <TrackListHeader />
-      {tracks.map((track, index) => (
-        <TrackRow
-          key={track.id}
-          track={track}
-          index={index}
-          onPlay={() => onPlayTrack(track, index)}
-          actions={{
-            onAddToPlaylist: () => onAddToPlaylist(track),
-            onGoToAlbum: track.albumID ? () => navigate(`/app/albums/${track.albumID}`) : undefined,
-            onGoToArtist: track.album?.artistID 
-              ? () => navigate(`/app/artists/${track.album?.artistID}`) 
-              : undefined,
-            onRemoveFromPlaylist: isOwner ? () => onRemoveFromPlaylist(track) : undefined,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function PlaylistDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { playTrack, playQueue } = usePlayer();
 
-  // State
-  const [data, setData] = useState<PlaylistData>({
-    playlist: null,
-    tracks: [],
-  });
-  const [loadingState, setLoadingState] = useState<LoadingState>("loading");
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-  const [isAddToPlaylistDialogOpen, setIsAddToPlaylistDialogOpen] = useState(false);
-  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  // Check if current user is the owner
-  const isOwner = user?.id === data.playlist?.userID;
-
-  // ============================================
-  // DATA FETCHING
-  // ============================================
-
-  const fetchData = useCallback(async () => {
-    if (!id) return;
-
-    setLoadingState("loading");
-    try {
-      const { playlist, tracks } = await playlistsApi.getPlaylistWithTracks(id);
-      setData({ playlist, tracks });
-      setLoadingState("success");
-    } catch (error) {
-      console.error("Failed to fetch playlist:", error);
-      setLoadingState("error");
-    }
-  }, [id]);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    async function fetchPlaylist() {
+      if (!id) return;
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  const handleBack = () => {
-    navigate(-1);
-  };
+        const playlistData = await playlistsApi.getPlaylist(id);
+        setPlaylist(playlistData);
+        // Note: Playlist tracks will come from the playlist object if available
+        // For now, we use an empty array since backend may not return tracks
+        setTracks(playlistData.tracks || []);
+      } catch (err) {
+        console.error("Failed to fetch playlist:", err);
+        setError("Failed to load playlist. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPlaylist();
+  }, [id]);
 
   const handlePlayAll = () => {
-    if (data.tracks.length > 0) {
-      playQueue(data.tracks, 0);
+    if (tracks.length > 0) {
+      playQueue(tracks);
     }
   };
 
   const handleShuffle = () => {
-    if (data.tracks.length > 0) {
-      const shuffled = [...data.tracks].sort(() => Math.random() - 0.5);
-      playQueue(shuffled, 0);
+    if (tracks.length > 0) {
+      const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+      playQueue(shuffled);
     }
   };
 
   const handlePlayTrack = (track: Track, index: number) => {
-    playTrack(track, data.tracks);
+    playQueue(tracks, index);
   };
 
-  const handleAddToPlaylist = (track: Track) => {
-    setSelectedTrack(track);
-    setIsAddToPlaylistDialogOpen(true);
-  };
-
-  const handleRemoveFromPlaylist = async (track: Track) => {
+  const handleDeletePlaylist = async () => {
     if (!id) return;
 
     try {
-      await playlistsApi.removeTrackFromPlaylist(id, track.id);
-      // Update local state
-      setData((prev) => ({
-        ...prev,
-        tracks: prev.tracks.filter((t) => t.id !== track.id),
-      }));
-    } catch (error) {
-      console.error("Failed to remove track from playlist:", error);
+      setIsDeleting(true);
+      await playlistsApi.deletePlaylist(id);
+      navigate("/app/library");
+    } catch (err) {
+      console.error("Failed to delete playlist:", err);
+      setError("Failed to delete playlist. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
-  const handleRename = async (newName: string) => {
-    if (!id) return;
-    
-    await playlistsApi.updatePlaylist(id, { name: newName });
-    setData((prev) => ({
-      ...prev,
-      playlist: prev.playlist ? { ...prev.playlist, name: newName } : null,
-    }));
-  };
+  // Get the first track's thumbnail as playlist artwork
+  const playlistArtwork = tracks[0]?.thumbnail || null;
 
-  const handleDelete = async () => {
-    if (!id) return;
-    
-    await playlistsApi.deletePlaylist(id);
-    navigate("/app/library");
-  };
+  if (isLoading) {
+    return (
+      <div className="animate-fade-in">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-6 mb-8">
+          <Skeleton className="w-48 h-48 md:w-56 md:h-56 rounded-lg flex-shrink-0" />
+          <div className="flex-1 text-center md:text-left">
+            <Skeleton className="h-4 w-20 mb-2" />
+            <Skeleton className="h-12 w-64 mb-4" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </div>
 
-  // ============================================
-  // RENDER
-  // ============================================
-
-  if (loadingState === "loading") {
-    return <LoadingSection message="Loading playlist..." />;
+        {/* Tracks skeleton */}
+        <div className="space-y-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonTrackRow key={i} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  if (loadingState === "error" || !data.playlist) {
+  if (error || !playlist) {
     return (
-      <ErrorState
-        title="Playlist not found"
-        message="We couldn't find this playlist. It may have been removed."
-        onRetry={fetchData}
-      />
+      <div className="flex flex-col items-center justify-center py-12">
+        <p className="text-red-400 mb-4">{error || "Playlist not found"}</p>
+        <Button variant="secondary" onClick={() => navigate(-1)}>
+          Go back
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Hero Section */}
-      <PlaylistHero
-        playlist={data.playlist}
-        tracks={data.tracks}
-        isOwner={isOwner}
-        onPlayAll={handlePlayAll}
-        onShuffle={handleShuffle}
-        onBack={handleBack}
-        onRename={() => setIsRenameDialogOpen(true)}
-        onDelete={() => setIsDeleteDialogOpen(true)}
-      />
+    <div className="animate-fade-in">
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="bg-surface-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-surface-100">Delete playlist?</h3>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-surface-400 hover:text-surface-100"
+              >
+                <CloseIcon size={24} />
+              </button>
+            </div>
+            <p className="text-surface-300 mb-6">
+              This will delete <strong>{playlist.name}</strong> from your library.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeletePlaylist}
+                isLoading={isDeleting}
+                className="bg-red-500 hover:bg-red-400"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Tracks List */}
-      <TracksList
-        tracks={data.tracks}
-        isOwner={isOwner}
-        onPlayTrack={handlePlayTrack}
-        onAddToPlaylist={handleAddToPlaylist}
-        onRemoveFromPlaylist={handleRemoveFromPlaylist}
-      />
+      {/* Playlist header */}
+      <div className="flex flex-col md:flex-row items-center md:items-end gap-6 mb-6">
+        <Artwork
+          src={playlistArtwork}
+          alt={playlist.name}
+          className="w-48 h-48 md:w-56 md:h-56 shadow-2xl flex-shrink-0"
+          rounded="lg"
+          size="full"
+        />
+        <div className="flex-1 text-center md:text-left">
+          <p className="text-sm font-medium text-surface-400 uppercase tracking-wide mb-2">
+            Playlist
+          </p>
+          <h1 className="text-3xl md:text-5xl font-bold text-surface-100 mb-4">
+            {playlist.name}
+          </h1>
+          <p className="text-surface-400">
+            {tracks.length} songs{tracks.length > 0 && ` • ${formatTotalDuration(tracks)}`}
+          </p>
+        </div>
+      </div>
 
-      {/* Add to Playlist Dialog */}
-      <AddToPlaylistDialog
-        open={isAddToPlaylistDialogOpen}
-        onOpenChange={setIsAddToPlaylistDialogOpen}
-        tracks={selectedTrack ? [selectedTrack] : []}
-      />
+      {/* Action buttons */}
+      <div className="flex items-center gap-4 mb-6">
+        <Button size="lg" onClick={handlePlayAll} disabled={tracks.length === 0}>
+          <PlayIcon size={24} />
+          Play
+        </Button>
+        <Button variant="secondary" size="lg" onClick={handleShuffle} disabled={tracks.length === 0}>
+          <ShuffleIcon size={20} />
+        </Button>
+        <button
+          className="p-2 text-surface-400 hover:text-red-400 transition-colors ml-auto"
+          aria-label="Delete playlist"
+          onClick={() => setShowDeleteConfirm(true)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+          </svg>
+        </button>
+      </div>
 
-      {/* Rename Dialog */}
-      <RenameDialog
-        open={isRenameDialogOpen}
-        onOpenChange={setIsRenameDialogOpen}
-        currentName={data.playlist.name}
-        onRename={handleRename}
-      />
+      {/* Tracks list */}
+      {tracks.length > 0 ? (
+        <div>
+          {/* Table header */}
+          <div className="flex items-center gap-4 px-2 py-2 text-sm text-surface-400 border-b border-surface-700 mb-2">
+            <div className="w-8 text-center">#</div>
+            <div className="flex-1">Title</div>
+            <div className="w-16 text-right">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="inline">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+              </svg>
+            </div>
+          </div>
 
-      {/* Delete Dialog */}
-      <DeleteDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        playlistName={data.playlist.name}
-        onDelete={handleDelete}
-      />
+          {/* Track rows */}
+          <div className="space-y-1">
+            {tracks.map((track, index) => (
+              <div
+                key={track.id}
+                className="flex items-center gap-4 p-2 rounded-lg hover:bg-surface-700 group cursor-pointer"
+                onClick={() => handlePlayTrack(track, index)}
+              >
+                {/* Track number / play button */}
+                <div className="w-8 text-center">
+                  <span className="text-surface-400 group-hover:hidden">
+                    {index + 1}
+                  </span>
+                  <button
+                    className="hidden group-hover:block text-surface-100"
+                    aria-label={`Play ${track.name}`}
+                  >
+                    <PlayIcon size={16} />
+                  </button>
+                </div>
+
+                {/* Track artwork */}
+                <Artwork
+                  src={track.thumbnail}
+                  alt={track.name}
+                  size="sm"
+                  rounded="sm"
+                />
+
+                {/* Track info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-surface-100 truncate">
+                    {track.name}
+                  </p>
+                  <p className="text-sm text-surface-400 truncate">
+                    {track.album?.name || "Unknown Album"}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <button
+                  className="p-2 text-surface-400 hover:text-surface-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Like"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <HeartIcon size={16} />
+                </button>
+
+                {/* Duration */}
+                <span className="text-sm text-surface-400 w-12 text-right">
+                  {formatDuration(track.duration)}
+                </span>
+
+                {/* More menu */}
+                <button
+                  className="p-2 text-surface-400 hover:text-surface-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="More options"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreIcon size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-surface-400 mb-4">This playlist is empty</p>
+          <Button variant="secondary" onClick={() => navigate("/app/search")}>
+            Find songs to add
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

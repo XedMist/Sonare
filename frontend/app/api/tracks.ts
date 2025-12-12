@@ -1,4 +1,4 @@
-import { apiClient, tokenStorage } from "./client";
+import { apiClient } from "./client";
 import { API_BASE_URL, DEFAULT_PAGE_SIZE } from "../config";
 import type { Track } from "../types";
 
@@ -35,11 +35,8 @@ export async function getTrack(id: string): Promise<Track> {
   return apiClient<Track>(`/tracks/${id}`);
 }
 
-// Get the audio file URL for a track (with token as query param for authenticated access)
-export function getTrackAudioUrl(id: string): string {
-  const token = tokenStorage.getAccessToken();
-  const url = `${API_BASE_URL}/tracks/${id}/file`;
-  return token ? `${url}?token=${encodeURIComponent(token)}` : url;
+export async function getTrackThumbnail(id: string): Promise<{ thumbnail: string }> {
+  return apiClient<{ thumbnail: string }>(`/tracks/${id}/thumbnail`);
 }
 
 // Get the audio file URL for a track

@@ -49,6 +49,9 @@ export class PrismaMapper {
     return {
       id: prisma.id,
       name: prisma.name,
+      image: prisma.image,
+      popularity: prisma.popularity,
+      genres: prisma.genres,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
     };
@@ -59,6 +62,7 @@ export class PrismaMapper {
       id: prisma.id,
       name: prisma.name,
       cover: prisma.cover,
+      popularity: prisma.popularity,
       artistID: prisma.artistID,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
@@ -72,7 +76,10 @@ export class PrismaMapper {
       name: prisma.name,
       duration: prisma.duration,
       thumbnail: prisma.thumbnail,
+      popularity: prisma.popularity,
+      spotifyId: prisma.spotifyId,
       albumID: prisma.albumID || '',
+      artistID: prisma.artistID,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
     };
@@ -132,6 +139,9 @@ export class DTOMapper {
     return {
       id: entity.id,
       name: entity.name,
+      image: entity.image,
+      popularity: entity.popularity,
+      genres: entity.genres,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

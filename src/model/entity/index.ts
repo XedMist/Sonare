@@ -33,6 +33,10 @@ export interface User {
 export interface Artist {
   id: string;
   name: string;
+  // Spotify metadata
+  image?: string | null;
+  popularity?: number | null;
+  genres?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +45,8 @@ export interface Album {
   id: string;
   name: string;
   cover?: string | null;
+  // Spotify metadata
+  popularity?: number | null;
   artistID: string;
   artist?: Artist;
   createdAt: Date;
@@ -53,10 +59,31 @@ export interface Track {
   name: string;
   duration: number;
   thumbnail: string;
+  // Spotify metadata
+  popularity?: number | null;
+  spotifyId?: string | null;
   albumID: string;
   album?: Album;
+  artistID?: string;
+  artist?: Artist;
+  // All artists on this track
+  artists?: TrackArtist[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export enum ArtistRole {
+  PRIMARY = 'PRIMARY',
+  FEATURED = 'FEATURED'
+}
+
+export interface TrackArtist {
+  id: string;
+  trackId: string;
+  artistId: string;
+  role: ArtistRole;
+  track?: Track;
+  artist?: Artist;
 }
 
 export interface Playlist {

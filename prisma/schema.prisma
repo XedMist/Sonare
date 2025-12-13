@@ -38,11 +38,19 @@ model Track {
   thumbnail String
   lyrics    String?
 
+  // Spotify metadata
+  popularity Int?
+  spotifyId  String?  // Spotify track ID for deduplication (indexed but not unique due to nulls)
+
   albumID String? @db.ObjectId
   album   Album?  @relation(fields: [albumID], references: [id])
 
+  // Primary artist (for backwards compatibility)
   artistID String @db.ObjectId
   artist   Artist @relation(fields: [artistID], references: [id])
+
+  // All artists (many-to-many)
+  trackArtists TrackArtist[]
 
   playlistItems PlaylistTrack[]
 
@@ -54,12 +62,40 @@ model Track {
   @@index([artistID])
 }
 
+// Junction table for Track-Artist many-to-many relationship
+model TrackArtist {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  trackId  String @db.ObjectId
+  artistId String @db.ObjectId
+  role     ArtistRole @default(PRIMARY)
+
+  track  Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([trackId, artistId])
+  @@index([trackId])
+  @@index([artistId])
+}
+
+enum ArtistRole {
+  PRIMARY
+  FEATURED
+}
+
 model Artist {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String
 
+  // Spotify metadata
+  image      String?
+  popularity Int?
+  genres     String[]
+
   albums Album[]
   tracks Track[]
+  
+  // All tracks this artist is on (many-to-many)
+  trackArtists TrackArtist[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -69,6 +105,9 @@ model Album {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String
   cover String?
+
+  // Spotify metadata
+  popularity Int?
 
   artistID String @db.ObjectId
   artist   Artist @relation(fields: [artistID], references: [id])

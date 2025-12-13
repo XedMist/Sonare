@@ -331,6 +331,7 @@ export default function AppHomePage() {
                 key={artist.id}
                 title={artist.name}
                 subtitle="Artista"
+                image={artist.image}
                 onClick={() => navigate(`/app/artists/${artist.id}`)}
                 rounded="full"
               />

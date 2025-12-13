@@ -125,6 +125,7 @@ export default function ArtistDetailPage() {
       {/* Artist header */}
       <div className="flex flex-col md:flex-row items-center md:items-end gap-6 mb-8">
         <Avatar
+          src={artist.image}
           alt={artist.name}
           size="xl"
           className="w-48 h-48 shadow-2xl"

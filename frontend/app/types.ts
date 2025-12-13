@@ -13,6 +13,10 @@ export interface User {
 export interface Artist {
     id: string;
     name: string;
+    // Spotify metadata
+    image?: string | null;
+    popularity?: number | null;
+    genres?: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -23,6 +27,8 @@ export interface Album {
     name: string;
     artistID: string;
     cover?: string;
+    // Spotify metadata
+    popularity?: number | null;
     createdAt: string;
     updatedAt: string;
     artist?: {
@@ -38,7 +44,11 @@ export interface Track {
     name: string;
     duration: number;
     thumbnail: string;
+    // Spotify metadata
+    popularity?: number | null;
+    spotifyId?: string | null;
     albumID: string;
+    artistID?: string;
     createdAt: string;
     updatedAt: string;
     album?: {
@@ -46,6 +56,19 @@ export interface Track {
         name: string;
         artistID: string;
     };
+    // All artists on this track
+    artists?: TrackArtist[];
+}
+
+// Track-Artist relationship
+export type ArtistRole = 'PRIMARY' | 'FEATURED';
+
+export interface TrackArtist {
+    id: string;
+    trackId: string;
+    artistId: string;
+    role: ArtistRole;
+    artist?: Artist;
 }
 
 // Playlist types

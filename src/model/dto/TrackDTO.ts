@@ -7,6 +7,8 @@ export const TrackResponseSchema = z.object({
   name: z.string(),
   duration: z.number(),
   thumbnail: z.string(),
+  // Spotify metadata
+  popularity: z.number().nullable().optional(),
   albumID: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),

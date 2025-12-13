@@ -4,6 +4,10 @@ import { z } from 'zod';
 export const ArtistResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
+  // Spotify metadata
+  image: z.string().nullable().optional(),
+  popularity: z.number().nullable().optional(),
+  genres: z.array(z.string()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

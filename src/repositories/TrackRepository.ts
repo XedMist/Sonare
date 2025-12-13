@@ -12,6 +12,9 @@ export default class TrackRepository {
                     artistID: artist.id
                 }
             },
+            orderBy: {
+                popularity: 'desc'
+            },
             skip, take
         });
         return tracks.map(PrismaMapper.toTrack);

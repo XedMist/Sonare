@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router";
 import { usePlayer } from "../context/PlayerContext";
 import * as searchApi from "../api/search";
-import { Card, SkeletonCard, SkeletonTrackRow } from "../components/ui";
+import type { UnifiedSearchItem } from "../api/search";
+import { SkeletonTrackRow } from "../components/ui";
 import { Artwork } from "../components/ui/Avatar";
 import { SearchIcon, PlayIcon } from "../components/icons/Icons";
-import type { Artist, Album, Track } from "../types";
+import { User, Disc3, Music } from "lucide-react";
+import type { Track } from "../types";
 import type { Route } from "../+types/root";
 
 export function meta({}: Route.MetaArgs) {
@@ -34,6 +36,109 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
+// Type badge component
+function TypeBadge({ type }: { type: 'artist' | 'album' | 'track' }) {
+  const config = {
+    artist: { icon: User, label: 'Artist', color: 'bg-purple-500/20 text-purple-300' },
+    album: { icon: Disc3, label: 'Album', color: 'bg-blue-500/20 text-blue-300' },
+    track: { icon: Music, label: 'Song', color: 'bg-green-500/20 text-green-300' },
+  };
+
+  const { icon: Icon, label, color } = config[type];
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+      <Icon size={12} />
+      {label}
+    </span>
+  );
+}
+
+// Unified search result row
+function SearchResultRow({
+  item,
+  onPlay,
+  onClick,
+}: {
+  item: UnifiedSearchItem;
+  onPlay?: () => void;
+  onClick: () => void;
+}) {
+  // Get image, title, and subtitle based on item type
+  let image: string | undefined;
+  let title: string;
+  let subtitle: string;
+  let duration: number | undefined;
+  let isRounded = false;
+
+  if (item.type === 'artist' && item.artist) {
+    image = item.artist.image || undefined;
+    title = item.artist.name;
+    subtitle = item.artist.genres?.slice(0, 2).join(', ') || 'Artist';
+    isRounded = true;
+  } else if (item.type === 'album' && item.album) {
+    image = item.album.cover;
+    title = item.album.name;
+    subtitle = item.album.artist?.name || 'Unknown Artist';
+  } else if (item.type === 'track' && item.track) {
+    image = item.track.thumbnail;
+    title = item.track.name;
+    subtitle = item.track.album?.name || 'Unknown Album';
+    duration = item.track.duration;
+  } else {
+    title = item.name;
+    subtitle = item.type;
+  }
+
+  return (
+    <div
+      className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-700 group cursor-pointer transition-colors"
+      onClick={onClick}
+    >
+      {/* Type badge */}
+      <div className="w-16 flex-shrink-0">
+        <TypeBadge type={item.type} />
+      </div>
+
+      {/* Artwork */}
+      <Artwork
+        src={image}
+        alt={title}
+        size="sm"
+        rounded={isRounded ? "full" : "sm"}
+        className="flex-shrink-0"
+      />
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-surface-100 truncate">{title}</p>
+        <p className="text-sm text-surface-400 truncate">{subtitle}</p>
+      </div>
+
+      {/* Duration (for tracks only) */}
+      {duration !== undefined && (
+        <span className="text-sm text-surface-400 flex-shrink-0">
+          {formatDuration(duration)}
+        </span>
+      )}
+
+      {/* Play button for tracks */}
+      {item.type === 'track' && onPlay && (
+        <button
+          className="opacity-0 group-hover:opacity-100 p-2 rounded-full bg-primary-500 text-surface-900 hover:bg-primary-400 transition-all flex-shrink-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPlay();
+          }}
+          aria-label={`Play ${title}`}
+        >
+          <PlayIcon size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function SearchPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,18 +147,16 @@ export default function SearchPage() {
   const query = searchParams.get("q") || "";
   const debouncedQuery = useDebounce(query, 300);
 
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [artists, setArtists] = useState<Artist[]>([]);
-  const [albums, setAlbums] = useState<Album[]>([]);
+  const [results, setResults] = useState<UnifiedSearchItem[]>([]);
+  const [allTracks, setAllTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     async function search() {
       if (!debouncedQuery.trim()) {
-        setTracks([]);
-        setArtists([]);
-        setAlbums([]);
+        setResults([]);
+        setAllTracks([]);
         setHasSearched(false);
         return;
       }
@@ -62,11 +165,16 @@ export default function SearchPage() {
       setHasSearched(true);
 
       try {
-        const results = await searchApi.search(debouncedQuery);
-
-        setTracks(results.tracks || []);
-        setArtists(results.artists || []);
-        setAlbums(results.albums || []);
+        const response = await searchApi.searchUnified(debouncedQuery);
+        setResults(response.items || []);
+        
+        // Extract all tracks for playback context
+        const tracks = response.items
+          .filter((item): item is UnifiedSearchItem & { track: Track } => 
+            item.type === 'track' && !!item.track
+          )
+          .map(item => item.track);
+        setAllTracks(tracks);
       } catch (err) {
         console.error("Search failed:", err);
       } finally {
@@ -85,11 +193,23 @@ export default function SearchPage() {
     }
   };
 
-  const handlePlayTrack = (track: Track) => {
-    playTrack(track, tracks);
+  const handleItemClick = (item: UnifiedSearchItem) => {
+    if (item.type === 'artist') {
+      navigate(`/app/artists/${item.id}`);
+    } else if (item.type === 'album') {
+      navigate(`/app/albums/${item.id}`);
+    } else if (item.type === 'track' && item.track) {
+      playTrack(item.track, allTracks);
+    }
   };
 
-  const hasResults = tracks.length > 0 || artists.length > 0 || albums.length > 0;
+  const handlePlayTrack = (item: UnifiedSearchItem) => {
+    if (item.type === 'track' && item.track) {
+      playTrack(item.track, allTracks);
+    }
+  };
+
+  const hasResults = results.length > 0;
 
   return (
     <div className="animate-fade-in">
@@ -124,15 +244,10 @@ export default function SearchPage() {
 
       {/* Loading state */}
       {isLoading && (
-        <div className="space-y-8">
-          <section>
-            <h2 className="text-xl font-bold text-surface-100 mb-4">Songs</h2>
-            <div className="space-y-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <SkeletonTrackRow key={i} />
-              ))}
-            </div>
-          </section>
+        <div className="space-y-1">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonTrackRow key={i} />
+          ))}
         </div>
       )}
 
@@ -161,117 +276,17 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* Results */}
+      {/* Unified Results */}
       {!isLoading && hasResults && (
-        <div className="space-y-8">
-          {/* Artists */}
-          {artists.length > 0 && (
-            <section>
-              <h2 className="text-xl font-bold text-surface-100 mb-4">Artists</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {artists.map((artist) => (
-                  <Card
-                    key={artist.id}
-                    hover
-                    className="group"
-                    onClick={() => navigate(`/app/artists/${artist.id}`)}
-                  >
-                    <Artwork
-                      alt={artist.name}
-                      size="full"
-                      rounded="full"
-                      className="mb-3 shadow-lg"
-                    />
-                    <h3 className="font-medium text-surface-100 truncate">{artist.name}</h3>
-                    <p className="text-sm text-surface-400">Artist</p>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Albums */}
-          {albums.length > 0 && (
-            <section>
-              <h2 className="text-xl font-bold text-surface-100 mb-4">Albums</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {albums.map((album) => (
-                  <Card
-                    key={album.id}
-                    hover
-                    className="group"
-                    onClick={() => navigate(`/app/albums/${album.id}`)}
-                  >
-                    <div className="relative mb-3">
-                      <Artwork
-                        src={album.cover}
-                        alt={album.name}
-                        size="full"
-                        rounded="md"
-                        className="shadow-lg"
-                      />
-                    </div>
-                    <h3 className="font-medium text-surface-100 truncate">{album.name}</h3>
-                    <p className="text-sm text-surface-400 truncate">
-                      {album.artist?.name || "Unknown Artist"}
-                    </p>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Tracks */}
-          {tracks.length > 0 && (
-            <section>
-              <h2 className="text-xl font-bold text-surface-100 mb-4">Songs</h2>
-              <div className="space-y-1">
-                {tracks.map((track, index) => (
-                  <div
-                    key={track.id}
-                    className="flex items-center gap-4 p-2 rounded-lg hover:bg-surface-700 group cursor-pointer"
-                    onClick={() => handlePlayTrack(track)}
-                  >
-                    {/* Track number / play button */}
-                    <div className="w-8 text-center">
-                      <span className="text-surface-400 group-hover:hidden">
-                        {index + 1}
-                      </span>
-                      <button
-                        className="hidden group-hover:block text-surface-100"
-                        aria-label={`Play ${track.name}`}
-                      >
-                        <PlayIcon size={16} />
-                      </button>
-                    </div>
-
-                    {/* Track artwork */}
-                    <Artwork
-                      src={track.thumbnail}
-                      alt={track.name}
-                      size="sm"
-                      rounded="sm"
-                    />
-
-                    {/* Track info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-surface-100 truncate">
-                        {track.name}
-                      </p>
-                      <p className="text-sm text-surface-400 truncate">
-                        {track.album?.name || "Unknown Album"}
-                      </p>
-                    </div>
-
-                    {/* Duration */}
-                    <span className="text-sm text-surface-400">
-                      {formatDuration(track.duration)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="space-y-1">
+          {results.map((item) => (
+            <SearchResultRow
+              key={`${item.type}-${item.id}`}
+              item={item}
+              onClick={() => handleItemClick(item)}
+              onPlay={item.type === 'track' ? () => handlePlayTrack(item) : undefined}
+            />
+          ))}
         </div>
       )}
     </div>

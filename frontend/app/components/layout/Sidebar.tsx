@@ -1,15 +1,24 @@
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
+import * as playlistsApi from "../../api/playlists";
+import { ScrollArea, DropdownMenu, DropdownItem, DropdownSeparator } from "../ui";
 import {
   HomeIcon,
   SearchIcon,
   LibraryIcon,
   PlusIcon,
   MusicNoteIcon,
+  UserIcon,
+  LogoutIcon,
+  MoreIcon,
 } from "../icons/Icons";
+import type { Playlist } from "../../types";
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+  onCreatePlaylist?: () => void;
 }
 
 const navItems = [
@@ -18,17 +27,40 @@ const navItems = [
   { to: "/app/library", icon: LibraryIcon, label: "Your Library" },
 ];
 
-export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarProps) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
-  const handleCreatePlaylist = () => {
-    // TODO: Implement playlist creation modal
-    console.log("Create playlist");
+  useEffect(() => {
+    let isMounted = true;
+    
+    async function fetchPlaylists() {
+      try {
+        const response = await playlistsApi.getPlaylists({ limit: 50 });
+        if (isMounted) {
+          setPlaylists(response.data || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error("Failed to fetch playlists:", err);
+        }
+      }
+    }
+    fetchPlaylists();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -36,17 +68,15 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-surface-900 transform transition-transform duration-300 ease-in-out lg:transform-none ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-surface-900 border-r border-surface-800/50 transform transition-transform duration-300 ease-in-out lg:transform-none ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         } flex flex-col h-full`}
       >
-        {/* Logo */}
         <div className="p-6">
           <NavLink to="/app" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center">
-              <MusicNoteIcon size={24} className="text-surface-900" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/20">
+              <MusicNoteIcon size={24} className="text-surface-100" />
             </div>
             <span className="text-xl font-bold text-surface-100 group-hover:text-primary-400 transition-colors">
               Sonare
@@ -54,7 +84,6 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           </NavLink>
         </div>
 
-        {/* Main navigation */}
         <nav className="px-3">
           <ul className="space-y-1">
             {navItems.map(({ to, icon: Icon, label, end }) => (
@@ -66,7 +95,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   className={({ isActive }) =>
                     `flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-surface-700 text-surface-100"
+                        ? "bg-surface-700/80 text-surface-100 border-l-2 border-primary-500"
                         : "text-surface-400 hover:text-surface-100 hover:bg-surface-800"
                     }`
                   }
@@ -79,37 +108,76 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           </ul>
         </nav>
 
-        {/* Library section */}
         <div className="mt-6 px-3 flex-1 overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-4 mb-4">
             <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">
-              Playlists
+              Your Playlists
             </h3>
             <button
-              onClick={handleCreatePlaylist}
-              className="p-1 text-surface-400 hover:text-surface-100 transition-colors"
+              onClick={onCreatePlaylist}
+              className="p-1.5 text-surface-400 hover:text-surface-100 hover:bg-surface-700 rounded-full transition-all"
               aria-label="Create playlist"
             >
-              <PlusIcon size={20} />
+              <PlusIcon size={18} />
             </button>
           </div>
 
-          {/* Playlist links - scrollable area */}
-          <div className="flex-1 overflow-y-auto">
-            <nav className="space-y-1">
-              {/* Placeholder playlists - will be populated dynamically */}
-              <p className="px-4 py-2 text-sm text-surface-500">
-                Your playlists will appear here
+          <ScrollArea className="flex-1 px-2">
+            {playlists.length > 0 ? (
+              <nav className="space-y-0.5">
+                {playlists.map((playlist) => (
+                  <NavLink
+                    key={playlist.id}
+                    to={`/app/playlists/${playlist.id}`}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                        isActive
+                          ? "bg-surface-700/80 text-surface-100"
+                          : "text-surface-400 hover:text-surface-100 hover:bg-surface-800"
+                      }`
+                    }
+                  >
+                    <div className="w-2 h-2 rounded-full bg-primary-500" />
+                    <span className="truncate">{playlist.name}</span>
+                  </NavLink>
+                ))}
+              </nav>
+            ) : (
+              <p className="px-3 py-2 text-sm text-surface-500">
+                No playlists yet
               </p>
-            </nav>
-          </div>
+            )}
+          </ScrollArea>
         </div>
 
-        {/* Bottom section */}
-        <div className="p-4 border-t border-surface-800">
-          <p className="text-xs text-surface-500 text-center">
-            © 2025 Sonare
-          </p>
+        <div className="p-3 border-t border-surface-800">
+          <DropdownMenu
+            align="left"
+            trigger={
+              <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-surface-800 transition-colors group">
+                <div className="w-8 h-8 rounded-full bg-surface-600 flex items-center justify-center text-surface-300 text-sm font-medium">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="text-sm font-medium text-surface-100 truncate">
+                    {user?.name || "User"}
+                  </p>
+                </div>
+                <MoreIcon size={18} className="text-surface-400 group-hover:text-surface-100" />
+              </button>
+            }
+          >
+            <DropdownItem onClick={() => navigate("/app/profile")}>
+              <UserIcon size={18} />
+              Account
+            </DropdownItem>
+            <DropdownSeparator />
+            <DropdownItem onClick={handleLogout}>
+              <LogoutIcon size={18} />
+              Log out
+            </DropdownItem>
+          </DropdownMenu>
         </div>
       </aside>
     </>

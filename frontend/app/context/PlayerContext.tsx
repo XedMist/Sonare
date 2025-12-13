@@ -44,8 +44,6 @@ function trackToPlayerTrack(track: Track): PlayerTrack {
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const loadedTrackId = useRef<string | null>(null);
-  const shouldAutoPlay = useRef(false);
   
   const [queue, setQueue] = useState<PlayerTrack[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -56,9 +54,19 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("off");
   const [shuffle, setShuffle] = useState(false);
 
+  // Use refs for values accessed in event handlers to avoid stale closures
+  const repeatModeRef = useRef(repeatMode);
+  const queueRef = useRef(queue);
+  const currentIndexRef = useRef(currentIndex);
+  
+  // Keep refs in sync
+  useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
+  useEffect(() => { queueRef.current = queue; }, [queue]);
+  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+
   const currentTrack = currentIndex >= 0 && currentIndex < queue.length ? queue[currentIndex] : null;
 
-  // Initialize audio element
+  // Initialize audio element - only once
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
@@ -76,14 +84,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
 
     const handleEnded = () => {
-      if (repeatMode === "one") {
+      const currentRepeatMode = repeatModeRef.current;
+      const currentQueue = queueRef.current;
+      const idx = currentIndexRef.current;
+      
+      if (currentRepeatMode === "one") {
         audio.currentTime = 0;
         audio.play();
-      } else if (currentIndex < queue.length - 1) {
-        shouldAutoPlay.current = true;
+      } else if (idx < currentQueue.length - 1) {
         setCurrentIndex((prev) => prev + 1);
-      } else if (repeatMode === "all" && queue.length > 0) {
-        shouldAutoPlay.current = true;
+      } else if (currentRepeatMode === "all" && currentQueue.length > 0) {
         setCurrentIndex(0);
       } else {
         setIsPlaying(false);
@@ -106,12 +116,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, [currentIndex, queue.length, repeatMode, volume]);
-
-  const isPlayingRef = useRef(isPlaying);
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
+  }, []); // Empty deps - only run once
 
   // Update audio source when current track changes
   useEffect(() => {
@@ -120,36 +125,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const fetchAudioUrl = async () => {
       if (audioRef.current && currentTrack) {
         try {
-          // Reset time immediately
-          setCurrentTime(0);
-          
+          // Only fetch if we don't have a URL yet or if it's a new track
+          // Note: Since we reset audioUrl to "" in trackToPlayerTrack, we always fetch here.
+          // You might want to cache this if needed, but presigned URLs expire.
           const url = await getTrackAudioUrl(currentTrack.id);
           
-          if (isMounted && audioRef.current) {
-             const audio = audioRef.current;
-             
-             // Define handler for when audio is ready
-             const handleCanPlay = async () => {
-               audio.removeEventListener("canplaythrough", handleCanPlay);
-               
-               // Check if we should auto-play (track ended naturally or user hit play)
-               if (shouldAutoPlay.current || isPlayingRef.current) {
-                 shouldAutoPlay.current = false;
-                 try {
-                   await audio.play();
-                   setIsPlaying(true);
-                 } catch (error) {
-                   console.error("Playback failed:", error);
-                   if (error instanceof Error && error.name !== "AbortError") {
-                     setIsPlaying(false);
-                   }
-                 }
-               }
-             };
-             
-             audio.addEventListener("canplaythrough", handleCanPlay);
-             audio.src = url;
-             loadedTrackId.current = currentTrack.id;
+          if (isMounted) {
+             audioRef.current.src = url;
+             audioRef.current.load();
+             if (isPlaying) {
+               audioRef.current.play().catch(() => {
+                 // Handle autoplay restrictions
+                 setIsPlaying(false);
+               });
+             }
           }
         } catch (error) {
           console.error("Failed to fetch audio URL:", error);
@@ -168,20 +157,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // Handle play/pause state changes
   useEffect(() => {
     if (audioRef.current && currentTrack) {
-      // If the loaded track is different from current track, wait for fetchAudioUrl
-      if (loadedTrackId.current !== currentTrack.id) {
-        if (!isPlaying) {
-          audioRef.current.pause();
-        }
-        return;
-      }
-
       if (isPlaying) {
-        audioRef.current.play().catch((error) => {
-           // Ignore AbortError which happens when pausing/loading quickly
-           if (error.name !== "AbortError") {
-             setIsPlaying(false);
-           }
+        audioRef.current.play().catch(() => {
+          setIsPlaying(false);
         });
       } else {
         audioRef.current.pause();

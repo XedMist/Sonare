@@ -104,6 +104,7 @@ function ArtistsSection({ artists }: ArtistsSectionProps) {
             type="artist"
             id={artist.id}
             name={artist.name}
+            artwork={artist.image || undefined}
           />
         ))}
       </div>
@@ -130,6 +131,7 @@ function AlbumsSection({ albums, onPlayAlbum }: AlbumsSectionProps) {
             id={album.id}
             name={album.name}
             subtitle={album.artist?.name}
+            artwork={album.cover}
             onPlay={() => onPlayAlbum(album.id)}
           />
         ))}

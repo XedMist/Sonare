@@ -306,28 +306,19 @@ export default function AppHomePage() {
   }
 
   // Prepare data for sections
-  // Albums don't currently include their own thumbnail. As a best-effort UI fallback,
-  // we derive album artwork from the first track we have for that album.
-  const albumIdToArtwork = new Map<string, string>();
-  for (const track of data.tracks) {
-    if (track.albumID && track.thumbnail && !albumIdToArtwork.has(track.albumID)) {
-      albumIdToArtwork.set(track.albumID, track.thumbnail);
-    }
-  }
-
   const albumItems = data.albums.map((album) => ({
     type: "album" as const,
     id: album.id,
     name: album.name,
     subtitle: album.artist?.name,
-    // Use the cover of the first track we know belongs to this album.
-    artwork: albumIdToArtwork.get(album.id),
+    artwork: album.cover,
   }));
 
   const artistItems = data.artists.map((artist) => ({
     type: "artist" as const,
     id: artist.id,
     name: artist.name,
+    artwork: artist.image || undefined,
   }));
 
   const playlistItems = data.playlists.map((playlist) => ({

@@ -63,9 +63,17 @@ function ArtistHero({ artist, tracksCount, albumsCount, onPlayAll, onShuffle, on
         <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
           {/* Artist Avatar */}
           <div className="relative">
-            <div className="w-40 h-40 md:w-52 md:h-52 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-2xl shadow-primary-500/20">
-              <ArtistIcon size={80} className="text-white/80" />
-            </div>
+            {artist.image ? (
+              <img
+                src={artist.image}
+                alt={artist.name}
+                className="w-40 h-40 md:w-52 md:h-52 rounded-full object-cover shadow-2xl shadow-primary-500/20"
+              />
+            ) : (
+              <div className="w-40 h-40 md:w-52 md:h-52 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-2xl shadow-primary-500/20">
+                <ArtistIcon size={80} className="text-white/80" />
+              </div>
+            )}
           </div>
           
           {/* Artist Info */}
@@ -133,6 +141,7 @@ function AlbumsSection({ albums, onPlayAlbum, isLoading }: AlbumsSectionProps) {
             id={album.id}
             name={album.name}
             subtitle={album.artist?.name}
+            artwork={album.cover}
             onPlay={() => onPlayAlbum(album.id)}
           />
         ))}

@@ -7,7 +7,7 @@ interface AuthContextState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (credentials: LoginRequest) => Promise<void>;
+    login: (credentials: LoginRequest) => Promise<User>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
 }

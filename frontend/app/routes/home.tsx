@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/home";
-import { Button } from "~/components/ui";
+import { Button } from "~/components/ui/Button";
 import Dither from "~/components/Dither";
 
 export function meta({ }: Route.MetaArgs) {
@@ -29,54 +29,54 @@ const logoSizes = {
 
 const SonareLogo = ({ size = "md", showText = true, className = "" }: SonareLogoProps) => {
     const { icon, text } = logoSizes[size];
-    
+
     return (
         <div className={`flex items-center gap-3 ${className}`}>
             <div className="relative group">
                 {/* Glow effect */}
                 <div className="absolute inset-0 bg-primary-500/40 rounded-xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
-                
+
                 {/* Logo container */}
-                <div 
+                <div
                     className="relative rounded-xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 flex items-center justify-center shadow-xl shadow-primary-500/25"
                     style={{ width: icon, height: icon }}
                 >
                     {/* Sound wave logo */}
-                    <svg 
-                        viewBox="0 0 48 48" 
-                        fill="none" 
+                    <svg
+                        viewBox="0 0 48 48"
+                        fill="none"
                         className="text-white"
                         style={{ width: icon * 0.6, height: icon * 0.6 }}
                     >
                         {/* Central circle (represents the sound source) */}
                         <circle cx="24" cy="24" r="6" fill="currentColor" />
-                        
+
                         {/* Sound waves emanating outward */}
-                        <path 
-                            d="M24 10C31.732 10 38 16.268 38 24C38 31.732 31.732 38 24 38" 
-                            stroke="currentColor" 
-                            strokeWidth="3" 
+                        <path
+                            d="M24 10C31.732 10 38 16.268 38 24C38 31.732 31.732 38 24 38"
+                            stroke="currentColor"
+                            strokeWidth="3"
                             strokeLinecap="round"
                             opacity="0.9"
                         />
-                        <path 
-                            d="M24 4C35.046 4 44 12.954 44 24C44 35.046 35.046 44 24 44" 
-                            stroke="currentColor" 
-                            strokeWidth="3" 
+                        <path
+                            d="M24 4C35.046 4 44 12.954 44 24C44 35.046 35.046 44 24 44"
+                            stroke="currentColor"
+                            strokeWidth="3"
                             strokeLinecap="round"
                             opacity="0.5"
                         />
-                        <path 
-                            d="M24 16C28.418 16 32 19.582 32 24C32 28.418 28.418 32 24 32" 
-                            stroke="currentColor" 
-                            strokeWidth="3" 
+                        <path
+                            d="M24 16C28.418 16 32 19.582 32 24C32 28.418 28.418 32 24 32"
+                            stroke="currentColor"
+                            strokeWidth="3"
                             strokeLinecap="round"
                             opacity="0.7"
                         />
                     </svg>
                 </div>
             </div>
-            
+
             {showText && (
                 <span className={`font-bold text-surface-50 tracking-tight ${text}`}>
                     Sonare
@@ -122,7 +122,7 @@ const HeroWaveIcon = () => (
     <svg viewBox="0 0 64 64" fill="none" className="w-full h-full text-white">
         {/* Central sound source */}
         <circle cx="32" cy="32" r="8" fill="currentColor" />
-        
+
         {/* Animated-looking waves */}
         <circle cx="32" cy="32" r="16" stroke="currentColor" strokeWidth="2.5" opacity="0.8" fill="none" />
         <circle cx="32" cy="32" r="24" stroke="currentColor" strokeWidth="2" opacity="0.5" fill="none" />
@@ -328,12 +328,12 @@ const FeaturesSection = () => {
         <section className="relative py-28 bg-surface-900">
             {/* Subtle gradient background */}
             <div className="absolute inset-0 bg-gradient-to-b from-surface-900 via-surface-800/20 to-surface-900" />
-            
+
             {/* Decorative glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary-500/5 rounded-full blur-[100px]" />
 
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <SectionHeader 
+                <SectionHeader
                     title="Todo lo que necesitas"
                     subtitle="Una experiencia de música completa diseñada para amantes de la música"
                 />
@@ -394,7 +394,7 @@ const CTASection = () => {
                 <p className="text-lg text-surface-300 mb-10 max-w-xl mx-auto leading-relaxed">
                     Únete a miles de usuarios que ya disfrutan de su música favorita con Sonare. Es gratis para comenzar.
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Link to="/register">
                         <Button size="lg" className="bg-primary-500 text-white hover:bg-primary-400 px-10 py-4 text-base font-semibold shadow-xl shadow-primary-500/30">
@@ -417,8 +417,8 @@ const CTASection = () => {
 // ============================================
 
 const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a 
-        href={href} 
+    <a
+        href={href}
         className="text-surface-400 hover:text-primary-400 transition-colors duration-200"
     >
         {children}

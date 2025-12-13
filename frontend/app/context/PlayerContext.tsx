@@ -20,6 +20,7 @@ interface PlayerContextType {
   
   // Methods
   playTrack: (track: Track, queue?: Track[]) => void;
+  playTracks: (tracks: Track[], startIndex?: number) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
   togglePlay: () => void;
   next: () => void;
@@ -295,6 +296,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     repeatMode,
     shuffle,
     playTrack,
+    playTracks: playQueue,
     playQueue,
     togglePlay,
     next,

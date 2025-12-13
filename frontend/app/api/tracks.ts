@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { API_BASE_URL, DEFAULT_PAGE_SIZE } from "../config";
+import { DEFAULT_PAGE_SIZE } from "../config";
 import type { Track } from "../types";
 
 interface GetTracksParams {
@@ -43,4 +43,14 @@ export async function getTrackThumbnail(id: string): Promise<{ thumbnail: string
 export async function getTrackAudioUrl(id: string): Promise<string> {
   const response = await apiClient<{ url: string }>(`/tracks/${id}/file`);
   return response.url;
+}
+
+// Fetch the thumbnail URL for a track (returns presigned URL from the API)
+export async function fetchTrackThumbnail(id: string): Promise<string | null> {
+  try {
+    const response = await apiClient<{ thumbnail: string | null }>(`/tracks/${id}/thumbnail`);
+    return response.thumbnail;
+  } catch {
+    return null;
+  }
 }

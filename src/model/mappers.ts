@@ -58,6 +58,7 @@ export class PrismaMapper {
     return {
       id: prisma.id,
       name: prisma.name,
+      cover: prisma.cover,
       artistID: prisma.artistID,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
@@ -140,6 +141,7 @@ export class DTOMapper {
     return {
       id: entity.id,
       name: entity.name,
+      cover: entity.cover,
       artistID: entity.artistID,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

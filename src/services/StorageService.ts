@@ -31,6 +31,10 @@ export class StorageService {
       }
   }
 
+  async uploadBuffer(objectName: string, buffer: Buffer, metaData?: Record<string, string>) {
+    return this.minioClient.putObject(this.bucketName, objectName, buffer, buffer.length, metaData);
+  }
+
   async uploadFile(objectName: string, filePath: string, metaData?: Record<string, string>) {
     return this.minioClient.fPutObject(this.bucketName, objectName, filePath, metaData);
   }

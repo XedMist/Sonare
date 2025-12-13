@@ -22,6 +22,7 @@ export interface Album {
     id: string;
     name: string;
     artistID: string;
+    cover?: string;
     createdAt: string;
     updatedAt: string;
     artist?: {
@@ -79,6 +80,10 @@ export interface RegisterRequest {
 export interface AuthTokens {
     accessToken: string;
     refreshToken: string;
+}
+
+export interface AuthResponse extends AuthTokens {
+    user?: User;
 }
 
 // API Response types

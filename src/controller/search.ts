@@ -42,9 +42,17 @@ searchController.get("/", validate("query", SearchQuerySchema), requirePermissio
         }));
     }
 
+    const albums = await Promise.all(result.albums.map(async (album) => {
+        const dto = DTOMapper.toAlbumResponse(album);
+        if (dto.cover) {
+             dto.cover = await storageService.getPresignedUrl(dto.cover);
+        }
+        return dto;
+    }));
+
     return c.json({
         artists: result.artists.map(DTOMapper.toArtistResponse),
-        albums: result.albums.map(DTOMapper.toAlbumResponse),
+        albums: albums,
         tracks: tracks,
         relatedTracks
     });

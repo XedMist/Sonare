@@ -21,11 +21,22 @@ export default class ArtistRepository {
     async getTracksOfArtist(artistId: string, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {
         const tracks = await db.track.findMany({
             where: {
-                album: {
-                    artistID: {
-                        equals: artistId,
-                    }
-                }
+                artistID: artistId,
+            },
+            skip,
+            take,
+            include: {
+                album: true,
+            }
+        });
+        return tracks.map(PrismaMapper.toTrack);
+    }
+
+    async getSinglesOfArtist(artistId: string, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {
+        const tracks = await db.track.findMany({
+            where: {
+                artistID: artistId,
+                albumID: { isSet: false },
             },
             skip,
             take

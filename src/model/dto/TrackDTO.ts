@@ -16,6 +16,7 @@ export const TrackWithAlbumResponseSchema = TrackResponseSchema.extend({
   album: z.object({
     id: z.string(),
     name: z.string(),
+    cover: z.string().nullable().optional(),
     artistID: z.string(),
   }),
 });

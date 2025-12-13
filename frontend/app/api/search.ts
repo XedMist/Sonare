@@ -1,32 +1,17 @@
 import { apiClient } from "./client";
 import type { Artist, Album, Track } from "../types";
 
-export interface SearchResults {
+export interface SearchResponse {
   artists: Artist[];
   albums: Album[];
   tracks: Track[];
   relatedTracks: Record<string, Track[]>;
 }
 
-export type SearchType = "artist" | "album" | "track";
-
-/**
- * Search for artists, albums, and tracks using the unified search endpoint.
- * @param query - Search query (minimum 3 characters)
- * @param types - Array of types to search for (default: all)
- */
-export async function search(
-  query: string,
-  types: SearchType[] = ["artist", "album", "track"]
-): Promise<SearchResults> {
-  if (query.length < 3) {
-    return { artists: [], albums: [], tracks: [], relatedTracks: {} };
-  }
-
+export async function search(query: string, type: string = "artist,album,track"): Promise<SearchResponse> {
   const queryParams = new URLSearchParams({
     q: query,
-    type: types.join(","),
+    type: type,
   });
-
-  return apiClient<SearchResults>(`/search?${queryParams}`);
+  return apiClient<SearchResponse>(`/search?${queryParams}`);
 }

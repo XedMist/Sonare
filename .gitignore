@@ -6,6 +6,11 @@ endpoints.txt
 *.py
 urls.txt
 urls2.txt
+TODO.md
+sync.sh
+spotify_links.txt
+spotify_links.json
+
 
 # Prerequisites
 *.d

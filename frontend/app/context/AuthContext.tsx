@@ -7,24 +7,12 @@ interface AuthContextState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (credentials: LoginRequest) => Promise<void>;
+    login: (credentials: LoginRequest) => Promise<User>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextState | null>(null);
-
-function createFallbackUser(username: string): User {
-    const now = new Date().toISOString();
-    return {
-        id: "",
-        name: username,
-        roleID: "",
-        createdAt: now,
-        updatedAt: now,
-    };
-}
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -41,12 +29,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                // Ideally validate token / fetch user profile
-                const profile = await authApi.getProfile?.();
+                // Fetch user profile using the stored token
+                const profile = await authApi.getProfile();
                 setUser(profile ?? null);
             } catch {
                 // Token invalid → clear & unauthenticate
-                tokenStorage.clear();
+                tokenStorage.clearTokens();
                 setUser(null);
             }
 
@@ -57,15 +45,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // --- LOGIN --------------------------------------------------------------
-    const login = useCallback(async (credentials: LoginRequest) => {
-        const response = await authApi.login(credentials);
-
-        let userData = response.user;
-        if (!userData) {
-            userData = createFallbackUser(credentials.username);
+    const login = useCallback(async (credentials: LoginRequest): Promise<User> => {
+        // Login returns { accessToken, refreshToken } - no user
+        await authApi.login(credentials);
+        
+        // Fetch user profile after successful login
+        let loggedInUser: User;
+        try {
+            const profile = await authApi.getProfile();
+            loggedInUser = profile;
+        } catch {
+            // Profile fetch failed but we're logged in - create minimal user
+            loggedInUser = {
+                id: "",
+                name: credentials.username,
+                roleID: "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
         }
-
-        setUser(userData);
+        
+        setUser(loggedInUser);
+        return loggedInUser;
     }, []);
 
     // --- REGISTER -----------------------------------------------------------
@@ -73,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         async (data: RegisterRequest) => {
             await authApi.register(data);
 
-            // Optional: Automatically log in after registration
+            // Automatically log in after registration
             await login({ username: data.name, password: data.password });
         },
         [login]
@@ -84,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await authApi.logout();
         } finally {
-            tokenStorage.clear();
+            tokenStorage.clearTokens();
             setUser(null);
         }
     }, []);

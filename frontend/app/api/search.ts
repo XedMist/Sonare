@@ -1,7 +1,7 @@
 import { apiClient } from "./client";
 import type { Artist, Album, Track } from "../types";
 
-export interface SearchResponse {
+export interface SearchResults {
   artists: Artist[];
   albums: Album[];
   tracks: Track[];
@@ -26,12 +26,13 @@ export interface UnifiedSearchResponse {
   relatedTracks: Record<string, Track[]>;
 }
 
-export async function search(query: string, type: string = "artist,album,track"): Promise<SearchResponse> {
+export async function search(query: string, type: string = "artist,album,track"): Promise<SearchResults> {
   const queryParams = new URLSearchParams({
     q: query,
     type: type,
   });
-  return apiClient<SearchResponse>(`/search?${queryParams}`);
+
+  return apiClient<SearchResults>(`/search?${queryParams}`);
 }
 
 export async function searchUnified(query: string): Promise<UnifiedSearchResponse> {

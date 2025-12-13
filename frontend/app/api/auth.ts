@@ -1,10 +1,15 @@
-import { publicApiClient, tokenStorage } from "./client";
-import type { AuthResponse, LoginRequest, RegisterRequest, User } from "../types";
+import { publicApiClient, apiClient, tokenStorage } from "./client";
+import type { AuthTokens, LoginRequest, RegisterRequest, User } from "../types";
 
-export async function login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await publicApiClient<AuthResponse>("/auth/login", {
+// Backend returns { accessToken, refreshToken } - no user object
+export async function login(credentials: LoginRequest): Promise<AuthTokens> {
+    // Backend expects { username, password }
+    const response = await publicApiClient<AuthTokens>("/auth/login", {
         method: "POST",
-        body: JSON.stringify(credentials),
+        body: JSON.stringify({
+            username: credentials.username,
+            password: credentials.password,
+        }),
     });
 
     tokenStorage.setAccessToken(response.accessToken);
@@ -21,16 +26,18 @@ export async function register(data: RegisterRequest): Promise<User> {
     return response;
 }
 
-export async function refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const response = await publicApiClient<AuthResponse>("/auth/refresh", {
+export async function getProfile(): Promise<User> {
+    return apiClient<User>("/me");
+}
+
+// Refresh returns only { accessToken } per backend
+export async function refreshToken(refreshTokenValue: string): Promise<{ accessToken: string }> {
+    const response = await publicApiClient<{ accessToken: string }>("/auth/refresh", {
         method: "POST",
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
     });
 
     tokenStorage.setAccessToken(response.accessToken);
-    if (response.refreshToken) {
-        tokenStorage.setRefreshToken(response.refreshToken);
-    }
 
     return response;
 }

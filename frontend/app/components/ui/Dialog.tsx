@@ -80,3 +80,40 @@ interface DialogFooterProps {
 export function DialogFooter({ children }: DialogFooterProps) {
   return <div className="flex justify-end gap-3 mt-6">{children}</div>;
 }
+
+interface DialogTitleProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function DialogTitle({ children, className = "" }: DialogTitleProps) {
+  return (
+    <h3 className={`text-xl font-bold text-surface-100 ${className}`}>
+      {children}
+    </h3>
+  );
+}
+
+interface DialogTriggerProps {
+  children: ReactNode;
+  asChild?: boolean;
+}
+
+export function DialogTrigger({ children }: DialogTriggerProps) {
+  // This is a passthrough component - the Dialog component is controlled
+  // The parent should handle the open state
+  return <>{children}</>;
+}
+
+interface DialogDescriptionProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function DialogDescription({ children, className = "" }: DialogDescriptionProps) {
+  return (
+    <p className={`text-surface-400 text-sm ${className}`}>
+      {children}
+    </p>
+  );
+}

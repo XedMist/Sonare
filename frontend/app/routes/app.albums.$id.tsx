@@ -11,7 +11,6 @@ import {
 } from "../components/shared/StateComponents";
 import { Button, Artwork } from "../components/ui";
 import { PlayIcon, ShuffleIcon, BackIcon, MusicNoteIcon, AlbumIcon } from "../components/icons/Icons";
-import { getTrackThumbnailUrl } from "../api/tracks";
 import type { Album, Track } from "../types";
 
 // ============================================
@@ -58,7 +57,7 @@ interface AlbumHeroProps {
 function AlbumHero({ album, tracks, onPlayAll, onShuffle, onBack }: AlbumHeroProps) {
   const navigate = useNavigate();
   const totalDuration = getTotalDuration(tracks);
-  const firstTrackId = tracks[0]?.id;
+  const firstTrack = tracks[0];
 
   return (
     <div className="relative mb-8">
@@ -80,9 +79,9 @@ function AlbumHero({ album, tracks, onPlayAll, onShuffle, onBack }: AlbumHeroPro
           {/* Album Artwork */}
           <div className="relative group">
             <div className="w-48 h-48 md:w-56 md:h-56 rounded-lg shadow-2xl shadow-black/40 overflow-hidden">
-              {firstTrackId ? (
+              {firstTrack?.thumbnail ? (
                 <Artwork
-                  src={getTrackThumbnailUrl(firstTrackId)}
+                  src={firstTrack.thumbnail}
                   alt={album.name}
                   size="full"
                   rounded="lg"

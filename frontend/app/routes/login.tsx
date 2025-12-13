@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { Button, TextField } from "../components/ui";
@@ -61,13 +61,20 @@ const SonareLogo = () => (
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Redirect to app when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/app", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -76,7 +83,7 @@ export default function LoginPage() {
 
     try {
       await login({ username, password });
-      navigate("/app");
+      // Navigation will happen via useEffect when isAuthenticated becomes true
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al iniciar sesión. Por favor, inténtalo de nuevo.");
     } finally {

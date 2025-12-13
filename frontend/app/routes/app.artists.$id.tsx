@@ -16,7 +16,6 @@ import {
 } from "../components/shared/StateComponents";
 import { Button, Artwork } from "../components/ui";
 import { PlayIcon, ShuffleIcon, BackIcon, ArtistIcon, MusicNoteIcon } from "../components/icons/Icons";
-import { getTrackThumbnailUrl } from "../api/tracks";
 import type { Artist, Album, Track } from "../types";
 
 // ============================================
@@ -134,7 +133,6 @@ function AlbumsSection({ albums, onPlayAlbum, isLoading }: AlbumsSectionProps) {
             id={album.id}
             name={album.name}
             subtitle={album.artist?.name}
-            artwork={getTrackThumbnailUrl(album.id)}
             onPlay={() => onPlayAlbum(album.id)}
           />
         ))}

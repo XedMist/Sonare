@@ -31,7 +31,6 @@ import {
   MoreIcon,
   PlusIcon
 } from "../components/icons/Icons";
-import { getTrackThumbnailUrl } from "../api/tracks";
 import type { Playlist, Track } from "../types";
 
 // ============================================
@@ -209,7 +208,7 @@ function PlaylistHero({
   onDelete 
 }: PlaylistHeroProps) {
   const totalDuration = getTotalDuration(tracks);
-  const firstTrackId = tracks[0]?.id;
+  const firstTrack = tracks[0];
 
   return (
     <div className="relative mb-8">
@@ -257,9 +256,9 @@ function PlaylistHero({
           {/* Playlist Artwork */}
           <div className="relative">
             <div className="w-48 h-48 md:w-56 md:h-56 rounded-lg shadow-2xl shadow-black/40 overflow-hidden bg-gradient-to-br from-primary-500 to-primary-700">
-              {firstTrackId ? (
+              {firstTrack?.thumbnail ? (
                 <img
-                  src={getTrackThumbnailUrl(firstTrackId)}
+                  src={firstTrack.thumbnail}
                   alt={playlist.name}
                   className="w-full h-full object-cover"
                 />

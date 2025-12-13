@@ -3,7 +3,6 @@ import { Link } from "react-router";
 import { Artwork } from "../ui/Avatar";
 import { PlayIcon, HeartIcon, MoreIcon } from "../icons/Icons";
 import { DropdownMenu, DropdownItem, DropdownSeparator } from "../ui";
-import { getTrackThumbnailUrl } from "../../api/tracks";
 import type { Track } from "../../types";
 
 interface TrackRowProps {
@@ -41,7 +40,7 @@ export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwo
 
       {showArtwork && (
         <Artwork 
-          src={getTrackThumbnailUrl(track.id)} 
+          src={track.thumbnail} 
           alt={track.name} 
           size="sm" 
           rounded="sm"
@@ -52,7 +51,7 @@ export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwo
       <div className="flex-1 min-w-0">
         <p className="font-medium text-surface-100 truncate">{track.name}</p>
         <p className="text-sm text-surface-400 truncate">
-          {track.album?.name || "Unknown Album"}
+          {track.album?.name || (track.albumID ? "Album" : "Unknown Album")}
         </p>
       </div>
 

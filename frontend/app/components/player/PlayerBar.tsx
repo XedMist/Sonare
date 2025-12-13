@@ -1,7 +1,6 @@
 import { usePlayer } from "../../context/PlayerContext";
 import { IconButton, Badge, Slider } from "../ui";
 import { Artwork } from "../ui/Avatar";
-import { getTrackThumbnailUrl } from "../../api/tracks";
 import {
   PlayIcon,
   PauseIcon,
@@ -53,7 +52,7 @@ export function PlayerBar() {
       <div className="h-full max-w-screen-2xl mx-auto px-4 flex items-center gap-4">
         <div className="flex items-center gap-3 w-[30%] min-w-0">
           <Artwork
-            src={getTrackThumbnailUrl(currentTrack.id)}
+            src={currentTrack.thumbnail}
             alt={currentTrack.name}
             size="md"
             rounded="sm"

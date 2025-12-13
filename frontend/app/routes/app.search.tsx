@@ -16,7 +16,6 @@ import {
 } from "../components/shared/StateComponents";
 import { Input } from "../components/ui";
 import { SearchIcon, CloseIcon } from "../components/icons/Icons";
-import { getTrackThumbnailUrl } from "../api/tracks";
 import type { Artist, Album, Track } from "../types";
 
 // ============================================
@@ -131,7 +130,6 @@ function AlbumsSection({ albums, onPlayAlbum }: AlbumsSectionProps) {
             id={album.id}
             name={album.name}
             subtitle={album.artist?.name}
-            artwork={getTrackThumbnailUrl(album.id)}
             onPlay={() => onPlayAlbum(album.id)}
           />
         ))}

@@ -7,7 +7,7 @@ interface AuthContextState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (credentials: LoginRequest) => Promise<void>;
+    login: (credentials: LoginRequest) => Promise<User>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
 }
@@ -45,24 +45,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // --- LOGIN --------------------------------------------------------------
-    const login = useCallback(async (credentials: LoginRequest) => {
+    const login = useCallback(async (credentials: LoginRequest): Promise<User> => {
         // Login returns { accessToken, refreshToken } - no user
         await authApi.login(credentials);
         
         // Fetch user profile after successful login
+        let loggedInUser: User;
         try {
             const profile = await authApi.getProfile();
-            setUser(profile);
+            loggedInUser = profile;
         } catch {
             // Profile fetch failed but we're logged in - create minimal user
-            setUser({
+            loggedInUser = {
                 id: "",
                 name: credentials.username,
                 roleID: "",
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-            });
+            };
         }
+        
+        setUser(loggedInUser);
+        return loggedInUser;
     }, []);
 
     // --- REGISTER -----------------------------------------------------------

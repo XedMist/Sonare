@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 import { DEFAULT_PAGE_SIZE } from "../config";
-import type { Playlist, Track } from "../types";
+import type { Playlist, Track, PaginatedResponse } from "../types";
 
 interface GetPlaylistsParams {
   page?: number;
@@ -10,6 +10,10 @@ interface GetPlaylistsParams {
 // Simple response wrapper to maintain compatibility with components
 interface ListResponse<T> {
   data: T[];
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
 }
 
 export async function getPlaylists(params: GetPlaylistsParams = {}): Promise<ListResponse<Playlist>> {
@@ -19,9 +23,14 @@ export async function getPlaylists(params: GetPlaylistsParams = {}): Promise<Lis
     limit: String(limit),
   });
   
-  // Backend returns array directly
-  const data = await apiClient<Playlist[]>(`/playlists?${queryParams}`);
-  return { data };
+  const response = await apiClient<PaginatedResponse<Playlist>>(`/playlists?${queryParams}`);
+  return {
+    data: response.data ?? [],
+    page: response.page,
+    limit: response.limit,
+    total: response.total,
+    totalPages: response.totalPages,
+  };
 }
 
 export async function getPlaylist(id: string): Promise<Playlist> {

@@ -16,18 +16,23 @@ export class StorageService {
     this.bucketName = config.minio.bucketName;
   }
 
-  async initialize() {
+    async initialize(options?: { failOnError?: boolean }) {
+      const failOnError = options?.failOnError ?? false;
       try {
         const exists = await this.minioClient.bucketExists(this.bucketName);
         if (!exists) {
-            // Note: makeBucket might fail if the user doesn't have permissions to create buckets
-            // or if the region is required.
-            await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
-            console.log(`Bucket ${this.bucketName} created successfully.`);
+          // Note: makeBucket might fail if the user doesn't have permissions to create buckets
+          // or if the region is required.
+          await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
+          console.log(`Bucket ${this.bucketName} created successfully.`);
         }
+        console.log(`connect to ${config.minio.endPoint}`);
       } catch (err) {
           console.error("Error checking/creating bucket:", err);
-          // Don't throw here, maybe the bucket exists but we don't have ListBucket permission
+        if (failOnError) {
+          throw err instanceof Error ? err : new Error('Storage initialization failed');
+        }
+        // Don't throw here, maybe the bucket exists but we don't have ListBucket permission
       }
   }
 

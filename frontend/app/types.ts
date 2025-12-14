@@ -4,6 +4,13 @@
 export interface User {
     id: string;
     name: string;
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    bio?: string | null;
+    country?: string | null;
+    birthdate?: string | null;
+    avatarUrl?: string | null;
     roleID: string;
     createdAt: string;
     updatedAt: string;
@@ -47,7 +54,7 @@ export interface Track {
     // Spotify metadata
     popularity?: number | null;
     spotifyId?: string | null;
-    albumID: string;
+    albumID?: string | null;
     artistID?: string;
     createdAt: string;
     updatedAt: string;
@@ -55,6 +62,7 @@ export interface Track {
         id: string;
         name: string;
         artistID: string;
+        cover?: string | null;
     };
     // All artists on this track
     artists?: TrackArtist[];
@@ -98,6 +106,21 @@ export interface LoginRequest {
 export interface RegisterRequest {
     name: string;
     password: string;
+    displayName: string;
+    firstName: string;
+    lastName: string;
+    bio?: string;
+    country?: string;
+    birthdate?: string;
+}
+
+export interface UserProfileUpdateRequest {
+    displayName?: string;
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+    country?: string;
+    birthdate?: string;
 }
 
 export interface AuthTokens {

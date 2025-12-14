@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 import * as playlistsApi from "../../api/playlists";
-import { ScrollArea, DropdownMenu, DropdownItem, DropdownSeparator } from "../ui";
+import { ScrollArea, DropdownMenu, DropdownItem, DropdownSeparator, Avatar } from "../ui";
 import {
   HomeIcon,
   SearchIcon,
@@ -152,32 +152,52 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
         </div>
 
         <div className="p-3 border-t border-surface-800">
-          <DropdownMenu
-            align="left"
-            trigger={
-              <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-surface-800 transition-colors group">
-                <div className="w-8 h-8 rounded-full bg-surface-600 flex items-center justify-center text-surface-300 text-sm font-medium">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-medium text-surface-100 truncate">
-                    {user?.name || "User"}
-                  </p>
-                </div>
-                <MoreIcon size={18} className="text-surface-400 group-hover:text-surface-100" />
-              </button>
-            }
-          >
-            <DropdownItem onClick={() => navigate("/app/profile")}>
-              <UserIcon size={18} />
-              Account
-            </DropdownItem>
-            <DropdownSeparator />
-            <DropdownItem onClick={handleLogout}>
-              <LogoutIcon size={18} />
-              Log out
-            </DropdownItem>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                navigate("/app/profile");
+                onClose?.();
+              }}
+              className="flex-1 flex items-center gap-3 p-2 rounded-lg hover:bg-surface-800 transition-colors text-left group"
+            >
+              <Avatar
+                src={user?.avatarUrl ?? undefined}
+                alt={user?.displayName || user?.name || "User"}
+                size="sm"
+                fallback={user?.name?.charAt(0).toUpperCase() || "U"}
+                className="ring-1 ring-surface-700"
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-surface-100 truncate">
+                  {user?.displayName || user?.name || "User"}
+                </p>
+                {user?.name && (
+                  <p className="text-xs text-surface-500 truncate">@{user.name}</p>
+                )}
+              </div>
+            </button>
+
+            <DropdownMenu
+              trigger={
+                <button
+                  aria-label="Abrir acciones de cuenta"
+                  className="p-2 rounded-full hover:bg-surface-800 text-surface-400 hover:text-surface-100 transition-colors"
+                >
+                  <MoreIcon size={18} />
+                </button>
+              }
+            >
+              <DropdownItem onClick={() => navigate("/app/profile") }>
+                <UserIcon size={18} />
+                Perfil
+              </DropdownItem>
+              <DropdownSeparator />
+              <DropdownItem onClick={handleLogout}>
+                <LogoutIcon size={18} />
+                Log out
+              </DropdownItem>
+            </DropdownMenu>
+          </div>
         </div>
       </aside>
     </>

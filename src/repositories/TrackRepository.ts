@@ -4,16 +4,19 @@ import { PrismaMapper } from "../model/mappers.ts";
 
 export default class TrackRepository {
     async findAll({ name }: Pick<Track, "name"> | { name: undefined }, album: Pick<Album, "id"> | { id: undefined }, artist: Pick<Artist, "id"> | { id: undefined }, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {
+        const where = {
+            ...(name ? { name } : {}),
+            ...(album.id ? { albumID: album.id } : {}),
+            ...(artist.id ? { album: { artistID: artist.id } } : {}),
+        };
+
         const tracks = await db.track.findMany({
-            where: {
-                name,
-                albumID: album.id,
-                album: {
-                    artistID: artist.id
-                }
-            },
+            where,
             orderBy: {
                 popularity: 'desc'
+            },
+            include: {
+                album: true,
             },
             skip, take
         });
@@ -24,7 +27,10 @@ export default class TrackRepository {
         const track = await db.track.findUnique({
             where: {
                 id,
-            }
+            },
+            include: {
+                album: true,
+            },
         });
         return track ? PrismaMapper.toTrack(track) : null;
     }

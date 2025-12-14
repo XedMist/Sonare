@@ -22,6 +22,14 @@ export interface Role {
 export interface User {
   id: string;
   name: string;
+  displayName?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  bio?: string | null;
+  country?: string | null;
+  birthdate?: Date | null;
+  avatarObjectKey?: string | null;
+  avatarUrl?: string | null;
   password: string;
   roleID: string;
   role?: Role;
@@ -62,7 +70,7 @@ export interface Track {
   // Spotify metadata
   popularity?: number | null;
   spotifyId?: string | null;
-  albumID: string;
+  albumID?: string | null;
   album?: Album;
   artistID?: string;
   artist?: Artist;

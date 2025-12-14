@@ -26,6 +26,8 @@ function formatDuration(seconds: number): string {
 
 // Memoized TrackRow to prevent unnecessary re-renders in lists
 export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwork = true, actions }: TrackRowProps) {
+  const artworkSrc = track.thumbnail || track.album?.cover || undefined;
+
   return (
     <div
       className="track-row group"
@@ -40,7 +42,7 @@ export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwo
 
       {showArtwork && (
         <Artwork 
-          src={track.thumbnail} 
+          src={artworkSrc} 
           alt={track.name} 
           size="sm" 
           rounded="sm"
@@ -50,9 +52,11 @@ export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwo
 
       <div className="flex-1 min-w-0">
         <p className="font-medium text-surface-100 truncate">{track.name}</p>
-        <p className="text-sm text-surface-400 truncate">
-          {track.album?.name || (track.albumID ? "Album" : "Unknown Album")}
-        </p>
+        {track.album?.name && (
+          <p className="text-sm text-surface-400 truncate">
+            {track.album.name}
+          </p>
+        )}
       </div>
 
       <button

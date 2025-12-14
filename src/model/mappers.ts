@@ -38,10 +38,18 @@ export class PrismaMapper {
     return {
       id: prisma.id,
       name: prisma.name,
+      displayName: prisma.displayName ?? null,
+      firstName: prisma.firstName ?? null,
+      lastName: prisma.lastName ?? null,
+      bio: prisma.bio ?? null,
+      country: prisma.country ?? null,
+      birthdate: prisma.birthdate ?? null,
+      avatarObjectKey: prisma.avatarObjectKey ?? null,
       password: prisma.password,
       roleID: prisma.roleID,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
+      favoritosID: prisma.favoritosID ?? undefined,
     };
   }
 
@@ -69,7 +77,7 @@ export class PrismaMapper {
     };
   }
 
-  static toTrack(prisma: PrismaTrack): Track {
+  static toTrack(prisma: PrismaTrack & { album?: PrismaAlbum | null }): Track {
     return {
       id: prisma.id,
       path: prisma.path,
@@ -78,7 +86,8 @@ export class PrismaMapper {
       thumbnail: prisma.thumbnail,
       popularity: prisma.popularity,
       spotifyId: prisma.spotifyId,
-      albumID: prisma.albumID || '',
+      albumID: prisma.albumID ?? undefined,
+      album: prisma.album ? PrismaMapper.toAlbum(prisma.album) : undefined,
       artistID: prisma.artistID,
       createdAt: prisma.createdAt,
       updatedAt: prisma.updatedAt,
@@ -129,6 +138,13 @@ export class DTOMapper {
     return {
       id: entity.id,
       name: entity.name,
+      displayName: entity.displayName ?? null,
+      firstName: entity.firstName ?? null,
+      lastName: entity.lastName ?? null,
+      bio: entity.bio ?? null,
+      country: entity.country ?? null,
+      birthdate: entity.birthdate ?? null,
+      avatarUrl: entity.avatarUrl ?? null,
       roleID: entity.roleID,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
@@ -165,9 +181,17 @@ export class DTOMapper {
       name: entity.name,
       duration: entity.duration,
       thumbnail: entity.thumbnail,
-      albumID: entity.albumID,
+      albumID: entity.albumID ?? undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      album: entity.album
+        ? {
+            id: entity.album.id,
+            name: entity.album.name,
+            cover: entity.album.cover ?? undefined,
+            artistID: entity.album.artistID,
+          }
+        : undefined,
     };
   }
 

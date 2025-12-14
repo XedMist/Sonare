@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface AvatarProps {
   src?: string | null;
   alt: string;
@@ -16,13 +18,16 @@ export function Avatar({ src, alt, size = "md", className = "", fallback, loadin
   };
 
   const initials = fallback || alt.charAt(0).toUpperCase();
+  const [hasError, setHasError] = useState(false);
+  const shouldRenderImage = Boolean(src) && !hasError;
 
-  if (src) {
+  if (shouldRenderImage) {
     return (
       <img
         src={src}
         alt={alt}
         loading={loading}
+        onError={() => setHasError(true)}
         className={`${sizeStyles[size]} rounded-full object-cover ${className}`}
       />
     );
@@ -69,12 +74,16 @@ export function Artwork({
     full: "rounded-full",
   };
 
-  if (src) {
+  const [hasError, setHasError] = useState(false);
+  const shouldRenderImage = Boolean(src) && !hasError;
+
+  if (shouldRenderImage) {
     return (
       <img
         src={src}
         alt={alt}
         loading={loading}
+        onError={() => setHasError(true)}
         className={`${sizeStyles[size]} ${roundedStyles[rounded]} object-cover ${className}`}
       />
     );

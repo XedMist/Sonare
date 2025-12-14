@@ -16,6 +16,9 @@ import swaggerMiddleware from "@/middleware/swagger.ts";
 import { authMiddleware } from "@/middleware/AuthMiddleware.ts";
 import { requestContext } from '@/middleware/requestContext.ts'
 import { errorHandler } from "@/middleware/errorHandler.ts";
+import { StorageService } from "@/services/StorageService.ts";
+
+await new StorageService().initialize({ failOnError: true });
 
 const app = new Hono();
 

@@ -335,12 +335,14 @@ export default function AppHomePage() {
       title: album.name,
       subtitle: album.artist?.name,
       type: "album" as const,
+      artwork: album.cover,
     })),
     ...data.playlists.slice(0, 3).map((playlist) => ({
       id: playlist.id,
       title: playlist.name,
       subtitle: "Playlist",
       type: "playlist" as const,
+      artwork: playlist.tracks?.[0]?.thumbnail,
     })),
   ];
 
@@ -358,6 +360,7 @@ export default function AppHomePage() {
                 key={`${item.type}-${item.id}`}
                 title={item.title}
                 subtitle={item.subtitle}
+                artwork={item.artwork}
                 onPlay={() => item.type === "album" ? handlePlayAlbum(item.id) : handlePlayPlaylist(item.id)}
               />
             ))}

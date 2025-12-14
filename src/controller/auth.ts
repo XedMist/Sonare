@@ -25,7 +25,7 @@ authController.post("/login", validate("json", UserLoginSchema), async (c) => {
 
 authController.post("/register", validate("json", UserCreateSchema), async (c) => {
     const body = c.req.valid("json");
-    const user = await userService.create(body.name, body.password);
+    const user = await userService.create(body);
     return c.json(DTOMapper.toUserResponse(user), 201);
 });
 

@@ -355,6 +355,18 @@ export const playlistsApi = {
         await fetchApi(`/playlists/${id}`, { method: 'DELETE' });
     },
 
+    getTracks: async (id: string): Promise<Track[]> => {
+        return fetchApi<Track[]>(`/playlists/${id}/tracks`);
+    },
+
+    getWithTracks: async (id: string): Promise<{ playlist: Playlist; tracks: Track[] }> => {
+        const [playlist, tracks] = await Promise.all([
+            playlistsApi.get(id),
+            playlistsApi.getTracks(id),
+        ]);
+        return { playlist, tracks };
+    },
+
     addTrack: async (playlistId: string, trackID: string): Promise<Playlist> => {
         return fetchApi<Playlist>(`/playlists/${playlistId}/tracks`, {
             method: 'PUT',

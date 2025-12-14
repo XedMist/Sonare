@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router";
 import { animate } from "animejs";
-import { playlistsApi, type Playlist, type Track } from "~/lib/api";
+import { playlistsApi, meApi, type Playlist, type Track } from "~/lib/api";
 import { usePlayer } from "~/context/PlayerContext";
 import { TrackCard } from "~/components/cards";
 import { PageLoader, EmptyState } from "~/components/LoadingStates";
@@ -33,6 +33,7 @@ export default function PlaylistPage() {
     const player = usePlayer();
 
     const [playlist, setPlaylist] = useState<Playlist | null>(null);
+    const [tracks, setTracks] = useState<Track[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -46,8 +47,9 @@ export default function PlaylistPage() {
 
             setIsLoading(true);
             try {
-                const data = await playlistsApi.get(id);
+                const { playlist: data, tracks: trackData } = await playlistsApi.getWithTracks(id);
                 setPlaylist(data);
+                setTracks(trackData);
             } catch (error) {
                 console.error("Error fetching playlist:", error);
             } finally {
@@ -79,20 +81,20 @@ export default function PlaylistPage() {
     }, [isLoading]);
 
     const handlePlayTrack = (track: Track, index: number) => {
-        if (playlist?.tracks) {
-            player.playTracks(playlist.tracks, index);
+        if (tracks.length > 0) {
+            player.playTracks(tracks, index);
         }
     };
 
     const handlePlayAll = () => {
-        if (playlist?.tracks && playlist.tracks.length > 0) {
-            player.playTracks(playlist.tracks);
+        if (tracks.length > 0) {
+            player.playTracks(tracks);
         }
     };
 
     const handleShufflePlay = () => {
-        if (playlist?.tracks && playlist.tracks.length > 0) {
-            const shuffled = [...playlist.tracks].sort(() => Math.random() - 0.5);
+        if (tracks.length > 0) {
+            const shuffled = [...tracks].sort(() => Math.random() - 0.5);
             player.playTracks(shuffled);
         }
     };
@@ -101,8 +103,8 @@ export default function PlaylistPage() {
         if (!playlist) return;
 
         try {
-            const updatedPlaylist = await playlistsApi.removeTrack(playlist.id, track.id);
-            setPlaylist(updatedPlaylist);
+            await playlistsApi.removeTrack(playlist.id, track.id);
+            setTracks(prev => prev.filter(t => t.id !== track.id));
         } catch (error) {
             console.error("Error removing track:", error);
         }
@@ -158,8 +160,6 @@ export default function PlaylistPage() {
             />
         );
     }
-
-    const tracks = playlist.tracks || [];
 
     return (
         <div className="space-y-8 -m-8">

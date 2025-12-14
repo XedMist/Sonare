@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { Button, TextField } from "../components/ui";
@@ -61,7 +61,7 @@ const SonareLogo = () => (
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-    const { register } = useAuth();
+    const { register, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
@@ -69,6 +69,13 @@ export default function RegisterPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Redirect to app if already authenticated
+    useEffect(() => {
+        if (!isAuthLoading && isAuthenticated) {
+            navigate("/app", { replace: true });
+        }
+    }, [isAuthenticated, isAuthLoading, navigate]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();

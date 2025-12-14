@@ -96,12 +96,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           aria-expanded={isUserMenuOpen}
         >
           <Avatar
-            alt={user?.name || "User"}
+            src={user?.avatarUrl ?? undefined}
+            alt={user?.displayName || user?.name || "User"}
             size="sm"
-            fallback={user?.name?.charAt(0) || "U"}
+            fallback={user?.displayName?.charAt(0) || user?.name?.charAt(0) || "U"}
           />
-          <span className="hidden sm:block text-sm font-medium text-surface-100 max-w-[100px] truncate">
-            {user?.name || "User"}
+          <span className="hidden sm:block text-sm font-medium text-surface-100 max-w-[120px] truncate">
+            {user?.displayName || user?.name || "User"}
           </span>
         </button>
 
@@ -110,9 +111,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           <div className="absolute right-0 mt-2 w-48 py-2 bg-surface-700 rounded-lg shadow-xl border border-surface-600 animate-fade-in">
             <div className="px-4 py-2 border-b border-surface-600">
               <p className="text-sm font-medium text-surface-100 truncate">
-                {user?.name || "User"}
+                {user?.displayName || user?.name || "User"}
               </p>
-              <p className="text-xs text-surface-400">View profile</p>
+              {user?.name && (
+                <p className="text-xs text-surface-400">@{user.name}</p>
+              )}
             </div>
 
             <nav className="py-1">
@@ -124,7 +127,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-surface-300 hover:text-surface-100 hover:bg-surface-600 transition-colors"
               >
                 <UserIcon size={18} />
-                Profile
+                Perfil
               </button>
 
               <button

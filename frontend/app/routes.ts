@@ -16,6 +16,7 @@ export default [
         // Nav 
         route("search", "routes/app.search.tsx"),
         route("library", "routes/app.library.tsx"),
+        route("profile", "routes/app.profile.tsx"),
 
         // Detail routes
         route("artists/:id", "routes/app.artists.$id.tsx"),

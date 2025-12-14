@@ -9,5 +9,6 @@ export { DropdownMenu, DropdownItem, DropdownSeparator } from "./DropdownMenu";
 export { Slider } from "./Slider";
 export { Tabs, Tab, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export { Input } from "./Input";
+export { SelectField } from "./SelectField";
 export { ScrollArea } from "./ScrollArea";
 export { Badge } from "./badge";

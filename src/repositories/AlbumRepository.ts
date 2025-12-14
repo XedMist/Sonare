@@ -4,7 +4,13 @@ import { PrismaMapper } from "../model/mappers.ts";
 
 export default class AlbumRepository {
     async findAll({ take, skip }: { skip?: number; take?: number }): Promise<Album[]> {
-        const albums = await db.album.findMany({ skip, take });
+        const albums = await db.album.findMany({
+            orderBy: {
+                popularity: 'desc'
+            },
+            skip,
+            take
+        });
         return albums.map(PrismaMapper.toAlbum);
     }
 
@@ -18,6 +24,9 @@ export default class AlbumRepository {
     async getTracksOfAlbum({ id }: Pick<Album, 'id'>, { take, skip }: { skip?: number, take?: number }): Promise<Track[]> {
         const tracks = await db.track.findMany({
             where: { albumID: id },
+            orderBy: {
+                popularity: 'desc'
+            },
             skip,
             take,
         });

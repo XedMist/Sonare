@@ -84,13 +84,16 @@ export async function apiClient<T>(
     const url = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
 
     const makeRequest = async (token: string | null): Promise<Response> => {
-        const headers: HeadersInit = {
-            "Content-Type": "application/json",
-            ...options.headers,
-        };
+        const headers = new Headers(options.headers as HeadersInit | undefined);
+        const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+        const isBlob = typeof Blob !== "undefined" && options.body instanceof Blob;
+
+        if (!isFormData && !isBlob && !headers.has("Content-Type")) {
+            headers.set("Content-Type", "application/json");
+        }
 
         if (token) {
-            (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+            headers.set("Authorization", `Bearer ${token}`);
         }
 
         return fetch(url, {
@@ -151,12 +154,17 @@ export async function publicApiClient<T>(
 ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
 
+    const headers = new Headers(options.headers as HeadersInit | undefined);
+    const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+    const isBlob = typeof Blob !== "undefined" && options.body instanceof Blob;
+
+    if (!isFormData && !isBlob && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+    }
+
     const response = await fetch(url, {
         ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...options.headers,
-        },
+        headers,
     });
 
     if (!response.ok) {

@@ -4,6 +4,13 @@
 export interface User {
     id: string;
     name: string;
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    bio?: string | null;
+    country?: string | null;
+    birthdate?: string | null;
+    avatarUrl?: string | null;
     roleID: string;
     createdAt: string;
     updatedAt: string;
@@ -13,6 +20,10 @@ export interface User {
 export interface Artist {
     id: string;
     name: string;
+    // Spotify metadata
+    image?: string | null;
+    popularity?: number | null;
+    genres?: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -22,6 +33,9 @@ export interface Album {
     id: string;
     name: string;
     artistID: string;
+    cover?: string;
+    // Spotify metadata
+    popularity?: number | null;
     createdAt: string;
     updatedAt: string;
     artist?: {
@@ -37,14 +51,32 @@ export interface Track {
     name: string;
     duration: number;
     thumbnail: string;
-    albumID: string;
+    // Spotify metadata
+    popularity?: number | null;
+    spotifyId?: string | null;
+    albumID?: string | null;
+    artistID?: string;
     createdAt: string;
     updatedAt: string;
     album?: {
         id: string;
         name: string;
         artistID: string;
+        cover?: string | null;
     };
+    // All artists on this track
+    artists?: TrackArtist[];
+}
+
+// Track-Artist relationship
+export type ArtistRole = 'PRIMARY' | 'FEATURED';
+
+export interface TrackArtist {
+    id: string;
+    trackId: string;
+    artistId: string;
+    role: ArtistRole;
+    artist?: Artist;
 }
 
 // Playlist types
@@ -74,6 +106,21 @@ export interface LoginRequest {
 export interface RegisterRequest {
     name: string;
     password: string;
+    displayName: string;
+    firstName: string;
+    lastName: string;
+    bio?: string;
+    country?: string;
+    birthdate?: string;
+}
+
+export interface UserProfileUpdateRequest {
+    displayName?: string;
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+    country?: string;
+    birthdate?: string;
 }
 
 export interface AuthTokens {

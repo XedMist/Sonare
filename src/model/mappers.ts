@@ -38,10 +38,18 @@ export class PrismaMapper {
         return {
             id: prisma.id,
             name: prisma.name,
+            displayName: prisma.displayName ?? null,
+            firstName: prisma.firstName ?? null,
+            lastName: prisma.lastName ?? null,
+            bio: prisma.bio ?? null,
+            country: prisma.country ?? null,
+            birthdate: prisma.birthdate ?? null,
+            avatarObjectKey: prisma.avatarObjectKey ?? null,
             password: prisma.password,
             roleID: prisma.roleID,
             createdAt: prisma.createdAt,
             updatedAt: prisma.updatedAt,
+            favoritosID: prisma.favoritosID ?? undefined,
         };
     }
 
@@ -49,6 +57,9 @@ export class PrismaMapper {
         return {
             id: prisma.id,
             name: prisma.name,
+            image: prisma.image,
+            popularity: prisma.popularity,
+            genres: prisma.genres,
             createdAt: prisma.createdAt,
             updatedAt: prisma.updatedAt,
         };
@@ -59,20 +70,25 @@ export class PrismaMapper {
             id: prisma.id,
             name: prisma.name,
             cover: prisma.cover,
+            popularity: prisma.popularity,
             artistID: prisma.artistID,
             createdAt: prisma.createdAt,
             updatedAt: prisma.updatedAt,
         };
     }
 
-    static toTrack(prisma: PrismaTrack): Track {
+    static toTrack(prisma: PrismaTrack & { album?: PrismaAlbum | null }): Track {
         return {
             id: prisma.id,
             path: prisma.path,
             name: prisma.name,
             duration: prisma.duration,
             thumbnail: prisma.thumbnail,
-            albumID: prisma.albumID || '',
+            popularity: prisma.popularity,
+            spotifyId: prisma.spotifyId,
+            albumID: prisma.albumID ?? undefined,
+            album: prisma.album ? PrismaMapper.toAlbum(prisma.album) : undefined,
+            artistID: prisma.artistID,
             createdAt: prisma.createdAt,
             updatedAt: prisma.updatedAt,
         };
@@ -122,16 +138,25 @@ export class DTOMapper {
         return {
             id: entity.id,
             name: entity.name,
+            displayName: entity.displayName ?? null,
+            firstName: entity.firstName ?? null,
+            lastName: entity.lastName ?? null,
+            bio: entity.bio ?? null,
+            country: entity.country ?? null,
+            birthdate: entity.birthdate ?? null,
+            avatarUrl: entity.avatarUrl ?? null,
             roleID: entity.roleID,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
     }
-
     static toArtistResponse(entity: Artist): ArtistResponse {
         return {
             id: entity.id,
             name: entity.name,
+            image: entity.image,
+            popularity: entity.popularity,
+            genres: entity.genres,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
@@ -155,12 +180,19 @@ export class DTOMapper {
             name: entity.name,
             duration: entity.duration,
             thumbnail: entity.thumbnail,
-            albumID: entity.albumID,
+            albumID: entity.albumID ?? undefined,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
+            album: entity.album
+                ? {
+                    id: entity.album.id,
+                    name: entity.album.name,
+                    cover: entity.album.cover ?? undefined,
+                    artistID: entity.album.artistID,
+                }
+                : undefined,
         };
     }
-
     static toPlaylistResponse(entity: Playlist): PlaylistResponse {
         return {
             id: entity.id,

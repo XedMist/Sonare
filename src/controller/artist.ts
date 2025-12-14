@@ -19,7 +19,16 @@ const storageService = new StorageService();
 artistController.get("/", validate("query", PaginationQuerySchema), requirePermission(Capability.READ, "artists"), async (c) => {
     const { page, limit } = c.req.valid('query')
     const artists = await service.findAll({ skip: page, take: limit });
-    return c.json(artists.map(DTOMapper.toArtistResponse));
+    
+    const response = await Promise.all(artists.map(async (artist) => {
+        const dto = DTOMapper.toArtistResponse(artist);
+        if (dto.image) {
+            dto.image = await storageService.getPresignedUrl(dto.image);
+        }
+        return dto;
+    }));
+    
+    return c.json(response);
 });
 
 artistController.post("/", validate("json", ArtistCreateSchema), requirePermission(Capability.CREATE, "artists"), async (c) => {
@@ -31,7 +40,11 @@ artistController.post("/", validate("json", ArtistCreateSchema), requirePermissi
 artistController.get("/:id", requirePermission(Capability.READ, "artists"), async (c) => {
     const { id } = c.req.param();
     const artist = await service.findByID(id);
-    return c.json(DTOMapper.toArtistResponse(artist));
+    const dto = DTOMapper.toArtistResponse(artist);
+    if (dto.image) {
+        dto.image = await storageService.getPresignedUrl(dto.image);
+    }
+    return c.json(dto);
 });
 
 artistController.delete("/:id", requirePermission(Capability.DELETE, "artists"), async (c) => {

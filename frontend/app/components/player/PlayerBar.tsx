@@ -39,6 +39,8 @@ export function PlayerBar() {
     toggleShuffle,
   } = usePlayer();
 
+  const artworkSrc = currentTrack?.thumbnail || currentTrack?.album?.cover || undefined;
+
   if (!currentTrack) {
     return (
       <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900/95 backdrop-blur-xl border-t border-surface-700/60 flex items-center justify-center">
@@ -48,11 +50,11 @@ export function PlayerBar() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900/95 backdrop-blur-xl border-t border-surface-700/60 z-40">
+    <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-900/95 backdrop-blur-xl border-t border-surface-700/60 z-[60]">
       <div className="h-full max-w-screen-2xl mx-auto px-4 flex items-center gap-4">
         <div className="flex items-center gap-3 w-[30%] min-w-0">
           <Artwork
-            src={currentTrack.thumbnail}
+            src={artworkSrc}
             alt={currentTrack.name}
             size="md"
             rounded="sm"
@@ -62,9 +64,11 @@ export function PlayerBar() {
             <p className="text-sm font-medium text-surface-100 truncate">
               {currentTrack.name}
             </p>
-            <p className="text-xs text-surface-400 truncate">
-              {currentTrack.album?.name || "Unknown Album"}
-            </p>
+            {currentTrack.album?.name && (
+              <p className="text-xs text-surface-400 truncate">
+                {currentTrack.album.name}
+              </p>
+            )}
           </div>
           <Badge variant="secondary" className="hidden sm:flex ml-2">
             Playing

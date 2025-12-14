@@ -1,24 +1,29 @@
 import { z } from 'zod';
 
 // Track DTOs
+const TrackAlbumSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  cover: z.string().nullable().optional(),
+  artistID: z.string(),
+});
+
 export const TrackResponseSchema = z.object({
   id: z.string(),
   path: z.string(),
   name: z.string(),
   duration: z.number(),
   thumbnail: z.string(),
-  albumID: z.string(),
+  // Spotify metadata
+  popularity: z.number().nullable().optional(),
+  albumID: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  album: TrackAlbumSchema.optional(),
 });
 
 export const TrackWithAlbumResponseSchema = TrackResponseSchema.extend({
-  album: z.object({
-    id: z.string(),
-    name: z.string(),
-    cover: z.string().nullable().optional(),
-    artistID: z.string(),
-  }),
+  album: TrackAlbumSchema,
 });
 
 export const TrackCreateSchema = z.object({

@@ -12,6 +12,9 @@ export default class ArtistRepository {
                     equals: artistId,
                 }
             },
+            orderBy: {
+                popularity: 'desc'
+            },
             skip,
             take
         });
@@ -19,33 +22,60 @@ export default class ArtistRepository {
     }
 
     async getTracksOfArtist(artistId: string, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {
-        const tracks = await db.track.findMany({
+        // Use TrackArtist junction table to get all tracks (primary + featured)
+        const trackArtists = await db.trackArtist.findMany({
             where: {
-                artistID: artistId,
+                artistId: artistId,
+            },
+            include: {
+                track: {
+                    include: {
+                        album: true,
+                    }
+                }
+            },
+            orderBy: {
+                track: {
+                    popularity: 'desc'
+                }
             },
             skip,
             take,
-            include: {
-                album: true,
-            }
         });
-        return tracks.map(PrismaMapper.toTrack);
+        return trackArtists.map(ta => PrismaMapper.toTrack(ta.track));
     }
 
     async getSinglesOfArtist(artistId: string, { skip, take }: { skip?: number, take?: number }): Promise<Track[]> {
-        const tracks = await db.track.findMany({
+        // Use TrackArtist junction table to get singles (tracks without album)
+        const trackArtists = await db.trackArtist.findMany({
             where: {
-                artistID: artistId,
-                albumID: { isSet: false },
+                artistId: artistId,
+                track: {
+                    albumID: { isSet: false },
+                }
+            },
+            include: {
+                track: true
+            },
+            orderBy: {
+                track: {
+                    popularity: 'desc'
+                }
             },
             skip,
             take
         });
-        return tracks.map(PrismaMapper.toTrack);
+        return trackArtists.map(ta => PrismaMapper.toTrack(ta.track));
     }
 
     async findAll({ skip, take }: { skip?: number, take?: number }): Promise<Artist[]> {
-        const artists = await db.artist.findMany({ skip, take });
+        const artists = await db.artist.findMany({
+            orderBy: {
+                popularity: 'desc'
+            },
+            skip,
+            take
+        });
         return artists.map(PrismaMapper.toArtist);
     }
 

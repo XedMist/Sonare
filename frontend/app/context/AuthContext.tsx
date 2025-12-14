@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import * as authApi from "../api/auth";
+import * as meApi from "../api/me";
 import { tokenStorage } from "../api/client";
-import type { User, LoginRequest, RegisterRequest } from "../types";
+import type { User, LoginRequest, RegisterRequest, UserProfileUpdateRequest } from "../types";
 
 interface AuthContextState {
     user: User | null;
@@ -10,6 +11,9 @@ interface AuthContextState {
     login: (credentials: LoginRequest) => Promise<User>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
+    refreshProfile: () => Promise<User | null>;
+    updateProfile: (data: UserProfileUpdateRequest) => Promise<User>;
+    uploadAvatar: (file: File) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextState | null>(null);
@@ -17,6 +21,12 @@ const AuthContext = createContext<AuthContextState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const fetchProfile = useCallback(async (): Promise<User | null> => {
+        const profile = await authApi.getProfile();
+        setUser(profile ?? null);
+        return profile ?? null;
+    }, []);
 
     // --- AUTH BOOTSTRAP ON REFRESH -----------------------------------------
     useEffect(() => {
@@ -29,11 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             try {
-                // Fetch user profile using the stored token
-                const profile = await authApi.getProfile();
-                setUser(profile ?? null);
+                await fetchProfile();
             } catch {
-                // Token invalid → clear & unauthenticate
                 tokenStorage.clearTokens();
                 setUser(null);
             }
@@ -42,32 +49,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         loadUserFromToken();
-    }, []);
+    }, [fetchProfile]);
 
     // --- LOGIN --------------------------------------------------------------
     const login = useCallback(async (credentials: LoginRequest): Promise<User> => {
-        // Login returns { accessToken, refreshToken } - no user
         await authApi.login(credentials);
-        
-        // Fetch user profile after successful login
-        let loggedInUser: User;
+
         try {
-            const profile = await authApi.getProfile();
-            loggedInUser = profile;
+            const profile = await fetchProfile();
+            if (profile) return profile;
         } catch {
-            // Profile fetch failed but we're logged in - create minimal user
-            loggedInUser = {
-                id: "",
-                name: credentials.username,
-                roleID: "",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
+            // Swallow error to allow fallback user
         }
-        
-        setUser(loggedInUser);
-        return loggedInUser;
-    }, []);
+
+        const fallbackUser: User = {
+            id: "",
+            name: credentials.username,
+            displayName: credentials.username,
+            roleID: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        setUser(fallbackUser);
+        return fallbackUser;
+    }, [fetchProfile]);
 
     // --- REGISTER -----------------------------------------------------------
     const register = useCallback(
@@ -90,6 +95,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    const refreshProfile = useCallback(async () => {
+        try {
+            return await fetchProfile();
+        } catch {
+            return null;
+        }
+    }, [fetchProfile]);
+
+    const updateProfile = useCallback(async (data: UserProfileUpdateRequest) => {
+        const updated = await meApi.updateProfile(data);
+        setUser(updated);
+        return updated;
+    }, []);
+
+    const uploadAvatar = useCallback(async (file: File) => {
+        const updated = await meApi.uploadAvatar(file);
+        setUser(updated);
+        return updated;
+    }, []);
+
     const value: AuthContextState = {
         user,
         isAuthenticated: Boolean(user),
@@ -97,6 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        refreshProfile,
+        updateProfile,
+        uploadAvatar,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

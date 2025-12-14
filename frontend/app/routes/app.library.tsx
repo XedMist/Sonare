@@ -208,6 +208,7 @@ function AlbumsTab({ albums, onPlayAlbum, isLoading }: AlbumsTabProps) {
           id={album.id}
           name={album.name}
           subtitle={album.artist?.name}
+          artwork={album.cover}
           onPlay={() => onPlayAlbum(album.id)}
         />
       ))}
@@ -251,6 +252,7 @@ function ArtistsTab({ artists, isLoading }: ArtistsTabProps) {
           type="artist"
           id={artist.id}
           name={artist.name}
+          artwork={artist.image || undefined}
         />
       ))}
     </div>

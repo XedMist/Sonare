@@ -8,25 +8,36 @@ export interface SearchResults {
   relatedTracks: Record<string, Track[]>;
 }
 
-export type SearchType = "artist" | "album" | "track";
+// Unified search item types
+export type SearchItemType = 'artist' | 'album' | 'track';
 
-/**
- * Search for artists, albums, and tracks using the unified search endpoint.
- * @param query - Search query (minimum 3 characters)
- * @param types - Array of types to search for (default: all)
- */
-export async function search(
-  query: string,
-  types: SearchType[] = ["artist", "album", "track"]
-): Promise<SearchResults> {
-  if (query.length < 3) {
-    return { artists: [], albums: [], tracks: [], relatedTracks: {} };
-  }
+export interface UnifiedSearchItem {
+  type: SearchItemType;
+  id: string;
+  name: string;
+  score: number;
+  artist?: Artist;
+  album?: Album;
+  track?: Track;
+}
 
+export interface UnifiedSearchResponse {
+  items: UnifiedSearchItem[];
+  relatedTracks: Record<string, Track[]>;
+}
+
+export async function search(query: string, type: string = "artist,album,track"): Promise<SearchResults> {
   const queryParams = new URLSearchParams({
     q: query,
-    type: types.join(","),
+    type: type,
   });
 
   return apiClient<SearchResults>(`/search?${queryParams}`);
+}
+
+export async function searchUnified(query: string): Promise<UnifiedSearchResponse> {
+  const queryParams = new URLSearchParams({
+    q: query,
+  });
+  return apiClient<UnifiedSearchResponse>(`/search/unified?${queryParams}`);
 }

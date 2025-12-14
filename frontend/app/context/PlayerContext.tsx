@@ -93,8 +93,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         audio.play();
       } else if (idx < currentQueue.length - 1) {
         setCurrentIndex((prev) => prev + 1);
+        setIsPlaying(true);
       } else if (currentRepeatMode === "all" && currentQueue.length > 0) {
         setCurrentIndex(0);
+        setIsPlaying(true);
       } else {
         setIsPlaying(false);
       }

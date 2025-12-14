@@ -1,16 +1,17 @@
+import type { PlaylistTrack } from "@/generated/prisma/browser.ts";
 import { db } from "../db/db.ts";
 import type { Playlist, Track } from "../model/entity/index.ts";
 import { PrismaMapper } from "../model/mappers.ts";
 
 
 // Get, post, get id, delete id
-export default class PlaylistRepository { 
-    async findAll({skip, take} : {skip?: number, take?: number}): Promise<Playlist[]> {
+export default class PlaylistRepository {
+    async findAll({ skip, take }: { skip?: number, take?: number }): Promise<Playlist[]> {
         const playlists = await db.playlist.findMany({ skip, take });
         return playlists.map(PrismaMapper.toPlaylist);
     }
 
-    async findById({id} : Pick<Playlist, "id">): Promise<Playlist | null> {
+    async findById({ id }: Pick<Playlist, "id">): Promise<Playlist | null> {
         const playlist = await db.playlist.findUnique({
             where: {
                 id: id,
@@ -32,8 +33,8 @@ export default class PlaylistRepository {
         });
         return PrismaMapper.toPlaylist(created);
     }
-    
-    async delete({id} : Pick<Playlist, "id">): Promise<boolean> {
+
+    async delete({ id }: Pick<Playlist, "id">): Promise<boolean> {
         try {
             await db.playlist.delete({
                 where: {
@@ -43,6 +44,18 @@ export default class PlaylistRepository {
             return true;
         } catch (_) {
             return false;
+        }
+    }
+
+    async update({ id, name }: Pick<Playlist, "id" | "name">): Promise<Playlist | null> {
+        try {
+            const updated = await db.playlist.update({
+                where: { id },
+                data: { name }
+            });
+            return PrismaMapper.toPlaylist(updated);
+        } catch (_) {
+            return null;
         }
     }
 
@@ -96,5 +109,11 @@ export default class PlaylistRepository {
         return playlists.map(PrismaMapper.toPlaylist);
     }
 
-    
+    async getPlaylistTracks(playlistID: string): Promise<PlaylistTrack[]> {
+        return db.playlistTrack.findMany({
+            where: {
+                playlistId: playlistID
+            }
+        });
+    }
 }

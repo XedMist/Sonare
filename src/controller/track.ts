@@ -22,11 +22,11 @@ const QuerySchema = PaginationQuerySchema.extend({
 router.get("/", validate("query", QuerySchema), requirePermission(Capability.READ, "tracks"), async (c) => {
     const { page, limit, name, albumID, artistID } = c.req.valid('query')
     const tracks = await service.findAll(name, albumID, artistID, { skip: page, take: limit });
-    
+
     const response = await Promise.all(tracks.map(async (track) => {
         const dto = DTOMapper.toTrackResponse(track);
         if (dto.thumbnail) {
-             dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+            dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
         }
         return dto;
     }));
@@ -37,7 +37,7 @@ router.get("/", validate("query", QuerySchema), requirePermission(Capability.REA
 router.get("/:id", requirePermission(Capability.READ, "tracks"), async (c) => {
     const { id } = c.req.param();
     const track = await service.findById(id);
-    
+
     if (!track) return c.json({ message: "Track not found" }, 404);
 
     const dto = DTOMapper.toTrackResponse(track);
@@ -58,7 +58,7 @@ router.get("/:id/file", requirePermission(Capability.READ, "tracks"), async (c) 
 router.get("/:id/thumbnail", requirePermission(Capability.READ, "tracks"), async (c) => {
     const { id } = c.req.param();
     const thumbnailPath = await service.getThumbnail(id);
-    
+
     if (!thumbnailPath) {
         return c.json({ thumbnail: null });
     }

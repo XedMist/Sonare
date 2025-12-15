@@ -93,3 +93,9 @@ export class InternalServerError extends AppError {
         super('Internal Server Error', 500, { detail, type: 'https://httpstatuses.com/500' });
     }
 }
+
+export class NotAcceptableError extends AppError {
+    constructor(detail?: string) {
+        super('Not Acceptable', 406, { detail, type: 'https://httpstatuses.com/406' });
+    }
+}

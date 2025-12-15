@@ -6,6 +6,7 @@ import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { requirePermission } from "@/middleware/AuthMiddleware";
 import { Capability } from "@/generated/prisma/client";
+import { mediaVersion, type ApiVersion } from "@/middleware/mediaVersion";
 
 const searchController = new Hono();
 
@@ -17,17 +18,18 @@ const SearchQuerySchema = z.object({
     type: z.string().optional().default("artist,album,track")
 });
 
-const UnifiedSearchQuerySchema = z.object({
-    q: z.string().min(3),
-});
+searchController.get(
+    "/",
+    mediaVersion("v2"),
+    validate("query", SearchQuerySchema),
+    requirePermission(Capability.READ, "tracks"),
+    async (c) => {
+        const { q, type } = c.req.valid("query");
+        const apiVersion = c.get('apiVersion') as ApiVersion;
 
-searchController
-    .get("/unified",
-        validate("query", UnifiedSearchQuerySchema),
-        requirePermission(Capability.READ, "tracks"),
-        async (c) => {
-            const { q } = c.req.valid("query");
+        c.header('X-Message', apiVersion)
 
+        if (apiVersion === "v2") {
             const result = await service.searchUnified(q);
 
             // Process items with presigned URLs
@@ -39,7 +41,6 @@ searchController
                     }
                     return { ...item, artist: dto };
                 } else if (item.type === 'album' && item.album) {
-                    // Build album response manually to preserve partial artist
                     const albumDto = {
                         id: item.album.id,
                         name: item.album.name,
@@ -51,7 +52,6 @@ searchController
                     };
                     return { ...item, album: albumDto };
                 } else if (item.type === 'track' && item.track) {
-                    // Build track response manually to preserve partial album
                     const trackDto = {
                         id: item.track.id,
                         path: item.track.path,
@@ -80,55 +80,54 @@ searchController
             }
 
             return c.json({ items, relatedTracks });
-        });
-
-searchController.get("/", validate("query", SearchQuerySchema), requirePermission(Capability.READ, "tracks"), async (c) => {
-    const { q, type } = c.req.valid("query");
-    const types = type.split(",");
-
-    const result = await service.search(q, types);
-
-    const tracks = await Promise.all(result.tracks.map(async (track) => {
-        const dto = DTOMapper.toTrackResponse(track);
-        if (dto.thumbnail) {
-            dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
         }
-        return dto;
-    }));
 
-    const relatedTracks: Record<string, any[]> = {};
-    for (const [trackId, trackList] of Object.entries(result.relatedTracks)) {
-        relatedTracks[trackId] = await Promise.all(trackList.map(async (track) => {
+        // V1: Separated search by type
+        const types = type.split(",");
+        const result = await service.search(q, types);
+
+        const tracks = await Promise.all(result.tracks.map(async (track) => {
             const dto = DTOMapper.toTrackResponse(track);
             if (dto.thumbnail) {
                 dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
             }
             return dto;
         }));
+
+        const relatedTracks: Record<string, any[]> = {};
+        for (const [trackId, trackList] of Object.entries(result.relatedTracks)) {
+            relatedTracks[trackId] = await Promise.all(trackList.map(async (track) => {
+                const dto = DTOMapper.toTrackResponse(track);
+                if (dto.thumbnail) {
+                    dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+                }
+                return dto;
+            }));
+        }
+
+        const albums = await Promise.all(result.albums.map(async (album) => {
+            const dto = DTOMapper.toAlbumResponse(album);
+            if (dto.cover) {
+                dto.cover = await storageService.getPresignedUrl(dto.cover);
+            }
+            return dto;
+        }));
+
+        const artists = await Promise.all(result.artists.map(async (artist) => {
+            const dto = DTOMapper.toArtistResponse(artist);
+            if (dto.image) {
+                dto.image = await storageService.getPresignedUrl(dto.image);
+            }
+            return dto;
+        }));
+
+        return c.json({
+            artists: artists,
+            albums: albums,
+            tracks: tracks,
+            relatedTracks
+        });
     }
-
-    const albums = await Promise.all(result.albums.map(async (album) => {
-        const dto = DTOMapper.toAlbumResponse(album);
-        if (dto.cover) {
-            dto.cover = await storageService.getPresignedUrl(dto.cover);
-        }
-        return dto;
-    }));
-
-    const artists = await Promise.all(result.artists.map(async (artist) => {
-        const dto = DTOMapper.toArtistResponse(artist);
-        if (dto.image) {
-            dto.image = await storageService.getPresignedUrl(dto.image);
-        }
-        return dto;
-    }));
-
-    return c.json({
-        artists: artists,
-        albums: albums,
-        tracks: tracks,
-        relatedTracks
-    });
-});
+);
 
 export default searchController;

@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { z } from 'zod';
-
 import TrackService from "@/services/TrackService.ts";
 import { StorageService } from "@/services/StorageService.ts";
 import { PaginationQuerySchema } from "@/model/dto/CommonDTO.ts";
@@ -8,9 +7,12 @@ import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { requirePermission } from "@/middleware/AuthMiddleware";
 import { Capability } from "@/generated/prisma/client";
+import { paginated } from "@/util/pagination";
+import type { TrackResponse } from "@/model/dto";
 
-const router = new Hono();
-const service = new TrackService();
+const trackController = new Hono();
+
+const trackService = new TrackService();
 const storageService = new StorageService();
 
 const QuerySchema = PaginationQuerySchema.extend({
@@ -19,52 +21,68 @@ const QuerySchema = PaginationQuerySchema.extend({
     albumID: z.string().optional(),
 });
 
-router.get("/", validate("query", QuerySchema), requirePermission(Capability.READ, "tracks"), async (c) => {
-    const { page, limit, name, albumID, artistID } = c.req.valid('query')
-    const tracks = await service.findAll(name, albumID, artistID, { skip: page, take: limit });
+trackController
+    .get("/",
+        validate("query", QuerySchema),
+        requirePermission(Capability.READ, "tracks"),
+        async (c) => {
+            const { page, limit, name, albumID, artistID } = c.req.valid('query')
+            const tracks = await trackService.findAll(name, albumID, artistID, { skip: page * limit, take: limit });
 
-    const response = await Promise.all(tracks.map(async (track) => {
-        const dto = DTOMapper.toTrackResponse(track);
-        if (dto.thumbnail) {
-            dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
-        }
-        return dto;
-    }));
+            const response = await Promise.all(tracks.map(async (track) => {
+                const dto = DTOMapper.toTrackResponse(track);
+                if (dto.thumbnail) {
+                    dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+                }
+                return dto;
+            }));
 
-    return c.json(response);
-});
+            return c.json(paginated<TrackResponse>(response, page, limit));
+        });
 
-router.get("/:id", requirePermission(Capability.READ, "tracks"), async (c) => {
-    const { id } = c.req.param();
-    const track = await service.findById(id);
+trackController
+    .get("/:id",
+        requirePermission(Capability.READ, "tracks"),
+        async (c) => {
+            const { id } = c.req.param();
+            const track = await trackService.findById(id);
 
-    if (!track) return c.json({ message: "Track not found" }, 404);
+            const dto = DTOMapper.toTrackResponse(track);
+            if (dto.thumbnail) {
+                dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+            }
 
-    const dto = DTOMapper.toTrackResponse(track);
-    if (dto.thumbnail) {
-        dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
-    }
-    return c.json(dto);
-});
+            return c.json(dto);
+        });
 
-router.get("/:id/file", requirePermission(Capability.READ, "tracks"), async (c) => {
-    const { id } = c.req.param();
-    const track = await service.findById(id);
+trackController
+    .get("/:id/file",
+        requirePermission(Capability.READ, "tracks"),
+        async (c) => {
+            const { id } = c.req.param();
+            const track = await trackService.findById(id);
 
-    const url = await storageService.getPresignedUrl(track.path);
-    return c.json({ url });
-});
+            const url = await storageService.getPresignedUrl(track.path);
 
-router.get("/:id/thumbnail", requirePermission(Capability.READ, "tracks"), async (c) => {
-    const { id } = c.req.param();
-    const thumbnailPath = await service.getThumbnail(id);
+            // TODO: Redirigir
+            return c.json({ url });
+        });
 
-    if (!thumbnailPath) {
-        return c.json({ thumbnail: null });
-    }
+trackController
+    .get("/:id/thumbnail",
+        requirePermission(Capability.READ, "tracks"),
+        async (c) => {
+            const { id } = c.req.param();
+            const thumbnailPath = await trackService.getThumbnail(id);
 
-    const url = await storageService.getPresignedUrl(thumbnailPath);
-    return c.json({ thumbnail: url });
-})
+            if (!thumbnailPath) {
+                return c.json({ thumbnail: null });
+            }
 
-export default router;
+            const url = await storageService.getPresignedUrl(thumbnailPath);
+
+            // TODO: Redirigir
+            return c.json({ thumbnail: url });
+        })
+
+export default trackController;

@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-
 import LyricsService from "@/services/LyricsService.ts";
 import { DTOMapper } from "@/model/mappers.ts";
 import { validate } from "@/middleware/ValidationMiddleware.ts";
@@ -17,7 +16,8 @@ lyricsController.get("/:trackID", requirePermission(Capability.READ, "lyrics"), 
     return c.json(dto);
 });
 
-lyricsController.post("/", validate("json", LyricsCreateSchema), requirePermission(Capability.CREATE, "lyrics"), async (c) => {    const data = c.req.valid("json");
+lyricsController.post("/", validate("json", LyricsCreateSchema), requirePermission(Capability.CREATE, "lyrics"), async (c) => {
+    const data = c.req.valid("json");
     if (!data.syncedLyrics) {
         return c.json({ error: "Synced lyrics are required" }, 400);
     }

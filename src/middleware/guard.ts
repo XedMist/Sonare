@@ -2,6 +2,8 @@ import type { Playlist } from "@/model/entity";
 import PlaylistService from "@/services/PlaylistService";
 import { createMiddleware } from "hono/factory";
 import { ForbiddenError, InternalServerError, NotFoundError } from '@/error/ApiError';
+import type { Album } from "@/generated/prisma/client";
+import AlbumService from "@/services/AlbumService";
 
 // La idea de las guardias es la de proteger los recursos para que solo los
 // creadores puedan modificarlos
@@ -49,5 +51,17 @@ export class PlaylistGuard implements ResourceGuard<Playlist> {
 
     getOwnerID(playlist: Playlist) {
         return playlist.userID;
+    }
+}
+
+export class AlbumGuard implements ResourceGuard<Album> {
+    private service = new AlbumService();
+
+    findByID(id: string) {
+        return this.service.findByID(id);
+    }
+
+    getOwnerID(album: Album) {
+        return album.artistID;
     }
 }

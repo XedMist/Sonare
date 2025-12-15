@@ -493,29 +493,29 @@ async function buildRelatedTracks(selected: Ranked<TrackWithRelations>[]): Promi
     const [albumRelatedRaw, artistRelatedRaw] = await Promise.all([
         albumIdArray.length
             ? db.track.findMany({
-                  where: {
-                      albumID: { in: albumIdArray },
-                      NOT: { id: { in: selectedIds } },
-                  },
-                  orderBy: {
-                      popularity: 'desc'
-                  },
-                  take: RELATED_LIMIT * albumIdArray.length,
-                  include: { artist: true, album: true },
-              })
+                where: {
+                    albumID: { in: albumIdArray },
+                    NOT: { id: { in: selectedIds } },
+                },
+                orderBy: {
+                    popularity: 'desc'
+                },
+                take: RELATED_LIMIT * albumIdArray.length,
+                include: { artist: true, album: true },
+            })
             : Promise.resolve([] as TrackWithRelations[]),
         artistIdArray.length
             ? db.track.findMany({
-                  where: {
-                      artistID: { in: artistIdArray },
-                      NOT: { id: { in: selectedIds } },
-                  },
-                  orderBy: {
-                      popularity: 'desc'
-                  },
-                  take: RELATED_LIMIT * artistIdArray.length,
-                  include: { artist: true, album: true },
-              })
+                where: {
+                    artistID: { in: artistIdArray },
+                    NOT: { id: { in: selectedIds } },
+                },
+                orderBy: {
+                    popularity: 'desc'
+                },
+                take: RELATED_LIMIT * artistIdArray.length,
+                include: { artist: true, album: true },
+            })
             : Promise.resolve([] as TrackWithRelations[]),
     ]);
 

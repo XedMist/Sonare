@@ -26,6 +26,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "hono": "^4.10.2",
+    "hono-openapi": "^1.1.2",
     "minio": "^8.0.6",
     "music-metadata": "^11.10.1",
     "npm": "^11.6.2",

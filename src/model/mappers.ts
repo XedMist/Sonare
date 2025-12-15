@@ -6,7 +6,8 @@ import type {
     Playlist as PrismaPlaylist,
     PlaylistTrack as PrismaPlaylistTrack,
     Role as PrismaRole,
-    Permision as PrismaPermission
+    Permision as PrismaPermission,
+    Lyrics as PrismaLyrics
 } from '@/generated/prisma/client.ts';
 
 import type {
@@ -18,7 +19,8 @@ import type {
     PlaylistTrack,
     Role,
     Permission,
-    Capability
+    Capability,
+    Lyrics
 } from './entity/index.ts';
 
 import type {
@@ -29,7 +31,8 @@ import type {
     PlaylistResponse,
     PlaylistTrackResponse,
     RoleResponse,
-    PermissionResponse
+    PermissionResponse,
+    LyricsResponse
 } from './dto/index.ts';
 
 // Prisma to Entity Mappers
@@ -130,6 +133,16 @@ export class PrismaMapper {
             rolesID: prisma.rolesID,
         };
     }
+
+    static toLyrics(prisma: PrismaLyrics): Lyrics {
+        return {
+            id: prisma.id,
+            trackID: prisma.trackID,
+            syncedLyrics: prisma.syncedLyrics,
+            createdAt: prisma.createdAt.toISOString(),
+            updatedAt: prisma.updatedAt.toISOString(),
+        };
+    }
 }
 
 // Entity to DTO Response Mappers
@@ -227,6 +240,16 @@ export class DTOMapper {
             capability: entity.capability,
             resource: entity.resource,
             rolesID: entity.rolesID,
+        };
+    }
+
+    static toLyricsResponse(entity: Lyrics): LyricsResponse {
+        return {
+            id: entity.id,
+            trackID: entity.trackID,
+            syncedLyrics: entity.syncedLyrics,
+            createdAt: entity.createdAt,
+            updatedAt: entity.updatedAt,
         };
     }
 }

@@ -9,6 +9,7 @@ import {
     authController,
     meController,
     searchController,
+    lyricsController,
 } from "@/controller/index.ts";
 
 
@@ -40,6 +41,7 @@ api.use("/tracks/*", authMiddleware);
 api.use("/playlists/*", authMiddleware);
 api.use("/me/*", authMiddleware);
 api.use("/search/*", authMiddleware);
+api.use("/lyrics/*", authMiddleware);
 
 api.route("/artists", artistController);
 api.route("/albums", albumController);
@@ -47,5 +49,6 @@ api.route("/tracks", trackController);
 api.route("/playlists", playlistController);
 api.route("/me", meController);
 api.route("/search", searchController);
+api.route("/lyrics", lyricsController);
 
 export default app;

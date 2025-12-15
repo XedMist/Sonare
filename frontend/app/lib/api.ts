@@ -70,6 +70,19 @@ export interface Track {
     updatedAt: string;
 }
 
+export interface Lyrics {
+    id: string;
+    trackID: string;
+    syncedLyrics: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface SyncedLyricLine {
+    timestamp: number; // in milliseconds
+    text: string;
+}
+
 // Playlist
 export interface Playlist {
     id: string;

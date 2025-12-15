@@ -16,15 +16,15 @@ datasource db {
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name     String @unique
-  displayName String?
-  firstName   String?
-  lastName    String?
-  bio         String?
-  country     String?
-  birthdate   DateTime?
+  name            String    @unique
+  displayName     String?
+  firstName       String?
+  lastName        String?
+  bio             String?
+  country         String?
+  birthdate       DateTime?
   avatarObjectKey String?
-  password String
+  password        String
 
   playlists Playlist[]
 
@@ -38,16 +38,16 @@ model User {
 }
 
 model Track {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
   path      String
   name      String
   duration  Int
   thumbnail String
-  lyrics    String?
+  lyrics    Lyrics?
 
   // Spotify metadata
   popularity Int?
-  spotifyId  String?  // Spotify track ID for deduplication (indexed but not unique due to nulls)
+  spotifyId  String? // Spotify track ID for deduplication (indexed but not unique due to nulls)
 
   albumID String? @db.ObjectId
   album   Album?  @relation(fields: [albumID], references: [id])
@@ -69,11 +69,22 @@ model Track {
   @@index([artistID])
 }
 
+model Lyrics {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  trackID String @unique @db.ObjectId
+  track   Track  @relation(fields: [trackID], references: [id], onDelete: Cascade)
+
+  syncedLyrics String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Junction table for Track-Artist many-to-many relationship
 model TrackArtist {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  trackId  String @db.ObjectId
-  artistId String @db.ObjectId
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  trackId  String     @db.ObjectId
+  artistId String     @db.ObjectId
   role     ArtistRole @default(PRIMARY)
 
   track  Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
@@ -100,7 +111,7 @@ model Artist {
 
   albums Album[]
   tracks Track[]
-  
+
   // All tracks this artist is on (many-to-many)
   trackArtists TrackArtist[]
 
@@ -109,8 +120,8 @@ model Artist {
 }
 
 model Album {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
   cover String?
 
   // Spotify metadata

@@ -9,6 +9,7 @@ export * from './TrackDTO.js';
 export * from './PlaylistDTO.js';
 export * from './RoleDTO.js';
 export * from './CommonDTO.js';
+export * from './LyricsDTO.js';
 
 // Mapper 
 export * from '../mappers.js';

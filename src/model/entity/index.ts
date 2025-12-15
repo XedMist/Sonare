@@ -80,6 +80,19 @@ export interface Track {
   updatedAt: Date;
 }
 
+export interface Lyrics {
+    id: string;
+    trackID: string;
+    syncedLyrics: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface SyncedLyricLine {
+    timestamp: number; // in milliseconds
+    text: string;
+}
+
 export enum ArtistRole {
   PRIMARY = 'PRIMARY',
   FEATURED = 'FEATURED'

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
-import { lyricsApi } from "~/api/lyrics";
 import { cn } from "~/lib/utils";
 import type { LyricsResponse } from "~/types";
+import { getLyrics } from "~/api/lyrics";
 
 interface LyricsViewProps {
     trackID: string;
@@ -77,7 +77,7 @@ function parseLRC(lrc: string): ParsedLyrics {
     };
 }
 
-export function LyricsView({ trackID, currentTime, onClose, className }: LyricsViewProps) {
+export function LyricsView({ trackID, currentTime, onClose, className, onLineClick }: LyricsViewProps & { onLineClick?: (time: number) => void }) {
     const [lyrics, setLyrics] = useState<LyricsResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export function LyricsView({ trackID, currentTime, onClose, className }: LyricsV
             try {
                 setLoading(true);
                 setError(null);
-                const data = await lyricsApi.getLyrics(trackID);
+                const data = await getLyrics(trackID);
                 if (mounted) {
                     setLyrics(data);
                 }
@@ -154,22 +154,11 @@ export function LyricsView({ trackID, currentTime, onClose, className }: LyricsV
 
     return (
         <div className={cn("flex flex-col h-full relative", className)}>
-            <div className="flex items-center justify-between p-6 border-b border-surface-800/50 bg-surface-900/95 backdrop-blur-md z-10 sticky top-0">
-                <div className="flex flex-col">
-                    <h2 className="text-xl font-bold tracking-tight">
-                        {metadata.title || "Lyrics"}
-                    </h2>
-                    {(metadata.artist || metadata.album) && (
-                        <p className="text-sm text-surface-400">
-                             {metadata.artist}
-                             {metadata.artist && metadata.album && " • "}
-                             {metadata.album}
-                        </p>
-                    )}
-                </div>
+             {/* ... header ... */}
+             <div className="absolute top-4 right-6 z-50">
                 <button 
                     onClick={onClose}
-                    className="p-2 hover:bg-surface-800 rounded-full transition-colors text-surface-400 hover:text-surface-200"
+                    className="p-2 bg-surface-800/50 hover:bg-surface-800 rounded-full transition-colors text-surface-400 hover:text-surface-200"
                 >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -179,8 +168,10 @@ export function LyricsView({ trackID, currentTime, onClose, className }: LyricsV
 
             <div 
                 ref={containerRef}
-                className="flex-1 overflow-y-auto px-6 py-10 space-y-8 scroll-smooth no-scrollbar"
+                className="flex-1 overflow-y-auto px-6 py-10 space-y-8 scroll-smooth [&::-webkit-scrollbar]:hidden"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
+                {/* ... loading/error states ... */}
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
@@ -203,14 +194,16 @@ export function LyricsView({ trackID, currentTime, onClose, className }: LyricsV
                                     key={index}
                                     ref={isActive ? activeLineRef : null}
                                     className={cn(
-                                        "text-xl md:text-3xl font-bold transition-all duration-500 cursor-pointer origin-left",
+                                        "text-xl md:text-3xl font-bold transition-all duration-500 origin-left",
                                         isSynced 
                                             ? (isActive ? "text-primary-400 scale-105" : isPast ? "text-surface-600" : "text-surface-400")
                                             : "text-surface-200", // Unsynced style
-                                        "hover:text-surface-200"
+                                        isSynced && "cursor-pointer hover:text-surface-200"
                                     )}
                                     onClick={() => {
-                                        // TODO: Implement seek to line on click
+                                        if (isSynced && line.time !== -1 && onLineClick) {
+                                            onLineClick(line.time);
+                                        }
                                     }}
                                 >
                                     {line.text}
@@ -224,11 +217,9 @@ export function LyricsView({ trackID, currentTime, onClose, className }: LyricsV
                     )
                 )}
             </div>
-            
-            {/* Attribution if needed */}
             {lyrics && (
                 <div className="p-4 text-center text-xs text-surface-600 bg-surface-900/50 backdrop-blur-sm">
-                    Lyrics provided by Sonare
+                    Lyrics stolen from Spotify ;)
                 </div>
             )}
         </div>

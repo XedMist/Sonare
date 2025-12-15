@@ -14,6 +14,12 @@ interface ListResponse<T> {
   data: T[];
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  limit: number;
+}
+
 export async function getArtists(params: GetArtistsParams = {}): Promise<ListResponse<Artist>> {
   const { page = 0, limit = DEFAULT_PAGE_SIZE, name } = params;
   const queryParams = new URLSearchParams({
@@ -25,13 +31,13 @@ export async function getArtists(params: GetArtistsParams = {}): Promise<ListRes
   
   const cacheKey = cacheKeys.artists({ page, limit, name });
   
-  const data = await apiCache.getOrFetch(
+  const response = await apiCache.getOrFetch(
     cacheKey,
-    () => apiClient<Artist[]>(`/artists?${queryParams}`),
+    () => apiClient<PaginatedResponse<Artist>>(`/artists?${queryParams}`),
     30 * 1000
   );
   
-  return { data };
+  return { data: response.data };
 }
 
 export async function getArtist(id: string): Promise<Artist> {
@@ -53,13 +59,13 @@ export async function getArtistAlbums(id: string, params: GetArtistsParams = {})
   
   const cacheKey = cacheKeys.artistAlbums(id);
   
-  const data = await apiCache.getOrFetch(
+  const response = await apiCache.getOrFetch(
     cacheKey,
-    () => apiClient<Album[]>(`/artists/${id}/albums?${queryParams}`),
+    () => apiClient<PaginatedResponse<Album>>(`/artists/${id}/albums?${queryParams}`),
     60 * 1000
   );
   
-  return { data };
+  return { data: response.data };
 }
 
 export async function getArtistTracks(id: string, params: GetArtistsParams = {}): Promise<ListResponse<Track>> {
@@ -71,11 +77,11 @@ export async function getArtistTracks(id: string, params: GetArtistsParams = {})
   
   const cacheKey = cacheKeys.artistTracks(id);
   
-  const data = await apiCache.getOrFetch(
+  const response = await apiCache.getOrFetch(
     cacheKey,
-    () => apiClient<Track[]>(`/artists/${id}/tracks?${queryParams}`),
+    () => apiClient<PaginatedResponse<Track>>(`/artists/${id}/tracks?${queryParams}`),
     60 * 1000
   );
   
-  return { data };
+  return { data: response.data };
 }

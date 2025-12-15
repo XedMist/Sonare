@@ -40,9 +40,9 @@ export function PlayerBar() {
     setVolume,
     toggleRepeat,
     toggleShuffle,
+    showLyrics,
+    setShowLyrics,
   } = usePlayer();
-
-  const [showLyrics, setShowLyrics] = useState(false);
 
   const artworkSrc = currentTrack?.thumbnail || currentTrack?.album?.cover || undefined;
 
@@ -58,13 +58,14 @@ export function PlayerBar() {
     <>
       {/* Lyrics View Overlay */}
       {showLyrics && (
-        <div className="fixed inset-0 z-50 bg-surface-950/95 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-10 duration-300 md:pb-20">
-            <div className="container mx-auto h-full max-w-4xl">
+        <div className="fixed top-0 right-0 bottom-20 left-0 lg:left-64 z-40 bg-surface-900 animate-in fade-in slide-in-from-bottom-10 duration-300">
+            <div className="h-full w-full overflow-hidden">
                 <LyricsView 
                     trackID={currentTrack.id}
                     currentTime={currentTime}
                     onClose={() => setShowLyrics(false)}
-                    className="bg-transparent"
+                    className="bg-transparent h-full max-w-4xl mx-auto"
+                    onLineClick={seek}
                 />
             </div>
         </div>
@@ -167,7 +168,7 @@ export function PlayerBar() {
                 onClick={() => setShowLyrics(!showLyrics)}
                 aria-label="Lyrics" 
                 size="sm"
-                className={showLyrics ? "text-primary-500" : "text-surface-400"}
+                className={showLyrics ? "text-primary-500" : ""}
             >
               <MicIcon size={18} />
             </IconButton>
@@ -176,7 +177,7 @@ export function PlayerBar() {
               <QueueMusicIcon size={18} />
             </IconButton>
 
-            <div className="flex items-center gap-2 w-32">
+            <div className="flex items-center gap-2 w-48">
               <IconButton
                 onClick={() => setVolume(volume === 0 ? 1 : 0)}
                 aria-label={volume === 0 ? "Unmute" : "Mute"}

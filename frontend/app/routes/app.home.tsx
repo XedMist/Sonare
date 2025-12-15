@@ -306,7 +306,7 @@ export default function AppHomePage() {
   }
 
   // Prepare data for sections
-  const albumItems = data.albums.map((album) => ({
+  const albumItems = (Array.isArray(data.albums) ? data.albums : []).map((album) => ({
     type: "album" as const,
     id: album.id,
     name: album.name,
@@ -314,14 +314,14 @@ export default function AppHomePage() {
     artwork: album.cover,
   }));
 
-  const artistItems = data.artists.map((artist) => ({
+  const artistItems = (Array.isArray(data.artists) ? data.artists : []).map((artist) => ({
     type: "artist" as const,
     id: artist.id,
     name: artist.name,
     artwork: artist.image || undefined,
   }));
 
-  const playlistItems = data.playlists.map((playlist) => ({
+  const playlistItems = (Array.isArray(data.playlists) ? data.playlists : []).map((playlist) => ({
     type: "playlist" as const,
     id: playlist.id,
     name: playlist.name,
@@ -330,14 +330,14 @@ export default function AppHomePage() {
 
   // Quick play items (mix of recent albums and playlists)
   const quickPlayItems = [
-    ...data.albums.slice(0, 3).map((album) => ({
+    ...(Array.isArray(data.albums) ? data.albums : []).slice(0, 3).map((album) => ({
       id: album.id,
       title: album.name,
       subtitle: album.artist?.name,
       type: "album" as const,
       artwork: album.cover,
     })),
-    ...data.playlists.slice(0, 3).map((playlist) => ({
+    ...(Array.isArray(data.playlists) ? data.playlists : []).slice(0, 3).map((playlist) => ({
       id: playlist.id,
       title: playlist.name,
       subtitle: "Playlist",
@@ -370,7 +370,7 @@ export default function AppHomePage() {
 
       {/* Recent Tracks */}
       <RecentTracksSection
-        tracks={data.tracks}
+        tracks={Array.isArray(data.tracks) ? data.tracks : []}
         onPlayTrack={handlePlayTrack}
         onAddToPlaylist={handleAddToPlaylist}
       />

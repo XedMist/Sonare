@@ -31,6 +31,8 @@ interface PlayerContextType {
   toggleShuffle: () => void;
   addToQueue: (track: Track) => void;
   clearQueue: () => void;
+  showLyrics: boolean;
+  setShowLyrics: (show: boolean) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -53,6 +55,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [duration, setDuration] = useState(0);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("off");
   const [shuffle, setShuffle] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
 
   // Use refs for values accessed in event handlers to avoid stale closures
   const repeatModeRef = useRef(repeatMode);
@@ -275,6 +278,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     duration,
     repeatMode,
     shuffle,
+    showLyrics,
+    setShowLyrics,
     playTrack,
     playTracks: playQueue,
     playQueue,

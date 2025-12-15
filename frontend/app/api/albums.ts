@@ -15,6 +15,12 @@ interface ListResponse<T> {
   data: T[];
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  limit: number;
+}
+
 export async function getAlbums(params: GetAlbumsParams = {}): Promise<ListResponse<Album>> {
   const { page = 0, limit = DEFAULT_PAGE_SIZE, name, artistID } = params;
   const queryParams = new URLSearchParams({
@@ -28,13 +34,13 @@ export async function getAlbums(params: GetAlbumsParams = {}): Promise<ListRespo
   const cacheKey = cacheKeys.albums({ page, limit, name, artistID });
   
   // Use cache for album lists (30 second TTL)
-  const data = await apiCache.getOrFetch(
+  const response = await apiCache.getOrFetch(
     cacheKey,
-    () => apiClient<Album[]>(`/albums?${queryParams}`),
+    () => apiClient<PaginatedResponse<Album>>(`/albums?${queryParams}`),
     30 * 1000
   );
   
-  return { data };
+  return { data: response.data };
 }
 
 export async function getAlbum(id: string): Promise<Album> {

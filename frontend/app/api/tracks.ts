@@ -15,6 +15,12 @@ interface ListResponse<T> {
   data: T[];
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  limit: number;
+}
+
 export async function getTracks(params: GetTracksParams = {}): Promise<ListResponse<Track>> {
   const { page = 0, limit = DEFAULT_PAGE_SIZE, name, albumID, artistID } = params;
   const queryParams = new URLSearchParams({
@@ -26,9 +32,9 @@ export async function getTracks(params: GetTracksParams = {}): Promise<ListRespo
   if (albumID) queryParams.set("albumID", albumID);
   if (artistID) queryParams.set("artistID", artistID);
   
-  // Backend returns array directly
-  const data = await apiClient<Track[]>(`/tracks?${queryParams}`);
-  return { data };
+  // Backend returns paginated response
+  const response = await apiClient<PaginatedResponse<Track>>(`/tracks?${queryParams}`);
+  return { data: response.data };
 }
 
 export async function getTrack(id: string): Promise<Track> {

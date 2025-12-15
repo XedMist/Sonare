@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
+import { usePlayer } from "../../context/PlayerContext";
 import * as playlistsApi from "../../api/playlists";
 import { ScrollArea, DropdownMenu, DropdownItem, DropdownSeparator, Avatar } from "../ui";
 import {
@@ -30,6 +31,7 @@ const navItems = [
 export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { setShowLyrics } = usePlayer();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   useEffect(() => {
@@ -91,7 +93,10 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
                 <NavLink
                   to={to}
                   end={end}
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose?.();
+                    setShowLyrics(false);
+                  }}
                   className={({ isActive }) =>
                     `flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                       isActive
@@ -129,7 +134,10 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
                   <NavLink
                     key={playlist.id}
                     to={`/app/playlists/${playlist.id}`}
-                    onClick={onClose}
+                    onClick={() => {
+                       onClose?.();
+                       setShowLyrics(false);
+                    }}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
                         isActive

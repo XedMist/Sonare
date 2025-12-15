@@ -129,6 +129,7 @@ export const openApiDoc = {
           birthdate: { type: "string", format: "date", nullable: true },
           avatarUrl: { type: "string", format: "uri", nullable: true },
           roleID: { type: "string" },
+          favoritosID: { type: "string", nullable: true },
           createdAt: { type: "string", format: "date-time" },
           updatedAt: { type: "string", format: "date-time" },
         },
@@ -220,6 +221,9 @@ export const openApiDoc = {
           id: { type: "string" },
           name: { type: "string" },
           userID: { type: "string" },
+          trackCount: { type: "integer", nullable: true },
+          cover: { type: "string", format: "uri", nullable: true },
+          user: { $ref: "#/components/schemas/UserResponse" },
           createdAt: { type: "string", format: "date-time" },
           updatedAt: { type: "string", format: "date-time" },
         },
@@ -761,7 +765,27 @@ export const openApiDoc = {
       },
     },
     "/api/playlists/{id}/tracks": {
-      put: {
+      get: {
+        summary: "Get tracks in playlist",
+        tags: ["Playlists"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string" } },
+            ...paginationParams,
+            { name: "order", in: "query", schema: { type: "string", enum: ["default", "shuffle"] } }
+        ],
+        responses: {
+          "200": {
+            description: "Tracks",
+            content: {
+              "application/json": {
+                schema: { type: "array", items: { $ref: "#/components/schemas/TrackResponse" } },
+              },
+            },
+          },
+        },
+      },
+      post: {
         summary: "Add track",
         tags: ["Playlists"],
         security: [{ bearerAuth: [] }],
@@ -775,7 +799,7 @@ export const openApiDoc = {
           },
         },
         responses: {
-          "200": {
+          "201": {
             description: "Updated playlist",
             content: {
               "application/json": {
@@ -785,30 +809,20 @@ export const openApiDoc = {
           },
         },
       },
-      delete: {
-        summary: "Remove track",
-        tags: ["Playlists"],
-        security: [{ bearerAuth: [] }],
-        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/PlaylistTrackActionRequest" },
+    },
+    "/api/playlists/{id}/tracks/{trackID}": {
+        delete: {
+            summary: "Remove track",
+            tags: ["Playlists"],
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                { name: "id", in: "path", required: true, schema: { type: "string" } },
+                { name: "trackID", in: "path", required: true, schema: { type: "string" } }
+            ],
+            responses: {
+              "204": { description: "Track removed" },
             },
-          },
-        },
-        responses: {
-          "200": {
-            description: "Updated playlist",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/PlaylistResponse" },
-              },
-            },
-          },
-        },
-      },
+        }
     },
 
     "/api/me": {
@@ -910,7 +924,7 @@ export const openApiDoc = {
           },
         },
       },
-      put: {
+      post: {
         summary: "Add favorite",
         tags: ["Me"],
         security: [{ bearerAuth: [] }],
@@ -926,18 +940,15 @@ export const openApiDoc = {
           "204": { description: "Track added" },
         },
       },
+    },
+    "/api/me/favorites/{trackID}": {
       delete: {
         summary: "Remove favorite",
         tags: ["Me"],
         security: [{ bearerAuth: [] }],
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/FavoriteActionRequest" },
-            },
-          },
-        },
+        parameters: [
+          { name: "trackID", in: "path", required: true, schema: { type: "string" } },
+        ],
         responses: {
           "204": { description: "Track removed" },
         },
@@ -954,8 +965,8 @@ export const openApiDoc = {
             name: "q",
             in: "query",
             required: true,
-            description: "Search term (min 3 chars)",
-            schema: { type: "string", minLength: 3 },
+            description: "Search term (min 1 char)",
+            schema: { type: "string", minLength: 1 },
           },
           {
             name: "type",
@@ -1002,7 +1013,7 @@ export const openApiDoc = {
         },
       },
     },
-  },
+  }
 };
 
 export default openApiDoc;

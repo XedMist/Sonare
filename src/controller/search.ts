@@ -14,7 +14,7 @@ const service = new SearchService();
 const storageService = new StorageService();
 
 const SearchQuerySchema = z.object({
-    q: z.string().min(3),
+    q: z.string().min(1),
     type: z.string().optional().default("artist,album,track")
 });
 
@@ -26,6 +26,9 @@ searchController.get(
     async (c) => {
         const { q, type } = c.req.valid("query");
         const apiVersion = c.get('apiVersion') as ApiVersion;
+        const UnifiedSearchQuerySchema = z.object({
+            q: z.string().min(1),
+        });
 
         c.header('X-Message', apiVersion)
 

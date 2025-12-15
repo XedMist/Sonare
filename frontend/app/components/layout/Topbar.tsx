@@ -127,7 +127,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-surface-300 hover:text-surface-100 hover:bg-surface-600 transition-colors"
               >
                 <UserIcon size={18} />
-                Perfil
+                Profile
               </button>
 
               <button

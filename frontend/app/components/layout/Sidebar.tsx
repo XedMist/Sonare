@@ -217,7 +217,7 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
             >
               <DropdownItem onClick={() => navigate("/app/profile") }>
                 <UserIcon size={18} />
-                Perfil
+                Profile
               </DropdownItem>
               <DropdownSeparator />
               <DropdownItem onClick={handleLogout}>

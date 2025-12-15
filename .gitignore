@@ -12,6 +12,8 @@ sync.sh
 spotify_links.txt
 spotify_links.json
 
+.vscode
+
 
 # Prerequisites
 *.d

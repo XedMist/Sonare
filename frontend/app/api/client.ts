@@ -99,6 +99,8 @@ export async function apiClient<T>(
         return fetch(url, {
             ...options,
             headers,
+            // Pass signal if present in options
+            signal: options.signal,
         });
     };
 

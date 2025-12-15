@@ -26,13 +26,13 @@ export interface UnifiedSearchResponse {
   relatedTracks: Record<string, Track[]>;
 }
 
-export async function search(query: string, type: string = "artist,album,track"): Promise<SearchResults> {
+export async function search(query: string, type: string = "artist,album,track", signal?: AbortSignal): Promise<SearchResults> {
   const queryParams = new URLSearchParams({
     q: query,
     type: type,
   });
 
-  return apiClient<SearchResults>(`/search?${queryParams}`);
+  return apiClient<SearchResults>(`/search?${queryParams}`, { signal });
 }
 
 export async function searchUnified(query: string): Promise<UnifiedSearchResponse> {

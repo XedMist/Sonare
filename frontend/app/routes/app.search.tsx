@@ -226,6 +226,13 @@ export default function AppSearchPage() {
   // SEARCH LOGIC
   // ============================================
 
+  // ============================================
+  // SEARCH LOGIC
+  // ============================================
+
+  // Ref for the current search request abort controller
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const performSearch = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 3) {
       setSearchState({
@@ -239,10 +246,25 @@ export default function AppSearchPage() {
       return;
     }
 
+    // Cancel previous request if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setSearchState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const results = await searchApi.search(searchQuery);
+      // Pass the abort signal
+      const results = await searchApi.search(searchQuery, "artist,album,track", controller.signal);
+      
+      // If initialized another request, this one is stale.
+      // Check if this is still the current controller
+      if (controller.signal.aborted) return;
+
       setSearchState({
         artists: results.artists || [],
         albums: results.albums || [],
@@ -255,6 +277,8 @@ export default function AppSearchPage() {
       // Update URL with query
       setSearchParams({ q: searchQuery }, { replace: true });
     } catch (error) {
+       if (controller.signal.aborted) return;
+       
       console.error("Search failed:", error);
       setSearchState((prev) => ({
         ...prev,
@@ -262,29 +286,35 @@ export default function AppSearchPage() {
         error: "Search failed. Please try again.",
         hasSearched: true,
       }));
+    } finally {
+        if (abortControllerRef.current === controller) {
+            abortControllerRef.current = null;
+        }
     }
   }, [setSearchParams]);
 
   // Debounced search effect
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+    // Cancel any pending search immediately when query changes
+    if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
     }
 
-    debounceRef.current = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       performSearch(query);
     }, 300);
 
     return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
+      clearTimeout(timeoutId);
+      // We don't abort here because we want the request to finish if components unmounts? 
+      // No, we should abort. But performSearch manages its own abort controller.
+      // If we just clear timeout, performSearch won't run.
     };
   }, [query, performSearch]);
 
   // Search on initial load if query exists
   useEffect(() => {
-    if (initialQuery.length >= 3) {
+    if (initialQuery.length >= 3 && !searchState.hasSearched) {
       performSearch(initialQuery);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

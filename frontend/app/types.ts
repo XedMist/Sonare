@@ -76,6 +76,8 @@ export interface Lyrics {
     updatedAt: string;
 }
 
+export type LyricsResponse = Lyrics;
+
 export interface SyncedLyricLine {
     timestamp: number; // in milliseconds
     text: string;

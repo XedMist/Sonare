@@ -26,7 +26,7 @@ export class StorageService {
         await this.minioClient.makeBucket(this.bucketName, "us-east-1");
         console.log(`Bucket ${this.bucketName} created successfully.`);
       }
-      console.log(`connect to ${config.minio.endPoint}`);
+      console.log(`Connected to MinIO at ${config.minio.endPoint}`);
     } catch (err) {
       console.error("Error checking/creating bucket:", err);
       // Only bubble the error when explicitly requested; otherwise log and continue
@@ -50,5 +50,20 @@ export class StorageService {
   
   async deleteFile(objectName: string) {
     return await this.minioClient.removeObject(this.bucketName, objectName);
+  }
+
+  async getFileContent(objectName: string): Promise<string | null> {
+    try {
+        const stream = await this.minioClient.getObject(this.bucketName, objectName);
+        return new Promise((resolve, reject) => {
+            let data = '';
+            stream.on('data', (chunk) => data += chunk);
+            stream.on('end', () => resolve(data));
+            stream.on('error', (err) => reject(err));
+        });
+    } catch (error) {
+        // If file doesn't exist, return null
+        return null;
+    }
   }
 }

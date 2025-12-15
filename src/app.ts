@@ -12,12 +12,12 @@ import {
     lyricsController,
 } from "@/controller/index.ts";
 
-
 import swaggerMiddleware from "@/middleware/swagger.ts";
 import { authMiddleware } from "@/middleware/AuthMiddleware.ts";
 import { requestContext } from '@/middleware/requestContext.ts'
 import { errorHandler } from "@/middleware/errorHandler.ts";
 import { StorageService } from "@/services/StorageService.ts";
+import { rateLimiter } from "./middleware/rateLimiter";
 
 await new StorageService().initialize({ failOnError: true });
 
@@ -28,7 +28,11 @@ app.use('*', requestContext())
 app.onError(errorHandler)
 
 const api = app.basePath("/api");
-
+api.use(rateLimiter({
+    capacity: 20 * 5,
+    refillRate: 20,
+    cost: (c) => (c.req.method === 'POST' ? 5 : 1),
+}));
 
 // Rutas publicas 
 api.route("/auth", authController);

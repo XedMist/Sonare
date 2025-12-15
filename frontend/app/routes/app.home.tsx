@@ -8,7 +8,7 @@ import * as tracksApi from "../api/tracks";
 import * as playlistsApi from "../api/playlists";
 import { MediaCard } from "../components/shared/MediaCard";
 import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
+import { AddToPlaylistDialog } from "../components/playlist/AddToPlaylistDialog";
 import { 
   LoadingSection, 
   ErrorState, 
@@ -70,13 +70,14 @@ interface QuickPlayCardProps {
   subtitle?: string;
   artwork?: string;
   onPlay: () => void;
+  onClick: () => void;
 }
 
-function QuickPlayCard({ title, subtitle, artwork, onPlay }: QuickPlayCardProps) {
+function QuickPlayCard({ title, subtitle, artwork, onPlay, onClick }: QuickPlayCardProps) {
   return (
     <div 
       className="group relative flex items-center gap-3 p-3 rounded-lg bg-surface-800/50 hover:bg-surface-700/60 transition-all cursor-pointer border border-surface-700/30"
-      onClick={onPlay}
+      onClick={onClick}
     >
       <div className="w-12 h-12 rounded bg-surface-700 overflow-hidden flex-shrink-0">
         {artwork ? (
@@ -92,7 +93,7 @@ function QuickPlayCard({ title, subtitle, artwork, onPlay }: QuickPlayCardProps)
         {subtitle && <p className="text-sm text-surface-400 truncate">{subtitle}</p>}
       </div>
       <button
-        className="absolute right-3 w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center shadow-lg opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-primary-400"
+        className="absolute right-3 w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center shadow-lg opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all hover:bg-primary-400 z-10"
         onClick={(e) => {
           e.stopPropagation();
           onPlay();
@@ -362,6 +363,7 @@ export default function AppHomePage() {
                 subtitle={item.subtitle}
                 artwork={item.artwork}
                 onPlay={() => item.type === "album" ? handlePlayAlbum(item.id) : handlePlayPlaylist(item.id)}
+                onClick={() => navigate(item.type === "album" ? `/app/albums/${item.id}` : `/app/playlists/${item.id}`)}
               />
             ))}
           </div>
@@ -380,7 +382,6 @@ export default function AppHomePage() {
         title="Albums"
         subtitle="Browse your collection"
         items={albumItems}
-        onPlayItem={handlePlayAlbum}
         onSeeAll={() => navigate("/app/library")}
       />
 
@@ -407,7 +408,7 @@ export default function AppHomePage() {
       <AddToPlaylistDialog
         open={isPlaylistDialogOpen}
         onOpenChange={setIsPlaylistDialogOpen}
-        tracks={selectedTrack ? [selectedTrack] : []}
+        trackId={selectedTrack?.id || null}
       />
     </div>
   );

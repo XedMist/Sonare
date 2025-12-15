@@ -114,6 +114,8 @@ export interface Playlist {
   user?: User;
   createdAt: Date;
   updatedAt: Date;
+  trackCount?: number;
+  cover?: string;
 }
 
 export interface PlaylistTrack {

@@ -1,6 +1,8 @@
 import { Hono } from "hono";
+import { db } from "@/db/db.ts";
 import { z } from 'zod';
 import PlaylistService from "@/services/PlaylistService.ts";
+import { StorageService } from "@/services/StorageService.ts";
 import { PaginationQuerySchema } from "@/model/dto/CommonDTO.ts";
 import { PlaylistCreateSchema, PlaylistTrackActionSchema, PlaylistUpdateSchema, type PlaylistResponse } from "@/model/dto/PlaylistDTO.ts";
 import { DTOMapper } from "@/model/mappers.ts";
@@ -13,9 +15,9 @@ import { PlaylistGuard, requireOwner } from "@/middleware/guard";
 
 
 const playlistController = new Hono();
-
 const service = new PlaylistService();
 const guard = new PlaylistGuard();
+const storageService = new StorageService();
 
 const ShuffleQuerySchema = z.object({
     order: z.enum(["default", "shuffle"]).default("default")
@@ -34,11 +36,23 @@ playlistController
             const role = c.get("userRole") as string
 
             if (role === "ADMIN") {
-                const dtos = playlists.map(DTOMapper.toPlaylistResponse)
+                const dtos = await Promise.all(playlists.map(async (p) => {
+                    const dto = DTOMapper.toPlaylistResponse(p);
+                    if (dto.cover) {
+                        dto.cover = await storageService.getPresignedUrl(dto.cover);
+                    }
+                    return dto;
+                }));
                 return c.json(paginated<PlaylistResponse>(dtos, page, limit));
             }
 
-            const dtos = playlists.filter((p) => p.userID === userID).map(DTOMapper.toPlaylistResponse)
+            const dtos = await Promise.all(playlists.filter((p) => p.userID === userID).map(async (p) => {
+                const dto = DTOMapper.toPlaylistResponse(p);
+                if (dto.cover) {
+                    dto.cover = await storageService.getPresignedUrl(dto.cover);
+                }
+                return dto;
+            }));
 
             return c.json(paginated<PlaylistResponse>(dtos, page, limit));
         });
@@ -64,7 +78,12 @@ playlistController
             const { id } = c.req.param();
             const playlist = await service.findByID(id);
 
-            return c.json(DTOMapper.toPlaylistResponse(playlist));
+            const dto = DTOMapper.toPlaylistResponse(playlist);
+            if (dto.cover) {
+                dto.cover = await storageService.getPresignedUrl(dto.cover);
+            }
+
+            return c.json(dto);
         });
 
 playlistController
@@ -77,7 +96,18 @@ playlistController
             const { order } = c.req.valid('query');
             const tracks = order === 'shuffle' ? await service.shuffle(id) : await service.getTracksInPlaylist(id);
 
-            return c.json(tracks.map(DTOMapper.toPlaylistTrackResponse));
+            const response = await Promise.all(tracks.map(async (track) => {
+                const dto = DTOMapper.toTrackResponse(track);
+                if (dto.thumbnail) {
+                    dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+                }
+                if (dto.album?.cover) {
+                    dto.album.cover = await storageService.getPresignedUrl(dto.album.cover);
+                }
+                return dto;
+            }));
+
+            return c.json(response);
         });
 
 playlistController
@@ -91,6 +121,13 @@ playlistController
 
             if (!body.name) {
                 return c.json({ message: "Name is required" }, 400);
+            }
+
+            // Check if it's the favorites playlist
+            const userID = c.get("userId") as string;
+            const user = await db.user.findUnique({ where: { id: userID } });
+            if (user?.favoritosID === id) {
+                return c.json({ message: "Cannot rename favorites playlist" }, 403);
             }
 
             const updated = await service.update(id, body.name);
@@ -129,8 +166,21 @@ playlistController
 playlistController
     .delete("/:id",
         requirePermission(Capability.DELETE, "playlists"),
+        requireOwner(guard),
         async (c) => {
             const { id } = c.req.param();
+            
+            // Check protection
+            try {
+                const userID = c.get("userId") as string;
+                const user = await db.user.findUnique({ where: { id: userID } });
+                if (user?.favoritosID === id) {
+                    return c.json({ message: "Cannot delete favorites playlist" }, 403);
+                }
+            } catch (e) {
+                console.error("Error checking favorites protection", e);
+            }
+
             const deleted = await service.delete(id);
 
             if (!deleted) {

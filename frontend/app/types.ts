@@ -12,6 +12,7 @@ export interface User {
     birthdate?: string | null;
     avatarUrl?: string | null;
     roleID: string;
+    favoritosID?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -101,7 +102,10 @@ export interface Playlist {
     userID: string;
     createdAt: string;
     updatedAt: string;
+    trackCount?: number;
+    cover?: string;
     tracks?: Track[];
+    user?: User;
 }
 
 export interface PlaylistTrack {

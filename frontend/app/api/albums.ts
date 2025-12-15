@@ -62,11 +62,11 @@ export async function getAlbumTracks(id: string, params: GetAlbumsParams = {}): 
   
   const cacheKey = cacheKeys.albumTracks(id);
   
-  const data = await apiCache.getOrFetch(
+  const response = await apiCache.getOrFetch(
     cacheKey,
-    () => apiClient<Track[]>(`/albums/${id}/tracks?${queryParams}`),
+    () => apiClient<PaginatedResponse<Track>>(`/albums/${id}/tracks?${queryParams}`),
     60 * 1000
   );
   
-  return { data };
+  return { data: response.data };
 }

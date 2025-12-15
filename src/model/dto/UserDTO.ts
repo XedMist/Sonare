@@ -12,6 +12,7 @@ export const UserResponseSchema = z.object({
   birthdate: z.date().nullable().optional(),
   avatarUrl: z.string().url().nullable().optional(),
   roleID: z.string(),
+  favoritosID: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

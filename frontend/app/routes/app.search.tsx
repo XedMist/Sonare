@@ -5,7 +5,7 @@ import * as searchApi from "../api/search";
 import * as albumsApi from "../api/albums";
 import { MediaCard } from "../components/shared/MediaCard";
 import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
+import { AddToPlaylistDialog } from "../components/playlist/AddToPlaylistDialog";
 import { 
   LoadingSection, 
   ErrorState, 
@@ -166,6 +166,9 @@ function TracksSection({ tracks, allTracks, onPlayTrack, onAddToPlaylist }: Trac
             actions={{
               onAddToPlaylist: () => onAddToPlaylist(track),
               onGoToAlbum: track.albumID ? () => navigate(`/app/albums/${track.albumID}`) : undefined,
+              onGoToArtist: (track.artistID || track.album?.artistID)
+                ? () => navigate(`/app/artists/${track.artistID || track.album?.artistID}`)
+                : undefined,
             }}
           />
         ))}
@@ -428,7 +431,7 @@ export default function AppSearchPage() {
       <AddToPlaylistDialog
         open={isPlaylistDialogOpen}
         onOpenChange={setIsPlaylistDialogOpen}
-        tracks={selectedTrack ? [selectedTrack] : []}
+        trackId={selectedTrack?.id || null}
       />
     </div>
   );

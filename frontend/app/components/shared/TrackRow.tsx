@@ -4,6 +4,7 @@ import { Artwork } from "../ui/Avatar";
 import { PlayIcon, HeartIcon, MoreIcon } from "../icons/Icons";
 import { DropdownMenu, DropdownItem, DropdownSeparator } from "../ui";
 import type { Track } from "../../types";
+import { usePlayer } from "../../context/PlayerContext";
 
 interface TrackRowProps {
   track: Track;
@@ -27,6 +28,8 @@ function formatDuration(seconds: number): string {
 // Memoized TrackRow to prevent unnecessary re-renders in lists
 export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwork = true, actions }: TrackRowProps) {
   const artworkSrc = track.thumbnail || track.album?.cover || undefined;
+  const { isFavorite, toggleFavorite } = usePlayer();
+  const isLiked = isFavorite(track.id);
 
   return (
     <div
@@ -60,11 +63,14 @@ export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwo
       </div>
 
       <button
-        className="p-2 text-surface-400 hover:text-primary-500 opacity-0 group-hover:opacity-100 transition-all"
-        aria-label="Like"
-        onClick={(e) => e.stopPropagation()}
+        className={`p-2 transition-all opacity-0 group-hover:opacity-100 ${isLiked ? "text-primary-500 opacity-100" : "text-surface-400 hover:text-primary-500"}`}
+        aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
+        onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(track.id);
+        }}
       >
-        <HeartIcon size={16} />
+        <HeartIcon size={16} filled={isLiked} />
       </button>
 
       <span className="text-sm text-surface-400 w-12 text-right">
@@ -93,7 +99,7 @@ export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwo
                 Go to album
               </DropdownItem>
             )}
-            {actions.onGoToArtist && track.album?.artistID && (
+            {actions.onGoToArtist && (track.artistID || track.album?.artistID) && (
               <DropdownItem onClick={actions.onGoToArtist}>
                 Go to artist
               </DropdownItem>

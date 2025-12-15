@@ -162,7 +162,8 @@ function PlaylistsTab({ playlists, onPlayPlaylist, onCreatePlaylist, isLoading }
           type="playlist"
           id={playlist.id}
           name={playlist.name}
-          subtitle={`${playlist.tracks?.length || 0} tracks`}
+          subtitle={`${playlist.trackCount || 0} tracks`}
+          artwork={playlist.cover || undefined}
           onPlay={() => onPlayPlaylist(playlist.id)}
         />
       ))}
@@ -305,6 +306,13 @@ export default function AppLibraryPage() {
 
   useEffect(() => {
     fetchData();
+
+    const handleUpdate = () => fetchData();
+    window.addEventListener("playlist-update", handleUpdate);
+    
+    return () => {
+      window.removeEventListener("playlist-update", handleUpdate);
+    };
   }, [fetchData]);
 
   // ============================================
@@ -339,6 +347,7 @@ export default function AppLibraryPage() {
       playlists: [playlist, ...prev.playlists],
     }));
     // Navigate to the new playlist
+    window.dispatchEvent(new Event('playlist-update'));
     navigate(`/app/playlists/${playlist.id}`);
   };
 

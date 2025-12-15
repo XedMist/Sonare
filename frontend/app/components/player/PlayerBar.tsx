@@ -15,6 +15,7 @@ import {
   RepeatOneIcon,
   QueueMusicIcon,
   MicIcon,
+  HeartIcon,
 } from "../icons/Icons";
 
 function formatTime(seconds: number): string {
@@ -42,8 +43,11 @@ export function PlayerBar() {
     toggleShuffle,
     showLyrics,
     setShowLyrics,
+    isFavorite,
+    toggleFavorite,
   } = usePlayer();
 
+  const isLiked = currentTrack ? isFavorite(currentTrack.id) : false;
   const artworkSrc = currentTrack?.thumbnail || currentTrack?.album?.cover || undefined;
 
   if (!currentTrack) {
@@ -85,9 +89,7 @@ export function PlayerBar() {
                   rounded="sm"
                   className="shadow-lg shadow-black/30 transition-transform duration-200 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-sm">
-                   <MicIcon size={20} className="text-white" />
-                </div>
+
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium text-surface-100 truncate">
@@ -99,6 +101,17 @@ export function PlayerBar() {
                 </p>
               )}
             </div>
+            <IconButton 
+              size="sm" 
+              aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
+              className={isLiked ? "text-primary-500" : "text-surface-400"}
+              onClick={(e) => {
+                 e.stopPropagation();
+                 toggleFavorite(currentTrack.id);
+              }}
+            >
+                <HeartIcon size={20} filled={isLiked} />
+            </IconButton>
             <Badge variant="secondary" className="hidden sm:flex ml-2">
               Playing
             </Badge>
@@ -106,13 +119,13 @@ export function PlayerBar() {
 
           <div className="flex-1 flex flex-col items-center gap-1 max-w-md">
             <div className="flex items-center gap-2">
-              <IconButton
-                onClick={toggleShuffle}
-                aria-label="Toggle shuffle"
-                size="sm"
-                className={shuffle ? "text-primary-500" : ""}
+              <IconButton 
+                  onClick={() => setShowLyrics(!showLyrics)}
+                  aria-label="Lyrics" 
+                  size="sm"
+                  className={showLyrics ? "text-primary-500" : ""}
               >
-                <ShuffleIcon size={18} />
+                <MicIcon size={18} />
               </IconButton>
 
               <IconButton onClick={previous} aria-label="Previous track">
@@ -164,19 +177,6 @@ export function PlayerBar() {
           </div>
 
           <div className="hidden md:flex items-center gap-2 w-[30%] justify-end">
-            <IconButton 
-                onClick={() => setShowLyrics(!showLyrics)}
-                aria-label="Lyrics" 
-                size="sm"
-                className={showLyrics ? "text-primary-500" : ""}
-            >
-              <MicIcon size={18} />
-            </IconButton>
-
-            <IconButton aria-label="Queue" size="sm">
-              <QueueMusicIcon size={18} />
-            </IconButton>
-
             <div className="flex items-center gap-2 w-48">
               <IconButton
                 onClick={() => setVolume(volume === 0 ? 1 : 0)}

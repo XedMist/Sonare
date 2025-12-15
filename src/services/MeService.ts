@@ -45,12 +45,12 @@ export default class MeService {
 
     async updateProfile(userID: string, payload: UserProfileUpdate): Promise<User> {
         const updateData: {
-            displayName?: string | null;
-            firstName?: string | null;
-            lastName?: string | null;
-            bio?: string | null;
-            country?: string | null;
-            birthdate?: Date | null;
+            displayName?: string | undefined;
+            firstName?: string | undefined;
+            lastName?: string | undefined;
+            bio?: string | undefined;
+            country?: string | undefined;
+            birthdate?: Date | undefined;
         } = {};
 
         if (payload.displayName !== undefined) updateData.displayName = payload.displayName;
@@ -60,7 +60,11 @@ export default class MeService {
         if (payload.country !== undefined) updateData.country = payload.country;
         if (payload.birthdate !== undefined) updateData.birthdate = payload.birthdate;
 
-        const updated = await this.userRepository.updateProfile(userID, updateData);
+        const updated = await this.userRepository.updateProfile({ id: userID, data: updateData });
+        const newFavoriteName = updated.displayName + "'s Favorites";
+        if (updated.favoritosID) {
+            await this.playlistRepository.update({ id: updated.favoritosID, name: newFavoriteName });
+        }
         return this.withAvatarUrl(updated);
     }
 

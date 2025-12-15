@@ -79,7 +79,7 @@ export async function addTrackToPlaylist(
   trackId: string
 ): Promise<Playlist> {
   return apiClient<Playlist>(`/playlists/${playlistId}/tracks`, {
-    method: "PUT",
+    method: "POST",
     body: JSON.stringify({ trackID: trackId }),
   });
 }
@@ -105,8 +105,7 @@ export async function removeTrackFromPlaylist(
   playlistId: string, 
   trackId: string
 ): Promise<void> {
-  await apiClient(`/playlists/${playlistId}/tracks`, {
+  await apiClient(`/playlists/${playlistId}/tracks/${trackId}`, {
     method: "DELETE",
-    body: JSON.stringify({ trackID: trackId }),
   });
 }

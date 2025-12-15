@@ -17,3 +17,20 @@ export async function uploadAvatar(file: File): Promise<User> {
     body: formData,
   });
 }
+
+export async function getFavorites(): Promise<import("../types").Track[]> {
+  return apiClient<import("../types").Track[]>("/me/favorites");
+}
+
+export async function addToFavorites(trackID: string): Promise<void> {
+  return apiClient("/me/favorites", {
+    method: "POST",
+    body: JSON.stringify({ trackID }),
+  });
+}
+
+export async function removeFromFavorites(trackID: string): Promise<void> {
+  return apiClient(`/me/favorites/${trackID}`, {
+    method: "DELETE",
+  });
+}

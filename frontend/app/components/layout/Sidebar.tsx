@@ -14,6 +14,7 @@ import {
   LogoutIcon,
   MoreIcon,
 } from "../icons/Icons";
+import { VinylRecord } from "../player/VinylRecord";
 import type { Playlist } from "../../types";
 
 interface SidebarProps {
@@ -31,7 +32,7 @@ const navItems = [
 export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { setShowLyrics } = usePlayer();
+  const { setShowLyrics, currentTrack, isPlaying } = usePlayer();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   useEffect(() => {
@@ -51,8 +52,15 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
     }
     fetchPlaylists();
     
+    const handlePlaylistUpdate = () => {
+      fetchPlaylists();
+    };
+
+    window.addEventListener('playlist-update', handlePlaylistUpdate);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('playlist-update', handlePlaylistUpdate);
     };
   }, []);
 
@@ -158,6 +166,18 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
             )}
           </ScrollArea>
         </div>
+
+        {/* Vinyl Record Display */}
+        {currentTrack && (
+          <div className="px-6 pb-6 lg:pb-8 flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <VinylRecord 
+                src={currentTrack.thumbnail || currentTrack.album?.cover || undefined}
+                alt={currentTrack.name}
+                isPlaying={isPlaying}
+                className="w-48 h-48 sm:w-56 sm:h-56 shadow-2xl shadow-black/50"
+             />
+          </div>
+        )}
 
         <div className="p-3 border-t border-surface-800">
           <div className="flex items-center gap-2">

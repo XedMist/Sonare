@@ -4,7 +4,7 @@ import { usePlayer } from "../context/PlayerContext";
 import { useAuth } from "../context/AuthContext";
 import * as playlistsApi from "../api/playlists";
 import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
+import { AddToPlaylistDialog } from "../components/playlist/AddToPlaylistDialog";
 import { 
   LoadingSection, 
   ErrorState, 
@@ -237,15 +237,23 @@ function PlaylistHero({
               </button>
             }
           >
-            <DropdownItem onClick={onRename}>
-              <EditIcon size={16} className="mr-2" />
-              Rename playlist
-            </DropdownItem>
-            <DropdownSeparator />
-            <DropdownItem onClick={onDelete} destructive>
-              <DeleteIcon size={16} className="mr-2" />
-              Delete playlist
-            </DropdownItem>
+            {playlist.id !== playlist.user?.favoritosID && (
+              <DropdownItem onClick={onRename}>
+                <EditIcon size={16} className="mr-2" />
+                Rename playlist
+              </DropdownItem>
+            )}
+            
+            {/* Verify if we can delete this playlist (checking against user favorites) */}
+            {playlist.id !== playlist.user?.favoritosID && (
+                <>
+                    <DropdownSeparator />
+                    <DropdownItem onClick={onDelete} destructive>
+                    <DeleteIcon size={16} className="mr-2" />
+                    Delete playlist
+                    </DropdownItem>
+                </>
+            )}
           </DropdownMenu>
         </div>
       )}
@@ -256,9 +264,9 @@ function PlaylistHero({
           {/* Playlist Artwork */}
           <div className="relative">
             <div className="w-48 h-48 md:w-56 md:h-56 rounded-lg shadow-2xl shadow-black/40 overflow-hidden bg-gradient-to-br from-primary-500 to-primary-700">
-              {firstTrack?.thumbnail ? (
+              {firstTrack?.thumbnail || firstTrack?.album?.cover ? (
                 <img
-                  src={firstTrack.thumbnail}
+                  src={firstTrack?.thumbnail || firstTrack?.album?.cover || ""}
                   alt={playlist.name}
                   className="w-full h-full object-cover"
                 />
@@ -339,8 +347,8 @@ function TracksList({ tracks, isOwner, onPlayTrack, onAddToPlaylist, onRemoveFro
           actions={{
             onAddToPlaylist: () => onAddToPlaylist(track),
             onGoToAlbum: track.albumID ? () => navigate(`/app/albums/${track.albumID}`) : undefined,
-            onGoToArtist: track.album?.artistID 
-              ? () => navigate(`/app/artists/${track.album?.artistID}`) 
+            onGoToArtist: (track.artistID || track.album?.artistID)
+              ? () => navigate(`/app/artists/${track.artistID || track.album?.artistID}`) 
               : undefined,
             onRemoveFromPlaylist: isOwner ? () => onRemoveFromPlaylist(track) : undefined,
           }}
@@ -445,6 +453,7 @@ export default function PlaylistDetailPage() {
     if (!id) return;
     
     await playlistsApi.updatePlaylist(id, { name: newName });
+    window.dispatchEvent(new Event('playlist-update'));
     setData((prev) => ({
       ...prev,
       playlist: prev.playlist ? { ...prev.playlist, name: newName } : null,
@@ -455,6 +464,7 @@ export default function PlaylistDetailPage() {
     if (!id) return;
     
     await playlistsApi.deletePlaylist(id);
+    window.dispatchEvent(new Event('playlist-update'));
     navigate("/app/library");
   };
 
@@ -503,7 +513,7 @@ export default function PlaylistDetailPage() {
       <AddToPlaylistDialog
         open={isAddToPlaylistDialogOpen}
         onOpenChange={setIsAddToPlaylistDialogOpen}
-        tracks={selectedTrack ? [selectedTrack] : []}
+        trackId={selectedTrack?.id || null}
       />
 
       {/* Rename Dialog */}

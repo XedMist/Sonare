@@ -66,7 +66,7 @@ export default class UserRepository {
         return PrismaMapper.toUser(user);
     }
 
-    async updateProfile(id: string, data: UpdateProfileInput): Promise<User> {
+    async updateProfile({ id, data }: { id: string, data: UpdateProfileInput }): Promise<User> {
         const user = await db.user.update({
             where: { id },
             data,

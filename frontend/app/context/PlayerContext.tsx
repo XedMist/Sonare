@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { getTrackAudioUrl } from "../api/tracks";
+import { getFavorites, addToFavorites, removeFromFavorites } from "../api/me";
+import { useAuth } from "./AuthContext";
 import type { Track, RepeatMode } from "../types";
 
 interface PlayerTrack extends Track {
@@ -33,7 +35,12 @@ interface PlayerContextType {
   clearQueue: () => void;
   showLyrics: boolean;
   setShowLyrics: (show: boolean) => void;
+  
+  // Favorites
+  isFavorite: (trackId: string) => boolean;
+  toggleFavorite: (trackId: string) => Promise<void>;
 }
+
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
 
@@ -56,6 +63,53 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("off");
   const [shuffle, setShuffle] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
+
+  // Favorites State
+  const [favoriteTrackIDs, setFavoriteTrackIDs] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function loadFavorites() {
+        if (!user) {
+            setFavoriteTrackIDs(new Set());
+            return;
+        }
+
+        try {
+            const favorites = await getFavorites();
+            setFavoriteTrackIDs(new Set(favorites.map(t => t.id)));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    loadFavorites();
+  }, [user]);
+
+  const isFavorite = useCallback((trackId: string) => {
+    return favoriteTrackIDs.has(trackId);
+  }, [favoriteTrackIDs]);
+
+  const toggleFavorite = useCallback(async (trackId: string) => {
+    try {
+        const isLiked = favoriteTrackIDs.has(trackId);
+        // Optimistic update
+        setFavoriteTrackIDs(prev => {
+            const newSet = new Set(prev);
+            if (isLiked) newSet.delete(trackId);
+            else newSet.add(trackId);
+            return newSet;
+        });
+
+        if (isLiked) {
+            await removeFromFavorites(trackId);
+        } else {
+            await addToFavorites(trackId);
+        }
+    } catch (e) {
+        console.error("Failed to toggle favorite", e);
+        // Revert on error could be implemented here
+    }
+  }, [favoriteTrackIDs]);
 
   // Use refs for values accessed in event handlers to avoid stale closures
   const repeatModeRef = useRef(repeatMode);
@@ -243,8 +297,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const toggleRepeat = useCallback(() => {
     setRepeatMode((prev) => {
-      if (prev === "off") return "all";
-      if (prev === "all") return "one";
+      // Logic changed to off -> one -> all to ensure icon change on first click
+      if (prev === "off") return "one";
+      if (prev === "one") return "all";
       return "off";
     });
   }, []);
@@ -292,6 +347,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     toggleShuffle,
     addToQueue,
     clearQueue,
+    isFavorite,
+    toggleFavorite,
   };
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;

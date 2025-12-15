@@ -33,12 +33,12 @@ export default class PlaylistService {
         return await this.playlistRepository.delete({ id });
     }
 
-    async getTracksInPlaylist(playlistID: string): Promise<PlaylistTrack[]> {
+    async getTracksInPlaylist(playlistID: string): Promise<Track[]> {
         const playlist = await this.playlistRepository.findById({ id: playlistID });
         if (!playlist) {
             throw new NotFoundError("No se encontro la playlist");
         }
-        const tracksPlaylist = await this.playlistRepository.getPlaylistTracks(playlistID);
+        const tracksPlaylist = await this.playlistRepository.getTracksInPlaylist(playlistID);
         return tracksPlaylist;
     }
 
@@ -60,26 +60,28 @@ export default class PlaylistService {
         return updatedPlaylist;
     }
 
-    async getPlaylistTracks(playlistID: string): Promise<PlaylistTrack[]> {
+    async getPlaylistTracks(playlistID: string): Promise<Track[]> {
         const playlist = await this.playlistRepository.findById({ id: playlistID });
         if (!playlist) {
             throw new NotFoundError("No se encontro la playlist");
         }
-        return await this.playlistRepository.getPlaylistTracks(playlistID);
+        return await this.playlistRepository.getTracksInPlaylist(playlistID);
     }
 
-    // Returns a PlaylistTracks[] but it doesnt mutate
-    async shuffle(playlistID: string): Promise<PlaylistTrack[]> {
+    // Returns a Track[] but it doesnt mutate
+    async shuffle(playlistID: string): Promise<Track[]> {
         const playlist = await this.playlistRepository.findById({ id: playlistID });
         if (!playlist) {
             throw new NotFoundError("No se encontro la playlist");
         }
-        const playlistTracks = await this.playlistRepository.getPlaylistTracks(playlistID);
+        const tracks = await this.playlistRepository.getTracksInPlaylist(playlistID);
         // Fisher-Yates shuffle algorithm
-        const shuffled = [...playlistTracks];
+        const shuffled = [...tracks];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            const temp = shuffled[i]!;
+            shuffled[i] = shuffled[j]!;
+            shuffled[j] = temp;
         }
         return shuffled;
     }

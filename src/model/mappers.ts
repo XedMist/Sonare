@@ -104,6 +104,9 @@ export class PrismaMapper {
             userID: prisma.userID,
             createdAt: prisma.createdAt,
             updatedAt: prisma.updatedAt,
+            trackCount: (prisma as any)._count?.items ?? undefined,
+            cover: (prisma as any).items?.[0]?.track?.thumbnail ?? (prisma as any).items?.[0]?.track?.album?.cover ?? undefined,
+            user: (prisma as any).user ? PrismaMapper.toUser((prisma as any).user) : undefined,
         };
     }
 
@@ -159,6 +162,7 @@ export class DTOMapper {
             birthdate: entity.birthdate ?? null,
             avatarUrl: entity.avatarUrl ?? null,
             roleID: entity.roleID,
+            favoritosID: entity.favoritosID,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
@@ -213,6 +217,9 @@ export class DTOMapper {
             userID: entity.userID,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
+            trackCount: entity.trackCount,
+            cover: entity.cover,
+            user: entity.user ? DTOMapper.toUserResponse(entity.user) : undefined,
         };
     }
 

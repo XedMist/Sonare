@@ -41,7 +41,7 @@ export default class UserService {
 
             const favoritosPlaylist = await tx.playlist.create({
                 data: {
-                    name: "Favoritos",
+                    name: newUser.displayName + "'s Favorites",
                     userID: newUser.id
                 }
             });

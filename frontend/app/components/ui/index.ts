@@ -4,7 +4,7 @@ export { TextField } from "./TextField";
 export { Card } from "./Card";
 export { Skeleton, SkeletonText, SkeletonCard, SkeletonTrackRow } from "./Skeleton";
 export { Avatar, Artwork } from "./Avatar";
-export { Dialog, DialogContent, DialogHeader, DialogFooter } from "./Dialog";
+export { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "./Dialog";
 export { DropdownMenu, DropdownItem, DropdownSeparator } from "./DropdownMenu";
 export { Slider } from "./Slider";
 export { Tabs, Tab, TabsList, TabsTrigger, TabsContent } from "./Tabs";

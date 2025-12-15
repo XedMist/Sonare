@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router";
 import { usePlayer } from "../context/PlayerContext";
 import * as albumsApi from "../api/albums";
 import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
+import { AddToPlaylistDialog } from "../components/playlist/AddToPlaylistDialog";
 import { 
   LoadingSection, 
   ErrorState, 
@@ -185,8 +185,8 @@ function TracksList({ tracks, onPlayTrack, onAddToPlaylist }: TracksListProps) {
           showArtwork={false}
           actions={{
             onAddToPlaylist: () => onAddToPlaylist(track),
-            onGoToArtist: track.album?.artistID 
-              ? () => navigate(`/app/artists/${track.album?.artistID}`) 
+            onGoToArtist: (track.artistID || track.album?.artistID)
+              ? () => navigate(`/app/artists/${track.artistID || track.album?.artistID}`) 
               : undefined,
           }}
         />
@@ -312,7 +312,7 @@ export default function AlbumDetailPage() {
       <AddToPlaylistDialog
         open={isPlaylistDialogOpen}
         onOpenChange={setIsPlaylistDialogOpen}
-        tracks={selectedTrack ? [selectedTrack] : []}
+        trackId={selectedTrack?.id || null}
       />
     </div>
   );

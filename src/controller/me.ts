@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import MeService from "@/services/MeService.ts";
 import { DTOMapper } from "@/model/mappers.ts";
+import { StorageService } from "@/services/StorageService.ts";
 import { requirePermission } from "@/middleware/AuthMiddleware"
 import { validate } from "@/middleware/ValidationMiddleware.ts";
 import { PlaylistTrackActionSchema, type PlaylistResponse } from "@/model/dto/PlaylistDTO.ts";
@@ -87,8 +88,20 @@ meController
         async (c) => {
             const userID = c.get("userId");
             const favorites = await service.getMyFavorites(userID);
+            const storageService = new StorageService();
 
-            return c.json(favorites.map(DTOMapper.toTrackResponse));
+            const response = await Promise.all(favorites.map(async (track) => {
+                const dto = DTOMapper.toTrackResponse(track);
+                if (dto.thumbnail) {
+                    dto.thumbnail = await storageService.getPresignedUrl(dto.thumbnail);
+                }
+                if (dto.album?.cover) {
+                    dto.album.cover = await storageService.getPresignedUrl(dto.album.cover);
+                }
+                return dto;
+            }));
+
+            return c.json(response);
         });
 
 meController.post("/favorites",

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UserResponseSchema } from './UserDTO.js';
 
 // Playlist DTOs
 export const PlaylistResponseSchema = z.object({
@@ -7,6 +8,9 @@ export const PlaylistResponseSchema = z.object({
   userID: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  trackCount: z.number().optional(),
+  cover: z.string().optional(),
+  user: UserResponseSchema.optional(),
 });
 
 export const PlaylistCreateSchema = z.object({

@@ -5,7 +5,7 @@ import * as artistsApi from "../api/artists";
 import * as albumsApi from "../api/albums";
 import { MediaCard } from "../components/shared/MediaCard";
 import { TrackRow, TrackListHeader } from "../components/shared/TrackRow";
-import { AddToPlaylistDialog } from "../components/shared/AddToPlaylistDialog";
+import { AddToPlaylistDialog } from "../components/playlist/AddToPlaylistDialog";
 import { 
   LoadingSection, 
   ErrorState, 
@@ -349,7 +349,7 @@ export default function ArtistDetailPage() {
       <AddToPlaylistDialog
         open={isPlaylistDialogOpen}
         onOpenChange={setIsPlaylistDialogOpen}
-        tracks={selectedTrack ? [selectedTrack] : []}
+        trackId={selectedTrack?.id || null}
       />
     </div>
   );

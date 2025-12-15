@@ -7,7 +7,25 @@ import { PrismaMapper } from "../model/mappers.ts";
 // Get, post, get id, delete id
 export default class PlaylistRepository {
     async findAll({ skip, take }: { skip?: number, take?: number }): Promise<Playlist[]> {
-        const playlists = await db.playlist.findMany({ skip, take });
+        const playlists = await db.playlist.findMany({ 
+            skip, 
+            take,
+            include: {
+                _count: {
+                    select: { items: true }
+                },
+                user: true,
+                items: {
+                    take: 1,
+                    orderBy: { position: 'asc' },
+                    include: {
+                        track: {
+                            include: { album: true }
+                        }
+                    }
+                }
+            }
+        });
         return playlists.map(PrismaMapper.toPlaylist);
     }
 
@@ -15,6 +33,21 @@ export default class PlaylistRepository {
         const playlist = await db.playlist.findUnique({
             where: {
                 id: id,
+            },
+            include: {
+                _count: {
+                    select: { items: true }
+                },
+                user: true,
+                items: {
+                    take: 1,
+                    orderBy: { position: 'asc' },
+                    include: {
+                        track: {
+                            include: { album: true }
+                        }
+                    }
+                }
             }
         });
         return playlist ? PrismaMapper.toPlaylist(playlist) : null;
@@ -36,13 +69,20 @@ export default class PlaylistRepository {
 
     async delete({ id }: Pick<Playlist, "id">): Promise<boolean> {
         try {
+            await db.playlistTrack.deleteMany({
+                where: {
+                    playlistId: id
+                }
+            });
+
             await db.playlist.delete({
                 where: {
                     id: id,
                 }
             });
             return true;
-        } catch (_) {
+        } catch (e) {
+            console.error("Failed to delete playlist", e);
             return false;
         }
     }
@@ -62,7 +102,17 @@ export default class PlaylistRepository {
     async getTracksInPlaylist(playlistID: string): Promise<Track[]> {
         const playlist = await db.playlist.findUnique({
             where: { id: playlistID },
-            include: { items: { include: { track: true } } }
+            include: { 
+                items: { 
+                    include: { 
+                                track: { 
+                                    include: { 
+                                        album: true 
+                                    } 
+                                } 
+                    } 
+                } 
+            }
         });
         if (!playlist) {
             return [];
@@ -104,6 +154,21 @@ export default class PlaylistRepository {
         const playlists = await db.playlist.findMany({
             where: {
                 userID: userID
+            },
+            include: {
+                _count: {
+                    select: { items: true }
+                },
+                user: true,
+                items: {
+                    take: 1,
+                    orderBy: { position: 'asc' },
+                    include: {
+                        track: {
+                            include: { album: true }
+                        }
+                    }
+                }
             }
         });
         return playlists.map(PrismaMapper.toPlaylist);

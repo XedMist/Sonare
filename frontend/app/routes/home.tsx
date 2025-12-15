@@ -32,50 +32,6 @@ const SonareLogo = ({ size = "md", showText = true, className = "" }: SonareLogo
 
     return (
         <div className={`flex items-center gap-3 ${className}`}>
-            <div className="relative group">
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-primary-500/40 rounded-xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
-
-                {/* Logo container */}
-                <div
-                    className="relative rounded-xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 flex items-center justify-center shadow-xl shadow-primary-500/25"
-                    style={{ width: icon, height: icon }}
-                >
-                    {/* Sound wave logo */}
-                    <svg
-                        viewBox="0 0 48 48"
-                        fill="none"
-                        className="text-white"
-                        style={{ width: icon * 0.6, height: icon * 0.6 }}
-                    >
-                        {/* Central circle (represents the sound source) */}
-                        <circle cx="24" cy="24" r="6" fill="currentColor" />
-
-                        {/* Sound waves emanating outward */}
-                        <path
-                            d="M24 10C31.732 10 38 16.268 38 24C38 31.732 31.732 38 24 38"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            opacity="0.9"
-                        />
-                        <path
-                            d="M24 4C35.046 4 44 12.954 44 24C44 35.046 35.046 44 24 44"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            opacity="0.5"
-                        />
-                        <path
-                            d="M24 16C28.418 16 32 19.582 32 24C32 28.418 28.418 32 24 32"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            opacity="0.7"
-                        />
-                    </svg>
-                </div>
-            </div>
 
             {showText && (
                 <span className={`font-bold text-surface-50 tracking-tight ${text}`}>
@@ -190,15 +146,6 @@ const HeroSection = () => {
             <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary-500/8 rounded-full blur-[150px] z-[1]" />
 
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-center">
-                {/* Hero Logo */}
-                <div className="mb-12 inline-flex">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-primary-500/40 rounded-3xl blur-2xl animate-pulse" />
-                        <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 flex items-center justify-center shadow-2xl shadow-primary-500/40 p-5">
-                            <HeroWaveIcon />
-                        </div>
-                    </div>
-                </div>
 
                 {/* Headline */}
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-surface-50 mb-6 tracking-tight">

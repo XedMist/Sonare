@@ -19,40 +19,6 @@ export function meta({ }: Route.MetaArgs) {
 
 const SonareLogo = () => (
     <div className="flex flex-col items-center gap-4">
-        <div className="relative group">
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-primary-500/40 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
-
-            {/* Logo container */}
-            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 flex items-center justify-center shadow-2xl shadow-primary-500/30">
-                {/* Sound wave logo */}
-                <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12 text-white">
-                    <circle cx="24" cy="24" r="6" fill="currentColor" />
-                    <path
-                        d="M24 10C31.732 10 38 16.268 38 24C38 31.732 31.732 38 24 38"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        opacity="0.9"
-                    />
-                    <path
-                        d="M24 4C35.046 4 44 12.954 44 24C44 35.046 35.046 44 24 44"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        opacity="0.5"
-                    />
-                    <path
-                        d="M24 16C28.418 16 32 19.582 32 24C32 28.418 28.418 32 24 32"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        opacity="0.7"
-                    />
-                </svg>
-            </div>
-        </div>
-
         <div className="text-center">
             <h1 className="text-3xl font-bold text-surface-50 tracking-tight">Sonare</h1>
             <p className="text-surface-400 mt-1">Tu música personal en streaming</p>

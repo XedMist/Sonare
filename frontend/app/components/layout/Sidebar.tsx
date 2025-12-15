@@ -85,9 +85,6 @@ export function Sidebar({ isOpen = true, onClose, onCreatePlaylist }: SidebarPro
       >
         <div className="p-6">
           <NavLink to="/app" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/20">
-              <MusicNoteIcon size={24} className="text-surface-100" />
-            </div>
             <span className="text-xl font-bold text-surface-100 group-hover:text-primary-400 transition-colors">
               Sonare
             </span>

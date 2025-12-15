@@ -327,6 +327,7 @@ export default function AppHomePage() {
     id: playlist.id,
     name: playlist.name,
     subtitle: `${playlist.tracks?.length || 0} tracks`,
+    artwork: playlist.cover || playlist.tracks?.[0]?.thumbnail,
   }));
 
   // Quick play items (mix of recent albums and playlists)

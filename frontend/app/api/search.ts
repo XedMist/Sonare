@@ -32,12 +32,22 @@ export async function search(query: string, type: string = "artist,album,track",
     type: type,
   });
 
-  return apiClient<SearchResults>(`/search?${queryParams}`, { signal });
+  return apiClient<SearchResults>(`/search?${queryParams}`, { 
+    signal,
+    headers: {
+      "Accept": "application/vnd.sonare.search-v1+json"
+    }
+  });
 }
 
-export async function searchUnified(query: string): Promise<UnifiedSearchResponse> {
+export async function searchUnified(query: string, signal?: AbortSignal): Promise<UnifiedSearchResponse> {
   const queryParams = new URLSearchParams({
     q: query,
   });
-  return apiClient<UnifiedSearchResponse>(`/search/unified?${queryParams}`);
+  return apiClient<UnifiedSearchResponse>(`/search?${queryParams}`, {
+    signal,
+    headers: {
+      "Accept": "application/vnd.sonare.search-v2+json"
+    }
+  });
 }

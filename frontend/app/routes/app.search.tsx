@@ -262,16 +262,27 @@ export default function AppSearchPage() {
 
     try {
       // Pass the abort signal
-      const results = await searchApi.search(searchQuery, "artist,album,track", controller.signal);
+      const result = await searchApi.searchUnified(searchQuery, controller.signal);
       
       // If initialized another request, this one is stale.
       // Check if this is still the current controller
       if (controller.signal.aborted) return;
 
+      // Map unified items to buckets
+      const artists: Artist[] = [];
+      const albums: Album[] = [];
+      const tracks: Track[] = [];
+
+      result.items.forEach(item => {
+        if (item.type === 'artist' && item.artist) artists.push(item.artist);
+        else if (item.type === 'album' && item.album) albums.push(item.album);
+        else if (item.type === 'track' && item.track) tracks.push(item.track);
+      });
+
       setSearchState({
-        artists: results.artists || [],
-        albums: results.albums || [],
-        tracks: results.tracks || [],
+        artists,
+        albums,
+        tracks,
         isLoading: false,
         error: null,
         hasSearched: true,

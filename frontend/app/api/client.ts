@@ -164,6 +164,8 @@ export async function publicApiClient<T>(
         headers.set("Content-Type", "application/json");
     }
 
+    console.log("[Client] Requesting:", url, "Base:", API_BASE_URL);
+
     const response = await fetch(url, {
         ...options,
         headers,

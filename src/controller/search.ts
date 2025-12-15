@@ -13,12 +13,12 @@ const service = new SearchService();
 const storageService = new StorageService();
 
 const SearchQuerySchema = z.object({
-    q: z.string().min(3),
+    q: z.string().min(1),
     type: z.string().optional().default("artist,album,track")
 });
 
 const UnifiedSearchQuerySchema = z.object({
-    q: z.string().min(3),
+    q: z.string().min(1),
 });
 
 searchController

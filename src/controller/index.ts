@@ -6,3 +6,4 @@ export { default as authController } from "@/controller/auth.ts";
 export { default as meController } from "@/controller/me.ts";
 export { default as searchController } from "@/controller/search.ts";
 export { default as lyricsController } from "@/controller/lyrics.ts";
+export { default as docsController } from "@/controller/docs.ts";

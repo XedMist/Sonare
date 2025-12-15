@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { cors } from "hono/cors";
 
 import {
     artistController,
@@ -10,6 +11,7 @@ import {
     meController,
     searchController,
     lyricsController,
+    docsController,
 } from "@/controller/index.ts";
 
 import swaggerMiddleware from "@/middleware/swagger.ts";
@@ -18,12 +20,14 @@ import { requestContext } from '@/middleware/requestContext.ts'
 import { errorHandler } from "@/middleware/errorHandler.ts";
 import { StorageService } from "@/services/StorageService.ts";
 import { rateLimiter } from "./middleware/rateLimiter";
+import { Scalar } from '@scalar/hono-api-reference'
 
 await new StorageService().initialize({ failOnError: true });
 
 const app = new Hono();
 
 app.use(logger());
+app.use("*", cors())
 app.use('*', requestContext())
 app.onError(errorHandler)
 
@@ -36,7 +40,7 @@ api.use(rateLimiter({
 
 // Rutas publicas 
 api.route("/auth", authController);
-api.route("/swagger", swaggerMiddleware);
+api.route("/docs", docsController);
 
 // Rutas con auth 
 api.use("/artists/*", authMiddleware);

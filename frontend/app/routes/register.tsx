@@ -101,32 +101,32 @@ export default function RegisterPage() {
 
         // Validation
         if (firstName.trim().length < 1) {
-            setError("El nombre es obligatorio");
+            setError("First name is required");
             return;
         }
 
         if (lastName.trim().length < 1) {
-            setError("Los apellidos son obligatorios");
+            setError("Last name is required");
             return;
         }
 
         if (displayName.trim().length < 1) {
-            setError("El nombre público es obligatorio");
+            setError("Public name is required");
             return;
         }
 
         if (name.trim().length < 3) {
-            setError("El nombre de usuario debe tener al menos 3 caracteres");
+            setError("Username must have at least 3 characters");
             return;
         }
 
         if (password.length < 6) {
-            setError("La contraseña debe tener al menos 6 caracteres");
+            setError("Password must have at least 6 characters");
             return;
         }
 
         if (password !== confirmPassword) {
-            setError("Las contraseñas no coinciden");
+            setError("Passwords do not match");
             return;
         }
 
@@ -145,7 +145,7 @@ export default function RegisterPage() {
             });
             navigate("/app");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Error al registrarse. Por favor, inténtalo de nuevo.");
+            setError(err instanceof Error ? err.message : "Error registering. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -202,43 +202,43 @@ export default function RegisterPage() {
                             </div>
                             <div className="grid gap-4 md:grid-cols-2">
                                 <TextField
-                                    label="Nombre *"
+                                    label="First name *"
                                     type="text"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
-                                    placeholder="Tu nombre"
+                                    placeholder="Your first name"
                                     required
                                     autoComplete="given-name"
                                 />
                                 <TextField
-                                    label="Apellidos *"
+                                    label="Last name *"
                                     type="text"
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
-                                    placeholder="Tus apellidos"
+                                    placeholder="Your last name"
                                     required
                                     autoComplete="family-name"
                                 />
                             </div>
                             <TextField
-                                label="Nombre público *"
+                                label="Public name *"
                                 type="text"
                                 value={displayName}
                                 onChange={(e) => {
                                     setDisplayName(e.target.value);
                                     setDisplayNameEdited(true);
                                 }}
-                                placeholder="Cómo te verán otros usuarios"
-                                helperText="Puedes cambiarlo más adelante"
+                                placeholder="How others will see you"
+                                helperText="You can change it later"
                                 required
                             />
                             <TextField
-                                label="Nombre de usuario *"
+                                label="Username *"
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Elige un usuario"
-                                helperText="Mínimo 3 caracteres, único"
+                                placeholder="Choose a username"
+                                helperText="Minimum 3 characters, unique"
                                 required
                                 autoComplete="username"
                             />
@@ -246,17 +246,17 @@ export default function RegisterPage() {
 
                         <section className="space-y-4">
                             <div>
-                                <p className="text-sm uppercase tracking-[0.2em] text-primary-300/80">Seguridad</p>
-                                <p className="text-surface-400 text-sm">Protege tu cuenta con una contraseña segura.</p>
+                                <p className="text-sm uppercase tracking-[0.2em] text-primary-300/80">Security</p>
+                                <p className="text-surface-400 text-sm">Protect your account with a secure password.</p>
                             </div>
                             <div className="relative">
                                 <TextField
-                                    label="Contraseña *"
+                                    label="Password *"
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Crea una contraseña"
-                                    helperText="Mínimo 6 caracteres"
+                                    placeholder="Create a password"
+                                    helperText="Minimum 6 characters"
                                     required
                                     autoComplete="new-password"
                                 />
@@ -264,7 +264,7 @@ export default function RegisterPage() {
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-9 text-surface-400 hover:text-surface-50 transition-colors"
-                                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
                                 >
                                     {showPassword ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -279,11 +279,11 @@ export default function RegisterPage() {
                             </div>
 
                             <TextField
-                                label="Confirmar Contraseña *"
+                                label="Confirm Password *"
                                 type={showPassword ? "text" : "password"}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Confirma tu contraseña"
+                                placeholder="Confirm your password"
                                 required
                                 autoComplete="new-password"
                             />
@@ -291,29 +291,29 @@ export default function RegisterPage() {
 
                         <section className="space-y-4">
                             <div>
-                                <p className="text-sm uppercase tracking-[0.2em] text-primary-300/80">Perfil público</p>
-                                <p className="text-surface-400 text-sm">Opcional, pero ayuda a personalizar tu experiencia.</p>
+                                <p className="text-sm uppercase tracking-[0.2em] text-primary-300/80">Public profile</p>
+                                <p className="text-surface-400 text-sm">Optional, but helps customize your experience.</p>
                             </div>
                             <div className="grid gap-4 md:grid-cols-2">
                                 <CountrySelect
                                     value={country}
                                     onChange={setCountry}
-                                    label="País (opcional)"
-                                    helperText="Selecciona tu país de residencia"
+                                    label="Country (optional)"
+                                    helperText="Select your country of residence"
                                 />
                                 <TextField
-                                    label="Fecha de nacimiento (opcional)"
+                                    label="Birthdate (optional)"
                                     type="date"
                                     value={birthdate}
                                     onChange={(e) => setBirthdate(e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-surface-300 mb-1.5">Biografía (opcional)</label>
+                                <label className="block text-sm font-medium text-surface-300 mb-1.5">Biography (optional)</label>
                                 <textarea
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
-                                    placeholder="Cuenta algo sobre ti, tus artistas favoritos o tus playlists imprescindibles."
+                                    placeholder="Share something about yourself, your favorite artists or your indispensable playlists."
                                     maxLength={280}
                                     className="w-full min-h-[100px] px-4 py-3 bg-surface-700 border border-surface-600 rounded-lg text-surface-100 placeholder:text-surface-400 focus:outline-none focus:ring-1 focus:ring-primary-500"
                                 />
@@ -327,15 +327,15 @@ export default function RegisterPage() {
                             size="lg"
                             isLoading={isLoading}
                         >
-                            Crear Cuenta
+                            Create Account
                         </Button>
                     </form>
 
                     <div className="mt-8 pt-6 border-t border-surface-700/50 text-center">
                         <p className="text-surface-400">
-                            ¿Ya tienes una cuenta?{" "}
+                            Already have an account?{" "}
                             <Link to="/login" className="text-primary-400 hover:text-primary-300 hover:underline font-medium transition-colors">
-                                Iniciar Sesión
+                                Login
                             </Link>
                         </p>
                     </div>
@@ -350,7 +350,7 @@ export default function RegisterPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                         </svg>
-                        Volver al inicio
+                        Back to home
                     </Link>
                 </div>
             </div>

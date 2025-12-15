@@ -6,8 +6,8 @@ import { CountrySelect } from "../components/form/CountrySelect";
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "Perfil - Sonare" },
-    { name: "description", content: "Gestiona tus datos personales y tu imagen en Sonare" },
+    { title: "Profile - Sonare" },
+    { name: "description", content: "Manage your profile data and avatar" },
   ];
 }
 
@@ -70,7 +70,7 @@ export default function ProfileRoute() {
     setStatus(null);
 
     if (!form.displayName.trim() || !form.firstName.trim() || !form.lastName.trim()) {
-      setStatus({ type: "error", message: "Nombre, apellidos y nombre público son obligatorios" });
+      setStatus({ type: "error", message: "First name, last name and display name are required" });
       return;
     }
 
@@ -93,11 +93,11 @@ export default function ProfileRoute() {
         country: updated.country ?? "",
         birthdate: updated.birthdate ? updated.birthdate.slice(0, 10) : "",
       });
-      setStatus({ type: "success", message: "Perfil actualizado correctamente" });
+      setStatus({ type: "success", message: "Profile updated successfully" });
     } catch (err) {
       setStatus({
         type: "error",
-        message: err instanceof Error ? err.message : "No se pudo actualizar tu perfil",
+        message: err instanceof Error ? err.message : "Your profile could not be updated",
       });
     } finally {
       setIsSaving(false);
@@ -109,13 +109,13 @@ export default function ProfileRoute() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setStatus({ type: "error", message: "Selecciona una imagen válida" });
+      setStatus({ type: "error", message: "Select a valid image" });
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setStatus({ type: "error", message: "La imagen debe pesar menos de 5MB" });
+      setStatus({ type: "error", message: "The image must weigh less than 5MB" });
       event.target.value = "";
       return;
     }
@@ -124,9 +124,9 @@ export default function ProfileRoute() {
 
     try {
       await uploadAvatar(file);
-      setStatus({ type: "success", message: "Tu foto de perfil se ha actualizado" });
+      setStatus({ type: "success", message: "Your avatar has been updated" });
     } catch (err) {
-      setStatus({ type: "error", message: err instanceof Error ? err.message : "No se pudo subir la imagen" });
+      setStatus({ type: "error", message: err instanceof Error ? err.message : "Your avatar could not be uploaded" });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -171,18 +171,18 @@ export default function ProfileRoute() {
 
           <div className="flex-1 space-y-3">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-surface-400">Perfil</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-surface-400">Profile</p>
               <h1 className="text-3xl font-semibold text-white">{user?.displayName || user?.name}</h1>
               {user?.name && (
                 <p className="text-surface-400">@{user.name}</p>
               )}
             </div>
             {memberSince && (
-              <p className="text-surface-300/80 text-sm">Miembro desde {memberSince}</p>
+              <p className="text-surface-300/80 text-sm">Member since {memberSince}</p>
             )}
             <div className="flex flex-wrap gap-3 items-center">
               <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                Actualizar foto
+                Update photo
               </Button>
             </div>
           </div>
@@ -205,52 +205,52 @@ export default function ProfileRoute() {
         <Card className="bg-surface-900/80 border border-surface-800">
           <form className="space-y-6" onSubmit={handleProfileSubmit}>
             <div>
-              <h2 className="text-xl font-semibold text-surface-50">Información básica</h2>
-              <p className="text-sm text-surface-400">Controla lo que otros ven sobre ti.</p>
+              <h2 className="text-xl font-semibold text-surface-50">Basic information</h2>
+              <p className="text-sm text-surface-400">Control what others see about you.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Nombre"
+                label="Name"
                 value={form.firstName}
                 onChange={handleInputChange("firstName")}
-                placeholder="Nombre"
+                placeholder="Name"
                 required
               />
               <TextField
-                label="Apellidos"
+                label="Last name"
                 value={form.lastName}
                 onChange={handleInputChange("lastName")}
-                placeholder="Apellidos"
+                placeholder="Last name"
                 required
               />
             </div>
             <TextField
-              label="Nombre público"
+              label="Display name"
               value={form.displayName}
               onChange={handleInputChange("displayName")}
-              placeholder="Este nombre acompaña a tus playlists"
-              helperText="Debe tener al menos 1 carácter"
+              placeholder="This name accompanies your playlists"
+              helperText="Must have at least 1 character"
               required
             />
             <div className="grid gap-4 md:grid-cols-2">
               <CountrySelect
                 value={form.country}
                 onChange={handleCountryChange}
-                helperText="Selecciona el país que se mostrará en tu perfil"
+                helperText="Select the country that will be shown in your profile"
               />
               <TextField
-                label="Fecha de nacimiento"
+                label="Birthdate"
                 type="date"
                 value={form.birthdate}
                 onChange={handleInputChange("birthdate")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-surface-300 mb-1.5">Biografía</label>
+              <label className="block text-sm font-medium text-surface-300 mb-1.5">Biography</label>
               <textarea
                 value={form.bio}
                 onChange={handleInputChange("bio")}
-                placeholder="Comparte tus géneros favoritos, la playlist que nunca falla o el concierto que te marcó."
+                placeholder="Share your favorite genres, the playlist that never fails or the concert that marked you."
                 maxLength={280}
                 className="w-full min-h-[120px] px-4 py-3 bg-surface-800 border border-surface-700 rounded-2xl text-surface-50 placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
@@ -258,7 +258,7 @@ export default function ProfileRoute() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button type="submit" isLoading={isSaving}>
-                Guardar cambios
+                Save changes
               </Button>
               <Button
                 type="button"
@@ -276,7 +276,7 @@ export default function ProfileRoute() {
                   setStatus(null);
                 }}
               >
-                Deshacer cambios
+                Cancel
               </Button>
             </div>
           </form>

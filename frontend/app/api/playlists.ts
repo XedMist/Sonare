@@ -7,7 +7,6 @@ interface GetPlaylistsParams {
   limit?: number;
 }
 
-// Simple response wrapper to maintain compatibility with components
 interface ListResponse<T> {
   data: T[];
   page?: number;
@@ -34,16 +33,12 @@ export async function getPlaylists(params: GetPlaylistsParams = {}): Promise<Lis
 }
 
 export async function getPlaylist(id: string): Promise<Playlist> {
-  // Backend returns playlist without tracks - fetch them separately
   return apiClient<Playlist>(`/playlists/${id}`);
 }
 
-// Fetch tracks for a playlist (new endpoint)
 export async function getPlaylistTracks(id: string): Promise<Track[]> {
   return apiClient<Track[]>(`/playlists/${id}/tracks`);
 }
-
-// Combined helper to get playlist with tracks
 export async function getPlaylistWithTracks(id: string): Promise<{ playlist: Playlist; tracks: Track[] }> {
   const [playlist, tracks] = await Promise.all([
     getPlaylist(id),
@@ -52,7 +47,6 @@ export async function getPlaylistWithTracks(id: string): Promise<{ playlist: Pla
   return { playlist, tracks };
 }
 
-// Backend expects only { name } - userID is derived from JWT
 export async function createPlaylist(data: { name: string; userID: string }): Promise<Playlist> {
   return apiClient<Playlist>("/playlists", {
     method: "POST",
@@ -73,7 +67,6 @@ export async function deletePlaylist(id: string): Promise<void> {
   });
 }
 
-// Backend: PUT /:id/tracks with { trackID } - adds one track at a time
 export async function addTrackToPlaylist(
   playlistId: string, 
   trackId: string
@@ -84,7 +77,6 @@ export async function addTrackToPlaylist(
   });
 }
 
-// Helper to add multiple tracks sequentially
 export async function addTracksToPlaylist(
   playlistId: string, 
   trackIds: string[]
@@ -93,14 +85,12 @@ export async function addTracksToPlaylist(
   for (const trackId of trackIds) {
     result = await addTrackToPlaylist(playlistId, trackId);
   }
-  // Return final playlist state, or fetch if empty
   if (!result) {
     result = await getPlaylist(playlistId);
   }
   return result;
 }
 
-// Backend: DELETE /:id/tracks with { trackID } in body
 export async function removeTrackFromPlaylist(
   playlistId: string, 
   trackId: string

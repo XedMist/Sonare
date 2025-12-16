@@ -9,7 +9,6 @@ interface GetArtistsParams {
   name?: string;
 }
 
-// Simple response wrapper to maintain compatibility with components
 interface ListResponse<T> {
   data: T[];
 }

@@ -8,7 +8,6 @@ export interface SearchResults {
   relatedTracks: Record<string, Track[]>;
 }
 
-// Unified search item types
 export type SearchItemType = 'artist' | 'album' | 'track';
 
 export interface UnifiedSearchItem {

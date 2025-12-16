@@ -10,7 +10,6 @@ interface GetTracksParams {
   artistID?: string;
 }
 
-// Simple response wrapper to maintain compatibility with components
 interface ListResponse<T> {
   data: T[];
 }
@@ -32,7 +31,6 @@ export async function getTracks(params: GetTracksParams = {}): Promise<ListRespo
   if (albumID) queryParams.set("albumID", albumID);
   if (artistID) queryParams.set("artistID", artistID);
   
-  // Backend returns paginated response
   const response = await apiClient<PaginatedResponse<Track>>(`/tracks?${queryParams}`);
   return { data: response.data };
 }
@@ -41,13 +39,10 @@ export async function getTrack(id: string): Promise<Track> {
   return apiClient<Track>(`/tracks/${id}`);
 }
 
-// Get the audio file URL for a track (returns presigned URL from the API)
 export async function getTrackAudioUrl(id: string): Promise<string> {
   const response = await apiClient<{ url: string }>(`/tracks/${id}/file`);
   return response.url;
 }
-
-// Fetch the thumbnail URL for a track (returns presigned URL from the API)
 export async function fetchTrackThumbnail(id: string): Promise<string | null> {
   try {
     const response = await apiClient<{ thumbnail: string | null }>(`/tracks/${id}/thumbnail`);

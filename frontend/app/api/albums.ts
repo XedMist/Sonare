@@ -10,7 +10,6 @@ interface GetAlbumsParams {
   artistID?: string;
 }
 
-// Simple response wrapper to maintain compatibility with components
 interface ListResponse<T> {
   data: T[];
 }
@@ -33,7 +32,6 @@ export async function getAlbums(params: GetAlbumsParams = {}): Promise<ListRespo
   
   const cacheKey = cacheKeys.albums({ page, limit, name, artistID });
   
-  // Use cache for album lists (30 second TTL)
   const response = await apiCache.getOrFetch(
     cacheKey,
     () => apiClient<PaginatedResponse<Album>>(`/albums?${queryParams}`),
@@ -49,7 +47,7 @@ export async function getAlbum(id: string): Promise<Album> {
   return apiCache.getOrFetch(
     cacheKey,
     () => apiClient<Album>(`/albums/${id}`),
-    60 * 1000 // 1 minute cache for individual albums
+    60 * 1000
   );
 }
 

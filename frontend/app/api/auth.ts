@@ -1,9 +1,7 @@
 import { publicApiClient, apiClient, tokenStorage } from "./client";
 import type { AuthTokens, LoginRequest, RegisterRequest, User } from "../types";
 
-// Backend returns { accessToken, refreshToken } - no user object
 export async function login(credentials: LoginRequest): Promise<AuthTokens> {
-    // Backend expects { username, password }
     const response = await publicApiClient<AuthTokens>("/auth/login", {
         method: "POST",
         body: JSON.stringify({
@@ -30,7 +28,6 @@ export async function getProfile(): Promise<User> {
     return apiClient<User>("/me");
 }
 
-// Refresh returns only { accessToken } per backend
 export async function refreshToken(refreshTokenValue: string): Promise<{ accessToken: string }> {
     const response = await publicApiClient<{ accessToken: string }>("/auth/refresh", {
         method: "POST",
@@ -52,7 +49,7 @@ export async function logout(): Promise<void> {
                 body: JSON.stringify({ refreshToken: refreshTokenValue }),
             });
         } catch {
-            // Ignore errors 
+            
         }
     }
 

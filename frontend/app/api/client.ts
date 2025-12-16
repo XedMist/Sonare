@@ -1,11 +1,9 @@
 import { API_BASE_URL } from "../config";
 import type { ApiError } from "../types";
 
-// Token storage keys
 const ACCESS_TOKEN_KEY = "sonare_access_token";
 const REFRESH_TOKEN_KEY = "sonare_refresh_token";
 
-// Token management
 export const tokenStorage = {
     getAccessToken: (): string | null => {
         if (typeof window === "undefined") return null;
@@ -30,7 +28,6 @@ export const tokenStorage = {
     },
 };
 
-// Custom error class for API errors
 export class ApiClientError extends Error {
     status: number;
 
@@ -41,11 +38,9 @@ export class ApiClientError extends Error {
     }
 }
 
-// Flag to prevent multiple refresh attempts
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
-// Refresh the access token
 async function refreshAccessToken(): Promise<string | null> {
     const refreshToken = tokenStorage.getRefreshToken();
     if (!refreshToken) return null;
@@ -76,7 +71,6 @@ async function refreshAccessToken(): Promise<string | null> {
     }
 }
 
-// Authenticated fetch wrapper
 export async function apiClient<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -99,7 +93,6 @@ export async function apiClient<T>(
         return fetch(url, {
             ...options,
             headers,
-            // Pass signal if present in options
             signal: options.signal,
         });
     };
@@ -138,7 +131,6 @@ export async function apiClient<T>(
         throw new ApiClientError(errorMessage, response.status);
     }
 
-    // Handle empty responses
     const text = await response.text();
     if (!text) return {} as T;
 
@@ -149,7 +141,6 @@ export async function apiClient<T>(
     }
 }
 
-// Unauthenticated fetch for public endpoints
 export async function publicApiClient<T>(
     endpoint: string,
     options: RequestInit = {}

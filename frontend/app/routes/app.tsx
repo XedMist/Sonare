@@ -3,8 +3,6 @@ import { useAuth } from "../context/AuthContext";
 import { PlayerProvider } from "../context/PlayerContext";
 import { AppShell } from "../components/layout/AppShell";
 
-// This is the main app route that wraps all authenticated routes
-// It provides the auth guard and the app shell layout
 export default function AppLayout() {
   return (
     <AuthGuard>
@@ -15,7 +13,6 @@ export default function AppLayout() {
   );
 }
 
-// Auth guard component that redirects to login if not authenticated
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 

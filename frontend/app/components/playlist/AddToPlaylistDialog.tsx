@@ -24,7 +24,7 @@ export function AddToPlaylistDialog({ trackId, open, onOpenChange }: AddToPlayli
     const [creating, setCreating] = useState(false);
     const [newPlaylistName, setNewPlaylistName] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const { user } = useAuth(); // Assuming useAuth exists, verify import
+    const { user } = useAuth();
 
     useEffect(() => {
         if (open) {
@@ -35,7 +35,7 @@ export function AddToPlaylistDialog({ trackId, open, onOpenChange }: AddToPlayli
     async function fetchPlaylists() {
         try {
             setLoading(true);
-            const response = await getPlaylists({ limit: 50 }); // Fetch reasonable amount
+            const response = await getPlaylists({ limit: 50 }); 
             setPlaylists(response.data);
         } catch (err) {
             console.error("Failed to load playlists", err);
@@ -52,7 +52,6 @@ export function AddToPlaylistDialog({ trackId, open, onOpenChange }: AddToPlayli
             await addTrackToPlaylist(playlistId, trackId);
             window.dispatchEvent(new Event('playlist-update'));
             onOpenChange(false);
-            // Optionally show toast success
         } catch (err) {
             console.error("Failed to add track", err);
             setError("Failed to add track to playlist");
@@ -67,7 +66,6 @@ export function AddToPlaylistDialog({ trackId, open, onOpenChange }: AddToPlayli
             const playlist = await createPlaylist({ name: newPlaylistName, userID: user.id });
             window.dispatchEvent(new Event('playlist-update'));
             await handleAddToPlaylist(playlist.id);
-            // Dialog closes in handleAddToPlaylist
         } catch (err) {
             console.error("Failed to create playlist", err);
             setError("Failed to create playlist");

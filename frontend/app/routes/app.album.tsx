@@ -8,7 +8,6 @@ import { PageLoader, EmptyState, TrackListSkeleton } from "~/components/LoadingS
 import { Button } from "~/components/ui/Button";
 import { cn } from "~/lib/utils";
 
-// Format total duration
 function formatTotalDuration(tracks: Track[]): string {
     const totalSeconds = tracks.reduce((acc, track) => acc + (track.duration || 0), 0);
     const hours = Math.floor(totalSeconds / 3600);
@@ -111,7 +110,6 @@ export default function AlbumPage() {
         }
     };
 
-    // Generate album gradient from name
     const getAlbumGradient = (name: string) => {
         const gradients = [
             "from-indigo-600/80 via-indigo-800/60 to-surface-900",
@@ -148,7 +146,6 @@ export default function AlbumPage() {
         );
     }
 
-    // Get album cover from first track with a thumbnail
     const albumCover = tracks.find((track) => track.thumbnail)?.thumbnail;
 
     return (

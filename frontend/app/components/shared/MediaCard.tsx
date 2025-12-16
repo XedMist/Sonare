@@ -14,7 +14,6 @@ interface MediaCardProps {
   onPlay?: () => void;
 }
 
-// Memoized MediaCard to prevent unnecessary re-renders in grids
 export const MediaCard = memo(function MediaCard({ type, id, name, subtitle, artwork, onPlay }: MediaCardProps) {
   const navigate = useNavigate();
 

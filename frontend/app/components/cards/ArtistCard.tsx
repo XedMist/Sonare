@@ -44,8 +44,7 @@ export function ArtistCard({ artist, index, className }: ArtistCardProps) {
             });
         }
     };
-
-    // Generate consistent color from artist name
+    
     const getArtistColor = (name: string) => {
         const colors = [
             "from-purple-600 to-blue-600",

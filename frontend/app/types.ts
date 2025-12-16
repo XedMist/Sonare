@@ -1,6 +1,3 @@
-// Type definitions for the frontend
-
-// User types
 export interface User {
     id: string;
     name: string;
@@ -17,11 +14,9 @@ export interface User {
     updatedAt: string;
 }
 
-// Artist types
 export interface Artist {
     id: string;
     name: string;
-    // Spotify metadata
     image?: string | null;
     popularity?: number | null;
     genres?: string[];
@@ -29,13 +24,11 @@ export interface Artist {
     updatedAt: string;
 }
 
-// Album types
 export interface Album {
     id: string;
     name: string;
     artistID: string;
     cover?: string;
-    // Spotify metadata
     popularity?: number | null;
     createdAt: string;
     updatedAt: string;
@@ -45,14 +38,12 @@ export interface Album {
     };
 }
 
-// Track types
 export interface Track {
     id: string;
     path: string;
     name: string;
     duration: number;
     thumbnail: string;
-    // Spotify metadata
     popularity?: number | null;
     spotifyId?: string | null;
     albumID?: string | null;
@@ -65,7 +56,6 @@ export interface Track {
         artistID: string;
         cover?: string | null;
     };
-    // All artists on this track
     artists?: TrackArtist[];
 }
 
@@ -80,11 +70,10 @@ export interface Lyrics {
 export type LyricsResponse = Lyrics;
 
 export interface SyncedLyricLine {
-    timestamp: number; // in milliseconds
+    timestamp: number;
     text: string;
 }
 
-// Track-Artist relationship
 export type ArtistRole = 'PRIMARY' | 'FEATURED';
 
 export interface TrackArtist {
@@ -95,7 +84,6 @@ export interface TrackArtist {
     artist?: Artist;
 }
 
-// Playlist types
 export interface Playlist {
     id: string;
     name: string;
@@ -116,7 +104,6 @@ export interface PlaylistTrack {
     addedAt: string;
 }
 
-// Auth types
 export interface LoginRequest {
     username: string;
     password: string;
@@ -147,7 +134,6 @@ export interface AuthTokens {
     refreshToken: string;
 }
 
-// API Response types
 export interface PaginatedResponse<T> {
     data: T[];
     page: number;
@@ -161,7 +147,6 @@ export interface ApiError {
     status: number;
 }
 
-// Player types
 export interface PlayerTrack extends Track {
     audioUrl: string;
 }

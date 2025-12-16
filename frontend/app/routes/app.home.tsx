@@ -20,10 +20,6 @@ import { Button } from "../components/ui";
 import { PlayIcon } from "../components/icons/Icons";
 import type { Artist, Album, Track, Playlist } from "../types";
 
-// ============================================
-// TYPES
-// ============================================
-
 interface HomeData {
   artists: Artist[];
   albums: Album[];
@@ -32,10 +28,6 @@ interface HomeData {
 }
 
 type LoadingState = "loading" | "error" | "success";
-
-// ============================================
-// WELCOME SECTION
-// ============================================
 
 interface WelcomeSectionProps {
   userName: string;
@@ -60,10 +52,6 @@ function WelcomeSection({ userName }: WelcomeSectionProps) {
     </div>
   );
 }
-
-// ============================================
-// QUICK PLAY SECTION
-// ============================================
 
 interface QuickPlayCardProps {
   title: string;
@@ -105,10 +93,6 @@ function QuickPlayCard({ title, subtitle, artwork, onPlay, onClick }: QuickPlayC
     </div>
   );
 }
-
-// ============================================
-// MEDIA GRID SECTION
-// ============================================
 
 interface MediaGridSectionProps {
   title: string;
@@ -155,10 +139,6 @@ function MediaGridSection({ title, subtitle, items, onSeeAll, onPlayItem, isLoad
   );
 }
 
-// ============================================
-// RECENT TRACKS SECTION
-// ============================================
-
 interface RecentTracksSectionProps {
   tracks: Track[];
   onPlayTrack: (track: Track, index: number) => void;
@@ -202,16 +182,11 @@ function RecentTracksSection({ tracks, onPlayTrack, onAddToPlaylist, isLoading }
   );
 }
 
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function AppHomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { playTrack, playQueue } = usePlayer();
   
-  // State
   const [data, setData] = useState<HomeData>({
     artists: [],
     albums: [],
@@ -221,10 +196,6 @@ export default function AppHomePage() {
   const [loadingState, setLoadingState] = useState<LoadingState>("loading");
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [isPlaylistDialogOpen, setIsPlaylistDialogOpen] = useState(false);
-
-  // ============================================
-  // DATA FETCHING
-  // ============================================
 
   const fetchData = useCallback(async () => {
     setLoadingState("loading");
@@ -252,10 +223,6 @@ export default function AppHomePage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  // ============================================
-  // HANDLERS
-  // ============================================
 
   const handlePlayAlbum = async (albumId: string) => {
     try {
@@ -288,10 +255,6 @@ export default function AppHomePage() {
     setIsPlaylistDialogOpen(true);
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
-
   if (loadingState === "loading") {
     return <LoadingSection message="Loading your music..." />;
   }
@@ -306,7 +269,6 @@ export default function AppHomePage() {
     );
   }
 
-  // Prepare data for sections
   const albumItems = (Array.isArray(data.albums) ? data.albums : []).map((album) => ({
     type: "album" as const,
     id: album.id,
@@ -330,7 +292,6 @@ export default function AppHomePage() {
     artwork: playlist.cover || playlist.tracks?.[0]?.thumbnail,
   }));
 
-  // Quick play items (mix of recent albums and playlists)
   const quickPlayItems = [
     ...(Array.isArray(data.albums) ? data.albums : []).slice(0, 3).map((album) => ({
       id: album.id,

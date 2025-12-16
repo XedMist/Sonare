@@ -16,7 +16,6 @@ interface TrackCardProps {
     showArtist?: boolean;
 }
 
-// Format seconds to mm:ss
 function formatDuration(seconds?: number): string {
     if (!seconds) return "--:--";
     const mins = Math.floor(seconds / 60);

@@ -1,10 +1,6 @@
 import { Button } from "../ui";
 import { MusicNoteIcon, SearchIcon, AlertCircleIcon, PlaylistIcon } from "../icons/Icons";
 
-// ============================================
-// LOADING STATE
-// ============================================
-
 interface LoadingSectionProps {
   message?: string;
   className?: string;
@@ -23,10 +19,6 @@ export function LoadingSection({ message = "Loading...", className = "" }: Loadi
     </div>
   );
 }
-
-// ============================================
-// LOADING SKELETON
-// ============================================
 
 interface SkeletonCardProps {
   className?: string;
@@ -90,10 +82,6 @@ export function SkeletonTrackList({ count = 5, className = "" }: SkeletonTrackLi
   );
 }
 
-// ============================================
-// ERROR STATE
-// ============================================
-
 interface ErrorStateProps {
   title?: string;
   message?: string;
@@ -122,10 +110,6 @@ export function ErrorState({
     </div>
   );
 }
-
-// ============================================
-// EMPTY STATES
-// ============================================
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -157,8 +141,6 @@ export function EmptyState({ icon, title, message, action, className = "" }: Emp
   );
 }
 
-// Pre-configured empty states for common scenarios
-
 export function NoPlaylistsState({ onCreatePlaylist }: { onCreatePlaylist: () => void }) {
   return (
     <EmptyState
@@ -189,10 +171,6 @@ export function NoTracksState() {
     />
   );
 }
-
-// ============================================
-// SECTION HEADER
-// ============================================
 
 interface SectionHeaderProps {
   title: string;

@@ -40,7 +40,6 @@ function parseLRC(lrc: string): ParsedLyrics {
         const trimmed = line.trim();
         if (!trimmed) continue;
 
-        // Check for metadata
         const metaMatch = trimmed.match(metaRegex);
         if (metaMatch) {
             const [_, key, value] = metaMatch;
@@ -48,7 +47,6 @@ function parseLRC(lrc: string): ParsedLyrics {
             continue;
         }
 
-        // Check for time tags
         const timeMatch = trimmed.match(timeRegex);
         if (timeMatch) {
             hasTimeTags = true;
@@ -56,7 +54,6 @@ function parseLRC(lrc: string): ParsedLyrics {
             const seconds = parseInt(timeMatch[2], 10);
             const milliseconds = parseInt(timeMatch[3], 10);
             
-            // Convert to seconds
             const time = minutes * 60 + seconds + milliseconds / (timeMatch[3].length === 3 ? 1000 : 100);
             const text = trimmed.replace(timeRegex, "").trim();
             
@@ -64,8 +61,6 @@ function parseLRC(lrc: string): ParsedLyrics {
                 result.push({ time, text });
             }
         } else {
-            // Line without time tag
-            // We'll add them with time -1 for now
             result.push({ time: -1, text: trimmed });
         }
     }
@@ -84,7 +79,6 @@ export function LyricsView({ trackID, currentTime, onClose, className, onLineCli
     const activeLineRef = useRef<HTMLParagraphElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     
-    // State for parsed lyrics
     const [parsedData, setParsedData] = useState<ParsedLyrics>({ lines: [], metadata: {}, isSynced: false });
 
     useEffect(() => {
@@ -129,10 +123,8 @@ export function LyricsView({ trackID, currentTime, onClose, className, onLineCli
 
     const activeIndex = useMemo(() => {
         if (!lines.length || !isSynced) return -1;
-        // Find the last line that has started
         return lines.findIndex((line, index) => {
             const nextLine = lines[index + 1];
-            // Only consider lines with valid time for syncing logic
             const currentLineTime = line.time !== -1 ? line.time : -1;
             const nextLineTime = nextLine && nextLine.time !== -1 ? nextLine.time : Infinity;
             
@@ -142,7 +134,6 @@ export function LyricsView({ trackID, currentTime, onClose, className, onLineCli
         });
     }, [lines, currentTime, isSynced]);
 
-    // Auto-scroll
     useEffect(() => {
         if (activeIndex !== -1 && activeLineRef.current && isSynced) {
             activeLineRef.current.scrollIntoView({
@@ -197,7 +188,7 @@ export function LyricsView({ trackID, currentTime, onClose, className, onLineCli
                                         "text-xl md:text-3xl font-bold transition-all duration-500 origin-left",
                                         isSynced 
                                             ? (isActive ? "text-primary-400 scale-105" : isPast ? "text-surface-600" : "text-surface-400")
-                                            : "text-surface-200", // Unsynced style
+                                            : "text-surface-200",
                                         isSynced && "cursor-pointer hover:text-surface-200"
                                     )}
                                     onClick={() => {

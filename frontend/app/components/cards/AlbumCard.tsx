@@ -15,7 +15,6 @@ interface AlbumCardProps {
 export function AlbumCard({ album, index, onPlay, className, thumbnail }: AlbumCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
 
-    // Use provided thumbnail or fall back to album.thumbnail (if it ever exists)
     const coverImage = thumbnail || (album as Album & { thumbnail?: string }).thumbnail;
 
     useEffect(() => {

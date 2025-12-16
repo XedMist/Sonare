@@ -33,20 +33,12 @@ import {
 } from "../components/icons/Icons";
 import type { Playlist, Track } from "../types";
 
-// ============================================
-// TYPES
-// ============================================
-
 interface PlaylistData {
   playlist: Playlist | null;
   tracks: Track[];
 }
 
 type LoadingState = "loading" | "error" | "success";
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
 
 function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
@@ -61,10 +53,6 @@ function formatDuration(seconds: number): string {
 function getTotalDuration(tracks: Track[]): number {
   return tracks.reduce((total, track) => total + (track.duration || 0), 0);
 }
-
-// ============================================
-// RENAME PLAYLIST DIALOG
-// ============================================
 
 interface RenameDialogProps {
   open: boolean;
@@ -131,10 +119,6 @@ function RenameDialog({ open, onOpenChange, currentName, onRename }: RenameDialo
   );
 }
 
-// ============================================
-// DELETE CONFIRMATION DIALOG
-// ============================================
-
 interface DeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -181,10 +165,6 @@ function DeleteDialog({ open, onOpenChange, playlistName, onDelete }: DeleteDial
     </Dialog>
   );
 }
-
-// ============================================
-// PLAYLIST HERO SECTION
-// ============================================
 
 interface PlaylistHeroProps {
   playlist: Playlist;
@@ -316,10 +296,6 @@ function PlaylistHero({
   );
 }
 
-// ============================================
-// TRACKS LIST SECTION
-// ============================================
-
 interface TracksListProps {
   tracks: Track[];
   isOwner: boolean;
@@ -358,17 +334,12 @@ function TracksList({ tracks, isOwner, onPlayTrack, onAddToPlaylist, onRemoveFro
   );
 }
 
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function PlaylistDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { playTrack, playQueue } = usePlayer();
 
-  // State
   const [data, setData] = useState<PlaylistData>({
     playlist: null,
     tracks: [],
@@ -379,12 +350,7 @@ export default function PlaylistDetailPage() {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Check if current user is the owner
   const isOwner = user?.id === data.playlist?.userID;
-
-  // ============================================
-  // DATA FETCHING
-  // ============================================
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -403,10 +369,6 @@ export default function PlaylistDetailPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  // ============================================
-  // HANDLERS
-  // ============================================
 
   const handleBack = () => {
     navigate(-1);
@@ -439,7 +401,6 @@ export default function PlaylistDetailPage() {
 
     try {
       await playlistsApi.removeTrackFromPlaylist(id, track.id);
-      // Update local state
       setData((prev) => ({
         ...prev,
         tracks: prev.tracks.filter((t) => t.id !== track.id),
@@ -467,10 +428,6 @@ export default function PlaylistDetailPage() {
     window.dispatchEvent(new Event('playlist-update'));
     navigate("/app/library");
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   if (loadingState === "loading") {
     return <LoadingSection message="Loading playlist..." />;

@@ -84,7 +84,6 @@ export function AddToPlaylistDialog({
         }
     };
 
-    // Generate playlist gradient from name
     const getPlaylistGradient = (name: string) => {
         const gradients = [
             "from-primary-600 to-purple-800",

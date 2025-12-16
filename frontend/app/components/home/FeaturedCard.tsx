@@ -152,7 +152,6 @@ export function FeaturedCard({
   );
 }
 
-// Skeleton loader para las cards
 export function FeaturedCardSkeleton({
   variant = "default",
 }: {

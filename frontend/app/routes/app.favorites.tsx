@@ -8,7 +8,6 @@ import { Button } from "~/components/ui/Button";
 import { Link } from "react-router";
 import { cn } from "~/lib/utils";
 
-// Format total duration
 function formatTotalDuration(tracks: Track[]): string {
     const totalSeconds = tracks.reduce((acc, track) => acc + (track.duration || 0), 0);
     const hours = Math.floor(totalSeconds / 3600);

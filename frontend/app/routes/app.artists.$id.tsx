@@ -18,10 +18,6 @@ import { Button, Artwork } from "../components/ui";
 import { PlayIcon, ShuffleIcon, BackIcon, ArtistIcon, MusicNoteIcon } from "../components/icons/Icons";
 import type { Artist, Album, Track } from "../types";
 
-// ============================================
-// TYPES
-// ============================================
-
 interface ArtistData {
   artist: Artist | null;
   albums: Album[];
@@ -29,10 +25,6 @@ interface ArtistData {
 }
 
 type LoadingState = "loading" | "error" | "success";
-
-// ============================================
-// ARTIST HERO SECTION
-// ============================================
 
 interface ArtistHeroProps {
   artist: Artist;
@@ -108,10 +100,6 @@ function ArtistHero({ artist, tracksCount, albumsCount, onPlayAll, onShuffle, on
   );
 }
 
-// ============================================
-// ALBUMS SECTION
-// ============================================
-
 interface AlbumsSectionProps {
   albums: Album[];
   onPlayAlbum: (albumId: string) => void;
@@ -149,10 +137,6 @@ function AlbumsSection({ albums, onPlayAlbum, isLoading }: AlbumsSectionProps) {
     </section>
   );
 }
-
-// ============================================
-// TRACKS SECTION
-// ============================================
 
 interface TracksSectionProps {
   tracks: Track[];
@@ -208,16 +192,11 @@ function TracksSection({ tracks, onPlayTrack, onAddToPlaylist, isLoading }: Trac
   );
 }
 
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function ArtistDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { playTrack, playQueue } = usePlayer();
 
-  // State
   const [data, setData] = useState<ArtistData>({
     artist: null,
     albums: [],
@@ -226,10 +205,6 @@ export default function ArtistDetailPage() {
   const [loadingState, setLoadingState] = useState<LoadingState>("loading");
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [isPlaylistDialogOpen, setIsPlaylistDialogOpen] = useState(false);
-
-  // ============================================
-  // DATA FETCHING
-  // ============================================
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -258,10 +233,6 @@ export default function ArtistDetailPage() {
     fetchData();
   }, [fetchData]);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
-
   const handleBack = () => {
     navigate(-1);
   };
@@ -274,7 +245,6 @@ export default function ArtistDetailPage() {
 
   const handleShuffle = () => {
     if (data.tracks.length > 0) {
-      // Shuffle the tracks
       const shuffled = [...data.tracks].sort(() => Math.random() - 0.5);
       playQueue(shuffled, 0);
     }
@@ -299,10 +269,6 @@ export default function ArtistDetailPage() {
     setSelectedTrack(track);
     setIsPlaylistDialogOpen(true);
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   if (loadingState === "loading") {
     return <LoadingSection message="Loading artist..." />;

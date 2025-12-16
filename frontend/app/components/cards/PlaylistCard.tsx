@@ -46,7 +46,6 @@ export function PlaylistCard({ playlist, index, onPlay, className }: PlaylistCar
         }
     };
 
-    // Generate consistent gradient from playlist name
     const getPlaylistGradient = (name: string) => {
         const gradients = [
             "from-primary-600 to-purple-800",

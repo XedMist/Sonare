@@ -83,7 +83,6 @@ export function CardGridSkeleton({
     );
 }
 
-// Full page loading spinner
 export function PageLoader() {
     return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -99,7 +98,6 @@ export function PageLoader() {
     );
 }
 
-// Empty state
 interface EmptyStateProps {
     icon?: React.ReactNode;
     title: string;

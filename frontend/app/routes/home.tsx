@@ -10,10 +10,6 @@ export function meta({ }: Route.MetaArgs) {
     ];
 }
 
-// ============================================
-// LOGO SONARE
-// ============================================
-
 interface SonareLogoProps {
     size?: "sm" | "md" | "lg" | "xl";
     showText?: boolean;
@@ -41,10 +37,6 @@ const SonareLogo = ({ size = "md", showText = true, className = "" }: SonareLogo
         </div>
     );
 };
-
-// ============================================
-// ICONOS DE FEATURES
-// ============================================
 
 interface FeatureIconProps {
     children: React.ReactNode;
@@ -86,10 +78,6 @@ const HeroWaveIcon = () => (
     </svg>
 );
 
-// ============================================
-// COMPONENTE: Header
-// ============================================
-
 const Header = () => {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-surface-900/90 backdrop-blur-xl border-b border-surface-700/30">
@@ -119,10 +107,6 @@ const Header = () => {
         </header>
     );
 };
-
-// ============================================
-// COMPONENTE: Hero Section
-// ============================================
 
 const HeroSection = () => {
     return (
@@ -173,21 +157,10 @@ const HeroSection = () => {
                         </Button>
                     </Link>
                 </div>
-
-                {/* Stats */}
-                <div className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto">
-                    <StatItem value="10M+" label="Canciones" />
-                    <StatItem value="500K+" label="Artistas" />
-                    <StatItem value="100K+" label="Usuarios" />
-                </div>
             </div>
         </section>
     );
 };
-
-// ============================================
-// COMPONENTE: Stat Item
-// ============================================
 
 interface StatItemProps {
     value: string;
@@ -200,10 +173,6 @@ const StatItem = ({ value, label }: StatItemProps) => (
         <div className="text-sm text-surface-500 mt-1">{label}</div>
     </div>
 );
-
-// ============================================
-// COMPONENTE: Feature Card
-// ============================================
 
 interface FeatureCardProps {
     icon: React.ReactNode;
@@ -228,10 +197,6 @@ const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
     </div>
 );
 
-// ============================================
-// COMPONENTE: Section Header
-// ============================================
-
 interface SectionHeaderProps {
     title: string;
     subtitle: string;
@@ -247,10 +212,6 @@ const SectionHeader = ({ title, subtitle }: SectionHeaderProps) => (
         </p>
     </div>
 );
-
-// ============================================
-// COMPONENTE: Features Section
-// ============================================
 
 const FeaturesSection = () => {
     const features = [
@@ -299,10 +260,6 @@ const FeaturesSection = () => {
         </section>
     );
 };
-
-// ============================================
-// COMPONENTE: CTA Section
-// ============================================
 
 const CTASection = () => {
     return (
@@ -359,10 +316,6 @@ const CTASection = () => {
     );
 };
 
-// ============================================
-// COMPONENTE: Footer
-// ============================================
-
 const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
     <a
         href={href}
@@ -400,10 +353,6 @@ const Footer = () => {
         </footer>
     );
 };
-
-// ============================================
-// PÁGINA PRINCIPAL
-// ============================================
 
 export default function Home() {
     return (

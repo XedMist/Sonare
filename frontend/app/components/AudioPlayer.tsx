@@ -6,7 +6,6 @@ import { Slider } from "~/components/ui/Slider";
 import { cn } from "~/lib/utils";
 import { LyricsView } from "./player/LyricsView";
 
-// Format seconds to mm:ss
 function formatTime(seconds: number): string {
     if (!seconds || isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -23,7 +22,6 @@ export function AudioPlayer() {
     const [volumeBeforeMute, setVolumeBeforeMute] = useState(1);
     const [showLyrics, setShowLyrics] = useState(false);
 
-    // Animate player on mount
     useEffect(() => {
         if (playerRef.current) {
             animate(playerRef.current, {
@@ -35,7 +33,6 @@ export function AudioPlayer() {
         }
     }, []);
 
-    // Animate album art on track change
     useEffect(() => {
         if (albumArtRef.current && player.currentTrack) {
             animate(albumArtRef.current, {
@@ -48,12 +45,10 @@ export function AudioPlayer() {
         }
     }, [player.currentTrack?.id]);
 
-    // Toggle play/pause
     const handlePlayPause = () => {
         player.togglePlay();
     };
 
-    // Toggle mute
     const handleToggleMute = () => {
         if (isMuted) {
             player.setVolume(volumeBeforeMute);
@@ -65,7 +60,6 @@ export function AudioPlayer() {
         }
     };
 
-    // Handle volume change
     const handleVolumeChange = (value: number) => {
         player.setVolume(value);
         if (value > 0) setIsMuted(false);
@@ -75,7 +69,6 @@ export function AudioPlayer() {
         return null;
     }
 
-    // Get artist info from the album if available
     const artistName = player.currentTrack.album?.artistID ? undefined : undefined;
 
     return (

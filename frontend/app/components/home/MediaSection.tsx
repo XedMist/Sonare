@@ -28,7 +28,6 @@ export function MediaSection({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Animación del header
             if (headerRef.current) {
               animate(headerRef.current, {
                 translateX: [-20, 0],
@@ -39,7 +38,6 @@ export function MediaSection({
               });
             }
 
-            // Animación de las cards
             const cards = sectionRef.current?.querySelectorAll(".media-card");
             if (cards && cards.length > 0) {
               animate(cards, {

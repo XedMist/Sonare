@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return profile ?? null;
     }, []);
 
-    // --- AUTH BOOTSTRAP ON REFRESH -----------------------------------------
     useEffect(() => {
         const loadUserFromToken = async () => {
             const token = tokenStorage.getAccessToken();
@@ -51,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loadUserFromToken();
     }, [fetchProfile]);
 
-    // --- LOGIN --------------------------------------------------------------
     const login = useCallback(async (credentials: LoginRequest): Promise<User> => {
         await authApi.login(credentials);
 
@@ -59,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const profile = await fetchProfile();
             if (profile) return profile;
         } catch {
-            // Swallow error to allow fallback user
+            
         }
 
         const fallbackUser: User = {
@@ -74,18 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return fallbackUser;
     }, [fetchProfile]);
 
-    // --- REGISTER -----------------------------------------------------------
     const register = useCallback(
         async (data: RegisterRequest) => {
             await authApi.register(data);
-
-            // Automatically log in after registration
             await login({ username: data.name, password: data.password });
         },
         [login]
     );
 
-    // --- LOGOUT -------------------------------------------------------------
     const logout = useCallback(async () => {
         try {
             await authApi.logout();

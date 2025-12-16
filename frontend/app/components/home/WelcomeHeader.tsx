@@ -10,7 +10,6 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
   const textRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
 
-  // Saludo basado en la hora del día
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Buenos días";
@@ -18,7 +17,6 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
     return "Buenas noches";
   };
 
-  // Obtener la fecha actual formateada en español
   const getFormattedDate = () => {
     const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
@@ -31,8 +29,6 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
 
   useEffect(() => {
     if (!containerRef.current || !textRef.current || !subtitleRef.current) return;
-
-    // Animación de entrada con anime.js v4
     const tl = createTimeline({
       defaults: {
         ease: "outExpo",
@@ -53,7 +49,6 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       "-=500"
     );
 
-    // Animación de las barras decorativas
     animate(".header-bar", {
       scaleX: [0, 1],
       opacity: [0, 1],

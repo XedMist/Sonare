@@ -1,8 +1,5 @@
-// API client for Sonare backend
-
 const API_BASE_URL = '/api';
 
-// Types
 export interface User {
     id: string;
     name: string;
@@ -26,13 +23,11 @@ export interface RegisterCredentials {
     password: string;
 }
 
-// Pagination
 export interface PaginationQuery {
     page: number;
     limit: number;
 }
 
-// Artist
 export interface Artist {
     id: string;
     name: string;
@@ -40,7 +35,6 @@ export interface Artist {
     updatedAt?: string;
 }
 
-// Album
 export interface Album {
     id: string;
     name: string;
@@ -52,7 +46,6 @@ export interface Album {
     updatedAt?: string;
 }
 
-// Track
 export interface Track {
     id: string;
     name: string;
@@ -79,11 +72,10 @@ export interface Lyrics {
 }
 
 export interface SyncedLyricLine {
-    timestamp: number; // in milliseconds
+    timestamp: number;
     text: string;
 }
 
-// Playlist
 export interface Playlist {
     id: string;
     name: string;
@@ -93,7 +85,6 @@ export interface Playlist {
     updatedAt?: string;
 }
 
-// Search Results
 export interface SearchResults {
     artists: Artist[];
     albums: Album[];
@@ -101,7 +92,6 @@ export interface SearchResults {
     relatedTracks: Record<string, Track[]>;
 }
 
-// API Error class
 export class ApiError extends Error {
     constructor(
         message: string,
@@ -113,7 +103,6 @@ export class ApiError extends Error {
     }
 }
 
-// Token storage - SSR safe
 const TOKEN_KEY = 'sonare_access_token';
 const REFRESH_TOKEN_KEY = 'sonare_refresh_token';
 const USER_KEY = 'sonare_user';
@@ -154,7 +143,6 @@ export const tokenStorage = {
     },
 };
 
-// Generic fetch wrapper
 async function fetchApi<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -166,7 +154,6 @@ async function fetchApi<T>(
         ...options.headers,
     };
 
-    // Add auth token if available
     const accessToken = tokenStorage.getAccessToken();
     if (accessToken) {
         (headers as Record<string, string>)['Authorization'] = `Bearer ${accessToken}`;
@@ -177,7 +164,6 @@ async function fetchApi<T>(
         headers,
     });
 
-    // Handle non-JSON responses
     const contentType = response.headers.get('content-type');
     const isJson = contentType?.includes('application/json');
 
@@ -192,7 +178,7 @@ async function fetchApi<T>(
                     errorMessage = (errorData as { message: string }).message;
                 }
             } catch {
-                // Ignore JSON parse errors
+                
             }
         }
 
@@ -206,7 +192,6 @@ async function fetchApi<T>(
     return {} as T;
 }
 
-// Auth API
 export const authApi = {
     login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
         const response = await fetchApi<AuthResponse>('/auth/login', {
@@ -214,7 +199,6 @@ export const authApi = {
             body: JSON.stringify(credentials),
         });
 
-        // Store tokens and user
         tokenStorage.setAccessToken(response.accessToken);
         tokenStorage.setRefreshToken(response.refreshToken);
         tokenStorage.setUser(response.user);
@@ -243,7 +227,6 @@ export const authApi = {
             body: JSON.stringify({ refreshToken }),
         });
 
-        // Update stored tokens
         tokenStorage.setAccessToken(response.accessToken);
         tokenStorage.setRefreshToken(response.refreshToken);
         tokenStorage.setUser(response.user);
@@ -261,7 +244,7 @@ export const authApi = {
                     body: JSON.stringify({ refreshToken }),
                 });
             } catch {
-                // Ignore logout errors - we'll clear local storage anyway
+                
             }
         }
 
@@ -269,7 +252,6 @@ export const authApi = {
     },
 };
 
-// Artists API
 export const artistsApi = {
     list: async (pagination: PaginationQuery): Promise<Artist[]> => {
         return fetchApi<Artist[]>(`/artists?page=${pagination.page}&limit=${pagination.limit}`);
@@ -299,7 +281,6 @@ export const artistsApi = {
     },
 };
 
-// Albums API
 export const albumsApi = {
     list: async (pagination: PaginationQuery): Promise<Album[]> => {
         return fetchApi<Album[]>(`/albums?page=${pagination.page}&limit=${pagination.limit}`);
@@ -314,7 +295,6 @@ export const albumsApi = {
     },
 };
 
-// Tracks API
 export interface TrackFilters {
     name?: string;
     artistID?: string;
@@ -347,7 +327,6 @@ export const tracksApi = {
     },
 };
 
-// Playlists API
 export const playlistsApi = {
     list: async (pagination: PaginationQuery): Promise<Playlist[]> => {
         return fetchApi<Playlist[]>(`/playlists?page=${pagination.page}&limit=${pagination.limit}`);
@@ -395,7 +374,6 @@ export const playlistsApi = {
     },
 };
 
-// Me API (current user)
 export const meApi = {
     get: async (): Promise<User> => {
         return fetchApi<User>('/me');
@@ -424,7 +402,6 @@ export const meApi = {
     },
 };
 
-// Search API
 export const searchApi = {
     search: async (query: string, types?: string[]): Promise<SearchResults> => {
         const params = new URLSearchParams({ q: query });

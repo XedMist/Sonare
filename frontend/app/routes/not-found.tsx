@@ -3,10 +3,6 @@ import { Button } from "../components/ui";
 import { HomeIcon, BackIcon, SearchIcon } from "../components/icons/Icons";
 import Dither from "../components/Dither";
 
-// ============================================
-// SONARE LOGO (mini version)
-// ============================================
-
 function SonareLogoMini() {
   return (
     <div className="flex items-center gap-3 mb-8">
@@ -39,10 +35,6 @@ function SonareLogoMini() {
   );
 }
 
-// ============================================
-// 404 ILLUSTRATION
-// ============================================
-
 function NotFoundIllustration() {
   return (
     <div className="relative w-64 h-64 mx-auto mb-8">
@@ -72,10 +64,6 @@ function NotFoundIllustration() {
     </div>
   );
 }
-
-// ============================================
-// MAIN NOT FOUND PAGE
-// ============================================
 
 export default function NotFoundPage() {
   const navigate = useNavigate();

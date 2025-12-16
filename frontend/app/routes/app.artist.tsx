@@ -93,7 +93,6 @@ export default function ArtistPage() {
         }
     };
 
-    // Generate artist color from name
     const getArtistGradient = (name: string) => {
         const gradients = [
             "from-purple-600/80 via-purple-800/60 to-surface-900",
@@ -132,7 +131,6 @@ export default function ArtistPage() {
 
     const displayedTracks = showAllTracks ? tracks : tracks.slice(0, 5);
 
-    // Build album thumbnail map from tracks
     const albumThumbnails = new Map<string, string>();
     for (const track of tracks) {
         if (track.albumID && track.thumbnail && !albumThumbnails.has(track.albumID)) {

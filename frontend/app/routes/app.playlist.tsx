@@ -15,7 +15,7 @@ import {
 } from "~/components/ui/Dialog";
 import { cn } from "~/lib/utils";
 
-// Format total duration
+
 function formatTotalDuration(tracks: Track[]): string {
     const totalSeconds = tracks.reduce((acc, track) => acc + (track.duration || 0), 0);
     const hours = Math.floor(totalSeconds / 3600);
@@ -124,7 +124,6 @@ export default function PlaylistPage() {
         }
     };
 
-    // Generate playlist gradient from name
     const getPlaylistGradient = (name: string) => {
         const gradients = [
             "from-primary-600/80 via-primary-800/60 to-surface-900",

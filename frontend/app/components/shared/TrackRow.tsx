@@ -25,7 +25,6 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-// Memoized TrackRow to prevent unnecessary re-renders in lists
 export const TrackRow = memo(function TrackRow({ track, index, onPlay, showArtwork = true, actions }: TrackRowProps) {
   const artworkSrc = track.thumbnail || track.album?.cover || undefined;
   const { isFavorite, toggleFavorite } = usePlayer();

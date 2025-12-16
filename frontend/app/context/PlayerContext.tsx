@@ -9,7 +9,6 @@ interface PlayerTrack extends Track {
 }
 
 interface PlayerContextType {
-  // State
   queue: PlayerTrack[];
   currentTrack: PlayerTrack | null;
   currentIndex: number;
@@ -20,7 +19,6 @@ interface PlayerContextType {
   repeatMode: RepeatMode;
   shuffle: boolean;
   
-  // Methods
   playTrack: (track: Track, queue?: Track[]) => void;
   playTracks: (tracks: Track[], startIndex?: number) => void;
   playQueue: (tracks: Track[], startIndex?: number) => void;
@@ -35,8 +33,7 @@ interface PlayerContextType {
   clearQueue: () => void;
   showLyrics: boolean;
   setShowLyrics: (show: boolean) => void;
-  
-  // Favorites
+
   isFavorite: (trackId: string) => boolean;
   toggleFavorite: (trackId: string) => Promise<void>;
 }
@@ -47,7 +44,7 @@ const PlayerContext = createContext<PlayerContextType | null>(null);
 function trackToPlayerTrack(track: Track): PlayerTrack {
   return {
     ...track,
-    audioUrl: "", // Will be fetched asynchronously
+    audioUrl: "",
   };
 }
 
@@ -64,7 +61,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [shuffle, setShuffle] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
 
-  // Favorites State
   const [favoriteTrackIDs, setFavoriteTrackIDs] = useState<Set<string>>(new Set());
   const { user } = useAuth();
 
@@ -92,7 +88,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const toggleFavorite = useCallback(async (trackId: string) => {
     try {
         const isLiked = favoriteTrackIDs.has(trackId);
-        // Optimistic update
         setFavoriteTrackIDs(prev => {
             const newSet = new Set(prev);
             if (isLiked) newSet.delete(trackId);
@@ -107,23 +102,19 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         }
     } catch (e) {
         console.error("Failed to toggle favorite", e);
-        // Revert on error could be implemented here
     }
   }, [favoriteTrackIDs]);
 
-  // Use refs for values accessed in event handlers to avoid stale closures
   const repeatModeRef = useRef(repeatMode);
   const queueRef = useRef(queue);
   const currentIndexRef = useRef(currentIndex);
   
-  // Keep refs in sync
   useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
   useEffect(() => { queueRef.current = queue; }, [queue]);
   useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
 
   const currentTrack = currentIndex >= 0 && currentIndex < queue.length ? queue[currentIndex] : null;
 
-  // Initialize audio element - only once
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
@@ -175,18 +166,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, []); // Empty deps - only run once
+  }, []);
 
-  // Update audio source when current track changes
   useEffect(() => {
     let isMounted = true;
 
     const fetchAudioUrl = async () => {
       if (audioRef.current && currentTrack) {
         try {
-          // Only fetch if we don't have a URL yet or if it's a new track
-          // Note: Since we reset audioUrl to "" in trackToPlayerTrack, we always fetch here.
-          // You might want to cache this if needed, but presigned URLs expire.
           const url = await getTrackAudioUrl(currentTrack.id);
           
           if (isMounted) {
@@ -194,7 +181,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
              audioRef.current.load();
              if (isPlaying) {
                audioRef.current.play().catch(() => {
-                 // Handle autoplay restrictions
                  setIsPlaying(false);
                });
              }
@@ -213,7 +199,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [currentTrack?.id]);
 
-  // Handle play/pause state changes
   useEffect(() => {
     if (audioRef.current && currentTrack) {
       if (isPlaying) {
@@ -270,7 +255,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentIndex, queue.length, repeatMode, shuffle]);
 
   const previous = useCallback(() => {
-    // If more than 3 seconds into the track, restart it
     if (audioRef.current && audioRef.current.currentTime > 3) {
       audioRef.current.currentTime = 0;
     } else if (currentIndex > 0) {
@@ -297,7 +281,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const toggleRepeat = useCallback(() => {
     setRepeatMode((prev) => {
-      // Logic changed to off -> one -> all to ensure icon change on first click
       if (prev === "off") return "one";
       if (prev === "one") return "all";
       return "off";

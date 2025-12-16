@@ -13,20 +13,12 @@ import { Button, Artwork } from "../components/ui";
 import { PlayIcon, ShuffleIcon, BackIcon, MusicNoteIcon, AlbumIcon } from "../components/icons/Icons";
 import type { Album, Track } from "../types";
 
-// ============================================
-// TYPES
-// ============================================
-
 interface AlbumData {
   album: Album | null;
   tracks: Track[];
 }
 
 type LoadingState = "loading" | "error" | "success";
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
 
 function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
@@ -41,10 +33,6 @@ function formatDuration(seconds: number): string {
 function getTotalDuration(tracks: Track[]): number {
   return tracks.reduce((total, track) => total + (track.duration || 0), 0);
 }
-
-// ============================================
-// ALBUM HERO SECTION
-// ============================================
 
 interface AlbumHeroProps {
   album: Album;
@@ -150,9 +138,6 @@ function AlbumHero({ album, tracks, onPlayAll, onShuffle, onBack }: AlbumHeroPro
   );
 }
 
-// ============================================
-// TRACKS LIST SECTION
-// ============================================
 
 interface TracksListProps {
   tracks: Track[];
@@ -195,16 +180,11 @@ function TracksList({ tracks, onPlayTrack, onAddToPlaylist }: TracksListProps) {
   );
 }
 
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function AlbumDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { playTrack, playQueue } = usePlayer();
 
-  // State
   const [data, setData] = useState<AlbumData>({
     album: null,
     tracks: [],
@@ -213,9 +193,6 @@ export default function AlbumDetailPage() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [isPlaylistDialogOpen, setIsPlaylistDialogOpen] = useState(false);
 
-  // ============================================
-  // DATA FETCHING
-  // ============================================
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -242,10 +219,6 @@ export default function AlbumDetailPage() {
     fetchData();
   }, [fetchData]);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
-
   const handleBack = () => {
     navigate(-1);
   };
@@ -271,10 +244,6 @@ export default function AlbumDetailPage() {
     setSelectedTrack(track);
     setIsPlaylistDialogOpen(true);
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   if (loadingState === "loading") {
     return <LoadingSection message="Loading album..." />;

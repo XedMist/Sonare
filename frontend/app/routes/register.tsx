@@ -13,9 +13,6 @@ export function meta({ }: Route.MetaArgs) {
     ];
 }
 
-// ============================================
-// LOGO SONARE
-// ============================================
 
 const SonareLogo = () => (
     <div className="flex flex-col items-center gap-4">
@@ -54,7 +51,6 @@ export default function RegisterPage() {
         }
     }, [firstName, lastName, name, displayNameEdited]);
 
-    // Redirect to app if already authenticated
     useEffect(() => {
         if (!isAuthLoading && isAuthenticated) {
             navigate("/app", { replace: true });
@@ -65,7 +61,6 @@ export default function RegisterPage() {
         e.preventDefault();
         setError("");
 
-        // Validation
         if (firstName.trim().length < 1) {
             setError("First name is required");
             return;

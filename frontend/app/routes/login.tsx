@@ -12,10 +12,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-// ============================================
-// LOGO SONARE
-// ============================================
-
 const SonareLogo = () => (
   <div className="flex flex-col items-center gap-4">
     <div className="text-center">
@@ -35,7 +31,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect to app when authenticated (but only after auth state is loaded)
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
       navigate("/app", { replace: true });
@@ -49,7 +44,6 @@ export default function LoginPage() {
 
     try {
       await login({ username, password });
-      // Navigation will happen via useEffect when isAuthenticated becomes true
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al iniciar sesión. Por favor, inténtalo de nuevo.");
     } finally {

@@ -84,7 +84,6 @@ export default function AppBrowsePage() {
                 setArtists(artistsData);
                 setPlaylists(playlistsData);
 
-                // Build album thumbnail map from tracks
                 const thumbnailMap = new Map<string, string>();
                 for (const track of tracksData) {
                     if (track.albumID && track.thumbnail && !thumbnailMap.has(track.albumID)) {
@@ -124,7 +123,6 @@ export default function AppBrowsePage() {
         }
     };
 
-    // Get time-based greeting
     const getGreeting = () => {
         const hour = new Date().getHours();
         if (hour < 12) return "Buenos días";

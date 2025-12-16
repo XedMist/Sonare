@@ -18,10 +18,6 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, Input } from "../com
 import { PlusIcon, PlaylistIcon, AlbumIcon, ArtistIcon } from "../components/icons/Icons";
 import type { Playlist, Album, Artist } from "../types";
 
-// ============================================
-// TYPES
-// ============================================
-
 interface LibraryData {
   playlists: Playlist[];
   albums: Album[];
@@ -30,10 +26,6 @@ interface LibraryData {
 
 type LoadingState = "loading" | "error" | "success";
 type TabValue = "playlists" | "albums" | "artists";
-
-// ============================================
-// CREATE PLAYLIST DIALOG
-// ============================================
 
 interface CreatePlaylistDialogProps {
   open: boolean;
@@ -109,10 +101,6 @@ function CreatePlaylistDialog({ open, onOpenChange, onCreated, userId }: CreateP
   );
 }
 
-// ============================================
-// LIBRARY HEADER
-// ============================================
-
 interface LibraryHeaderProps {
   onCreatePlaylist: () => void;
 }
@@ -133,10 +121,6 @@ function LibraryHeader({ onCreatePlaylist }: LibraryHeaderProps) {
     </div>
   );
 }
-
-// ============================================
-// PLAYLISTS TAB
-// ============================================
 
 interface PlaylistsTabProps {
   playlists: Playlist[];
@@ -170,10 +154,6 @@ function PlaylistsTab({ playlists, onPlayPlaylist, onCreatePlaylist, isLoading }
     </div>
   );
 }
-
-// ============================================
-// ALBUMS TAB
-// ============================================
 
 interface AlbumsTabProps {
   albums: Album[];
@@ -217,10 +197,6 @@ function AlbumsTab({ albums, onPlayAlbum, isLoading }: AlbumsTabProps) {
   );
 }
 
-// ============================================
-// ARTISTS TAB
-// ============================================
-
 interface ArtistsTabProps {
   artists: Artist[];
   isLoading: boolean;
@@ -260,16 +236,11 @@ function ArtistsTab({ artists, isLoading }: ArtistsTabProps) {
   );
 }
 
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function AppLibraryPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { playQueue } = usePlayer();
 
-  // State
   const [data, setData] = useState<LibraryData>({
     playlists: [],
     albums: [],
@@ -278,10 +249,6 @@ export default function AppLibraryPage() {
   const [loadingState, setLoadingState] = useState<LoadingState>("loading");
   const [activeTab, setActiveTab] = useState<TabValue>("playlists");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
-  // ============================================
-  // DATA FETCHING
-  // ============================================
 
   const fetchData = useCallback(async () => {
     setLoadingState("loading");
@@ -315,10 +282,6 @@ export default function AppLibraryPage() {
     };
   }, [fetchData]);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
-
   const handlePlayPlaylist = async (playlistId: string) => {
     try {
       const tracks = await playlistsApi.getPlaylistTracks(playlistId);
@@ -346,14 +309,9 @@ export default function AppLibraryPage() {
       ...prev,
       playlists: [playlist, ...prev.playlists],
     }));
-    // Navigate to the new playlist
     window.dispatchEvent(new Event('playlist-update'));
     navigate(`/app/playlists/${playlist.id}`);
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   if (loadingState === "loading") {
     return <LoadingSection message="Loading your library..." />;

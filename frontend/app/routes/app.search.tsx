@@ -18,10 +18,6 @@ import { Input } from "../components/ui";
 import { SearchIcon, CloseIcon } from "../components/icons/Icons";
 import type { Artist, Album, Track } from "../types";
 
-// ============================================
-// TYPES
-// ============================================
-
 interface SearchState {
   artists: Artist[];
   albums: Album[];
@@ -30,10 +26,6 @@ interface SearchState {
   error: string | null;
   hasSearched: boolean;
 }
-
-// ============================================
-// SEARCH INPUT COMPONENT
-// ============================================
 
 interface SearchInputProps {
   value: string;
@@ -46,7 +38,6 @@ function SearchInput({ value, onChange, onClear, isLoading }: SearchInputProps) 
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Focus input on mount
     inputRef.current?.focus();
   }, []);
 
@@ -82,10 +73,6 @@ function SearchInput({ value, onChange, onClear, isLoading }: SearchInputProps) 
     </div>
   );
 }
-
-// ============================================
-// SEARCH RESULTS SECTIONS
-// ============================================
 
 interface ArtistsSectionProps {
   artists: Artist[];
@@ -177,10 +164,6 @@ function TracksSection({ tracks, allTracks, onPlayTrack, onAddToPlaylist }: Trac
   );
 }
 
-// ============================================
-// INITIAL STATE COMPONENT
-// ============================================
-
 function InitialSearchState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -197,19 +180,13 @@ function InitialSearchState() {
   );
 }
 
-// ============================================
-// MAIN PAGE COMPONENT
-// ============================================
-
 export default function AppSearchPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { playTrack, playQueue } = usePlayer();
   
-  // Get initial query from URL
   const initialQuery = searchParams.get("q") || "";
   
-  // State
   const [query, setQuery] = useState(initialQuery);
   const [searchState, setSearchState] = useState<SearchState>({
     artists: [],
@@ -222,18 +199,7 @@ export default function AppSearchPage() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [isPlaylistDialogOpen, setIsPlaylistDialogOpen] = useState(false);
 
-  // Debounce ref
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // ============================================
-  // SEARCH LOGIC
-  // ============================================
-
-  // ============================================
-  // SEARCH LOGIC
-  // ============================================
-
-  // Ref for the current search request abort controller
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const performSearch = useCallback(async (searchQuery: string) => {
@@ -249,26 +215,20 @@ export default function AppSearchPage() {
       return;
     }
 
-    // Cancel previous request if exists
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // Create new controller
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
     setSearchState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Pass the abort signal
       const result = await searchApi.searchUnified(searchQuery, controller.signal);
       
-      // If initialized another request, this one is stale.
-      // Check if this is still the current controller
       if (controller.signal.aborted) return;
 
-      // Map unified items to buckets
       const artists: Artist[] = [];
       const albums: Album[] = [];
       const tracks: Track[] = [];
@@ -288,7 +248,6 @@ export default function AppSearchPage() {
         hasSearched: true,
       });
 
-      // Update URL with query
       setSearchParams({ q: searchQuery }, { replace: true });
     } catch (error) {
        if (controller.signal.aborted) return;
@@ -307,9 +266,7 @@ export default function AppSearchPage() {
     }
   }, [setSearchParams]);
 
-  // Debounced search effect
   useEffect(() => {
-    // Cancel any pending search immediately when query changes
     if (abortControllerRef.current) {
         abortControllerRef.current.abort();
     }
@@ -320,22 +277,14 @@ export default function AppSearchPage() {
 
     return () => {
       clearTimeout(timeoutId);
-      // We don't abort here because we want the request to finish if components unmounts? 
-      // No, we should abort. But performSearch manages its own abort controller.
-      // If we just clear timeout, performSearch won't run.
     };
   }, [query, performSearch]);
 
-  // Search on initial load if query exists
   useEffect(() => {
     if (initialQuery.length >= 3 && !searchState.hasSearched) {
       performSearch(initialQuery);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ============================================
-  // HANDLERS
-  // ============================================
+  }, []);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
@@ -373,10 +322,6 @@ export default function AppSearchPage() {
     setSelectedTrack(track);
     setIsPlaylistDialogOpen(true);
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   const { artists, albums, tracks, isLoading, error, hasSearched } = searchState;
   const hasResults = artists.length > 0 || albums.length > 0 || tracks.length > 0;

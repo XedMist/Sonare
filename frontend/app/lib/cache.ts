@@ -1,8 +1,3 @@
-/**
- * Simple in-memory cache for API responses
- * Reduces redundant network requests during navigation
- */
-
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -10,11 +5,8 @@ interface CacheEntry<T> {
 
 class ApiCache {
   private cache = new Map<string, CacheEntry<unknown>>();
-  private defaultTTL = 60 * 1000; // 1 minute default
+  private defaultTTL = 60 * 1000;
 
-  /**
-   * Get cached data if still valid
-   */
   get<T>(key: string, ttl = this.defaultTTL): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
@@ -28,9 +20,6 @@ class ApiCache {
     return entry.data as T;
   }
 
-  /**
-   * Store data in cache
-   */
   set<T>(key: string, data: T): void {
     this.cache.set(key, {
       data,
@@ -38,16 +27,10 @@ class ApiCache {
     });
   }
 
-  /**
-   * Check if key exists and is valid
-   */
   has(key: string, ttl = this.defaultTTL): boolean {
     return this.get(key, ttl) !== null;
   }
 
-  /**
-   * Clear a specific key or all cache
-   */
   clear(key?: string): void {
     if (key) {
       this.cache.delete(key);
@@ -56,9 +39,6 @@ class ApiCache {
     }
   }
 
-  /**
-   * Invalidate all entries matching a prefix
-   */
   invalidatePrefix(prefix: string): void {
     for (const key of this.cache.keys()) {
       if (key.startsWith(prefix)) {
@@ -67,9 +47,6 @@ class ApiCache {
     }
   }
 
-  /**
-   * Get or fetch: returns cached data or fetches and caches new data
-   */
   async getOrFetch<T>(
     key: string,
     fetcher: () => Promise<T>,
@@ -86,10 +63,8 @@ class ApiCache {
   }
 }
 
-// Export singleton instance
 export const apiCache = new ApiCache();
 
-// Cache key generators for consistency
 export const cacheKeys = {
   artists: (params?: Record<string, unknown>) => 
     `artists:${JSON.stringify(params || {})}`,

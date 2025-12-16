@@ -5,7 +5,7 @@ import type { Variables } from 'hono/types';
 export type ApiVersion = "v1" | "v2";
 
 export const mediaVersion = (defaultVersion: ApiVersion = "v1") => {
-    return createMiddleware<{ Variables: Variables }>(async (c, next) => {
+    return createMiddleware<{ Variables: { apiVersion: ApiVersion } }>(async (c, next) => {
         const accept = c.req.header('accept') ?? ''
 
         let version: ApiVersion = defaultVersion;

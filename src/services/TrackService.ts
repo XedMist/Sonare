@@ -1,6 +1,7 @@
-import { NotFoundError } from "@/error/ApiError.ts";
+import { NotFoundError, ForbiddenError, UnauthorizedError } from "@/error/ApiError.ts";
 import type { Track } from "@/model/entity/index.ts";
 import TrackRepository from "@/repositories/TrackRepository.ts";
+import UserRepository from "@/repositories/UserRepository.ts";
 
 
 export default class TrackService {
@@ -32,5 +33,27 @@ export default class TrackService {
             "aac": "audio/aac",
         };
         return mimeTypes[extension || ""] || "application/octet-stream";
+    }
+
+    async delete(id: string, userId: string): Promise<void> {
+        const track = await this.trackRepository.findByIdWithArtist(id);
+        if (!track) throw new NotFoundError("No se encontro la pista");
+
+        const userRepo = new UserRepository();
+        const user = await userRepo.findByIdWithPermissions(userId);
+
+        if (!user) throw new UnauthorizedError("Usuario no encontrado");
+
+        if (user.role.name === 'User') {
+             throw new ForbiddenError("No tienes permiso para eliminar esta pista");
+        }
+
+        if (user.role.name === 'Artist') {
+            if (user.name !== track.artist.name) {
+                 throw new ForbiddenError("No tienes permiso para eliminar esta pista (no eres el creador)");
+            }
+        }
+        
+        await this.trackRepository.delete(id);
     }
 }

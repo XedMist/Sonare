@@ -13,7 +13,7 @@ export async function uploadAvatar(file: File): Promise<User> {
   formData.append("avatar", file);
 
   return apiClient<User>("/me/avatar", {
-    method: "POST",
+    method: "PUT",
     body: formData,
   });
 }

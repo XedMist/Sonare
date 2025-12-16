@@ -311,8 +311,8 @@ export default class SearchService {
 
             albumTracks.forEach((track) => {
                 const albumRanked = albumScores.get(track.albumID || '');
-                if (albumRanked && albumRanked.score > ALBUM_DIRECT_MATCH_BOOST) {
-                    // Only boost tracks if the album was a direct match
+                if (albumRanked && albumRanked.score >= TRACK_RELATED_BOOST) {
+                    // Boost tracks if the album was a direct match OR if a track from it matched
                     const popularityBoost = (track.popularity ?? 0) * POPULARITY_BOOST_FACTOR;
                     addScore(trackScores, track.id, track, ALBUM_CONTENT_BOOST + popularityBoost);
                 }

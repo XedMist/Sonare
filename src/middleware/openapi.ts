@@ -590,6 +590,19 @@ export const openApiDoc = {
           "404": { description: "Album not found" },
         },
       },
+      delete: {
+        summary: "Delete album",
+        tags: ["Albums"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          "204": { description: "Deleted" },
+          "404": { description: "Album not found" },
+          "403": { description: "Forbidden" },
+        },
+      },
     },
     "/api/albums/{id}/tracks": {
       get: {
@@ -649,6 +662,19 @@ export const openApiDoc = {
             },
           },
           "404": { description: "Track not found" },
+        },
+      },
+      delete: {
+        summary: "Delete track",
+        tags: ["Tracks"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          "204": { description: "Deleted" },
+          "404": { description: "Track not found" },
+          "403": { description: "Forbidden" },
         },
       },
     },
@@ -866,7 +892,7 @@ export const openApiDoc = {
       },
     },
     "/api/me/avatar": {
-      post: {
+      put: {
         summary: "Upload avatar",
         tags: ["Me"],
         security: [{ bearerAuth: [] }],
@@ -884,24 +910,6 @@ export const openApiDoc = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/UserResponse" },
-              },
-            },
-          },
-        },
-      },
-    },
-    "/api/me/playlists": {
-      get: {
-        summary: "My playlists",
-        tags: ["Me"],
-        security: [{ bearerAuth: [] }],
-        parameters: paginationParams,
-        responses: {
-          "200": {
-            description: "Playlists",
-            content: {
-              "application/json": {
-                schema: { type: "array", items: { $ref: "#/components/schemas/PlaylistResponse" } },
               },
             },
           },
@@ -958,6 +966,7 @@ export const openApiDoc = {
     "/api/search": {
       get: {
         summary: "Search artists, albums, tracks",
+        description: "Unified search endpoint supporting content negotiation. Default version is V2 (Unified). Send `Accept: application/vnd.sonare.search-v1+json` for legacy V1 response.",
         tags: ["Search"],
         security: [{ bearerAuth: [] }],
         parameters: [
@@ -971,42 +980,22 @@ export const openApiDoc = {
           {
             name: "type",
             in: "query",
-            description: "Comma separated resource types",
+            description: "Comma separated resource types (V1 only)",
             schema: { type: "string", default: "artist,album,track" },
           },
         ],
         responses: {
           "200": {
-            description: "Search result grouped by resource",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/SearchResponse" },
-              },
-            },
-          },
-        },
-      },
-    },
-    "/api/search/unified": {
-      get: {
-        summary: "Unified ranked search",
-        tags: ["Search"],
-        security: [{ bearerAuth: [] }],
-        parameters: [
-          {
-            name: "q",
-            in: "query",
-            required: true,
-            description: "Search term (min 3 chars)",
-            schema: { type: "string", minLength: 3 },
-          },
-        ],
-        responses: {
-          "200": {
-            description: "Mixed list",
+            description: "Search result",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/UnifiedSearchResponse" },
+              },
+              "application/vnd.sonare.search-v2+json": {
+                schema: { $ref: "#/components/schemas/UnifiedSearchResponse" },
+              },
+              "application/vnd.sonare.search-v1+json": {
+                schema: { $ref: "#/components/schemas/SearchResponse" },
               },
             },
           },

@@ -39,7 +39,7 @@ meController
         });
 
 meController
-    .post("/avatar",
+    .put("/avatar",
         requirePermission(Capability.UPDATE, "me"),
         async (c) => {
             const userID = c.get("userId");
@@ -70,17 +70,7 @@ meController
             return c.json(DTOMapper.toUserResponse(updated));
         });
 
-meController
-    .get("/playlists",
-        validate("query", PaginationQuerySchema),
-        requirePermission(Capability.READ, "me"),
-        async (c) => {
-            const userID = c.get("userId");
-            const { page, limit } = c.req.valid("query");
-            const playlists = await service.getMyPlaylists(userID, { skip: page * limit, take: limit });
 
-            return c.json(paginated<PlaylistResponse>(playlists.map(DTOMapper.toPlaylistResponse), page, limit));
-        });
 
 meController
     .get("/favorites",

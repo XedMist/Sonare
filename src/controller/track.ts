@@ -85,4 +85,17 @@ trackController
             return c.json({ thumbnail: url });
         })
 
+trackController
+    .delete("/:id",
+        requirePermission(Capability.DELETE, "tracks"),
+        async (c) => {
+            const { id } = c.req.param();
+            const userId = c.get('userId');
+
+            await trackService.delete(id, userId);
+
+            return c.body(null, 204);
+        });
+
+
 export default trackController;

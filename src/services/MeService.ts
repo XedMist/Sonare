@@ -97,10 +97,6 @@ export default class MeService {
         return this.withAvatarUrl(updated);
     }
 
-    async getMyPlaylists(userID: string, pagination: { skip?: number, take?: number } | undefined): Promise<Playlist[]> {
-        const userPlaylists = await this.playlistRepository.findByUserID(userID);
-        return userPlaylists.slice(pagination?.skip ?? 0, (pagination?.take ? (pagination.skip ?? 0) + pagination.take : undefined));
-    }
 
     async getMyFavorites(userID: string): Promise<Track[]> {
         const user = await this.getMe(userID);

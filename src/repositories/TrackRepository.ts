@@ -34,4 +34,25 @@ export default class TrackRepository {
         });
         return track ? PrismaMapper.toTrack(track) : null;
     }
+
+    async findByIdWithArtist(id: string): Promise<(Track & { artist: Artist }) | null> {
+        const track = await db.track.findUnique({
+            where: { id },
+            include: { artist: true, album: true }
+        });
+        if (!track) return null;
+        return {
+            ...PrismaMapper.toTrack(track),
+            artist: PrismaMapper.toArtist(track.artist)
+        };
+    }
+
+    async delete(id: string): Promise<boolean> {
+        try {
+            await db.track.delete({ where: { id } });
+            return true;
+        } catch {
+            return false;
+        }
+    }
 }

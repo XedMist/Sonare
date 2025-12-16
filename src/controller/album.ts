@@ -68,4 +68,16 @@ albumController
             return c.json(paginated<TrackResponse>(response, page, limit));
         });
 
+albumController
+    .delete("/:id",
+        requirePermission(Capability.DELETE, "albums"),
+        async (c) => {
+            const { id } = c.req.param();
+            const userId = c.get('userId'); // Assuming userId is set by auth middleware
+
+            await service.delete(id, userId);
+
+            return c.body(null, 204);
+        });
+
 export default albumController;

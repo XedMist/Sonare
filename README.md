@@ -1,74 +1,125 @@
 # Sonare
 
-## Estructura
+Sonare is a modern, full-stack music streaming application designed with a modern aesthetic. It provides a comprehensive set of features for discovering, organizing, and playing music, backed by a robust and scalable architecture.
 
-```
-├── deno.json
-├── deno.lock
-├── README.md
-└── src
-    ├── app.ts  # Donde se añaden los controladores
-    ├── controller 
-    │   ├─── user.ts
-    │   ├─── artist.ts
-    │   ├─── playlist.ts
-    │   ├─── track.ts
-    │   ├─── users.ts
-    ├── main.ts # Entrypoint de la API
-    ├── middleware
-    │   └── ...
-    ├── model
-    │   └── ...
-    ├── repositories
-    │   └── ...
-    └── services
-        └── ...
-```
+## 🚀 Features
 
-### Guía de la estructura
+-   **Music Playback**: Seamless playback of tracks, albums, and playlists.
+-   **Unified Search**: Powerful search across tracks, albums, and artists.
+-   **User Library**: personalized user profiles, playlists, and "Liked Songs" (Favorites).
+-   **Lyrics Support**: Integrated synced lyrics for tracks.
+-   **Role-Based Access Control (RBAC)**: secure permission management for users and roles.
+-   **Modern UI/UX**: distinctive modern design language, featuring smooth animations and 3D elements.
 
-- **`deno.json`**: Archivo de configuración para Deno, donde se definen las
-  dependencias, tareas y opciones del compilador.
-- **`src/app.ts`**: Archivo principal donde se configuran los controladores y
-  middlewares de la aplicación.
-- **`src/main.ts`**: Punto de entrada de la API, donde se inicia el servidor.
-- **`src/controller/`**: Contiene los controladores que definen las rutas y
-  manejan las solicitudes HTTP.
-- **`src/middleware/`**: Contiene middlewares personalizados, como la
-  configuración de Swagger para la documentación de la API.
-- **`src/model/`**: Define los modelos de datos y esquemas de validación, como
-  `User`, `Track`, `Album`, etc.
-- **`src/repositories/`**: Contiene la lógica de acceso a datos, como el
-  almacenamiento en memoria para usuarios.
-- **`src/services/`**: Implementa la lógica de negocio, como la creación y
-  recuperación de usuarios.
+## 🛠 Tech Stack
 
-### Cómo iniciar el proyecto
+### Backend
+-   **Runtime**: [Bun](https://bun.sh/)
+-   **Framework**: [Hono](https://hono.dev/) - Fast, lightweight, web-standard.
+-   **Database**: [MongoDB](https://www.mongodb.com/) (via [Prisma ORM](https://www.prisma.io/)).
+-   **Caching**: [Redis](https://redis.io/).
+-   **Storage**: [MinIO](https://min.io/) (S3-compatible object storage).
+-   **API Documentation**: Swagger UI & Scalar.
 
-1. Asegúrate de tener [Deno](https://deno.land/) instalado.
-2. Ejecuta el siguiente comando para iniciar el servidor:
+### Frontend
+-   **Framework**: [React Router v7](https://reactrouter.com/) (formerly Remix).
+-   **Language**: TypeScript.
+-   **Styling**: [Tailwind CSS v4](https://tailwindcss.com/).
+-   **UI Components**: [Shadcn/UI](https://ui.shadcn.com/) (Radix UI).
+-   **Visuals**: [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) & [Anime.js](https://animejs.com/) for animations.
 
-   ```bash
-   deno task start
-   ```
+## 📦 Prerequisites
 
-3. Accede a la documentación Swagger en `http://localhost:8000/api/swagger/ui`.
+Before running the project, ensure you have the following installed:
+-   [Bun](https://bun.sh/) (latest version)
+-   MongoDB instance
+-   Redis instance
+-   MinIO instance (or AWS S3 credentials)
 
-### Endpoints disponibles
+## 🔧 Installation & Setup
 
-- **`GET /api/users`**: Obtiene todos los usuarios.
-- **`POST /api/users`**: Crea un nuevo usuario. El cuerpo de la solicitud debe
-  incluir un objeto JSON con el siguiente formato:
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd Sonare
+    ```
 
-  ```json
-  {
-    "name": "Nombre del usuario"
-  }
-  ```
+2.  **Install dependencies:**
+    *   **Root (Backend):**
+        ```bash
+        bun install
+        ```
+    *   **Frontend:**
+        ```bash
+        cd frontend
+        bun install
+        ```
 
-### Dependencias principales
+3.  **Environment Configuration:**
+    *   Create a `.env` file in the root directory based on `.env.example`.
+    *   Configure your database URLs, Redis connection, and S3/MinIO credentials.
 
-- **[Hono](https://hono.dev/)**: Framework web ligero para Deno.
-- **[Zod](https://zod.dev/)**: Biblioteca para validación de esquemas.
-- **[Swagger UI](https://swagger.io/tools/swagger-ui/)**: Herramienta para la
-  documentación interactiva de APIs.
+4.  **Database Setup:**
+    ```bash
+    # Generate Prisma Client
+    bun run generate
+
+    # Push schema to MongoDB
+    bun run push
+    ```
+
+5.  **Running the Application:**
+
+    *   **Backend (API):**
+        From the root directory:
+        ```bash
+        bun run dev
+        ```
+        The API will typically start on port `3000` (check console output).
+
+    *   **Frontend:**
+        From the `frontend` directory:
+        ```bash
+        cd frontend
+        bun run dev
+        ```
+        The frontend client will start on `http://localhost:5173`.
+
+## 📂 Project Structure
+
+### Backend (`src/`)
+
+The backend follows a layered architecture (Controller -> Service -> Repository).
+
+-   `controller/`: **API Entry Points**. Handles HTTP requests, validation, and responses.
+    -   `auth.ts`, `me.ts`, `search.ts`, `playlist.ts`, etc.
+-   `services/`: **Business Logic**. Contains the core logic for the application.
+    -   `SearchService.ts`: Engines the unified search functionality.
+    -   `AuthService.ts`: Handles registration, login, and token management.
+    -   `PlaylistService.ts`, `TrackService.ts`, etc.
+-   `repositories/`: **Data Access**. Direct interaction with the database via Prisma.
+    -   `UserRepository.ts`, `PlaylistRepository.ts`, etc.
+-   `middleware/`:
+    -   `auth.ts`: JWT authentication middleware.
+    -   `openapi.ts`: API documentation configuration.
+-   `model/`: Zod schemas and TypeScript types.
+
+### Frontend (`frontend/app/`)
+
+Built with React Router v7, using a file-system based routing approach.
+
+-   `routes/`: **Pages & Views**.
+    -   `app.home.tsx`: Main landing page.
+    -   `app.search.tsx`: Unified search interface.
+    -   `app.library.tsx`, `app.favorites.tsx`: User library management.
+    -   `app.playlists.$id.tsx`: Playlist detail view.
+-   `components/`: **UI Components**. Reusable Shadcn/UI components and custom widgets.
+-   `api/`: **API Client**. TypeScript functions for communicating with the backend API.
+-   `context/`: **State Management**. React Context providers (e.g., for the global music player state).
+-   `lib/`: **Utilities**. Helper functions and shared logic.
+
+### Database & Config
+
+-   `prisma/`:
+    -   `schema.prisma`: The single source of truth for the database schema.
+
